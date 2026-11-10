@@ -1,0 +1,1548 @@
+# The picture-against-prompt judge's labelled pictures: every distinct picture the trials painted (one copy of each), with
+# the prompt it was painted for. `regression.py build` copies them into DATA/prompts and `regression.py run` judges them
+# as the case "prompt-pictures": each must pass "shows the thing asked for" against its own prompt and fail it against
+# every other prompt here, and an empty backdrop must fail it for every prompt (the prompt's words written out, the
+# typographic attack, still pass: a known miss, shown, not held; docs/objects.md). Labelled by eye: `shows = "unclear"` marks a picture that does not clearly show the
+# thing its prompt names (a war hammer painted with an axe-like or hybrid head, labelled blind in head-cases.toml; a table seen from straight above); it is shown, not
+# held. The longbows the trials painted are left out: bows are not made in release 1 (words.NOT_YET). Labels are never
+# changed to make a run hold (docs/metrics.md, the honesty rules).
+# The pictures themselves are not published (docs/objects.md, "The regression set"); "3060" in a name or folder marks
+# a picture painted on the 12 GB card.
+
+[[picture]]
+name = "broom-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/broom/picture.png"
+mask = "2026-11-09-3060-trial/broom/mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "candle-brass-holder-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/candle-brass-holder/picture.png"
+mask = "2026-11-09-3060-trial/candle-brass-holder/mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "chair-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/chair/picture.png"
+mask = "2026-11-09-3060-trial/chair/mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "clay-jug-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/clay-jug/picture.png"
+mask = "2026-11-09-3060-trial/clay-jug/mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/double-bitted-battle-axe/picture.png"
+mask = "2026-11-09-3060-trial/double-bitted-battle-axe/mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "iron-sword-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/iron-sword/picture.png"
+mask = "2026-11-09-3060-trial/iron-sword/mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/leather-bound-book-closed/picture.png"
+mask = "2026-11-09-3060-trial/leather-bound-book-closed/mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "round-table-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/round-table/picture.png"
+mask = "2026-11-09-3060-trial/round-table/mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/round-wooden-shield-iron/picture.png"
+mask = "2026-11-09-3060-trial/round-wooden-shield-iron/mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/rusty-iron-lantern/picture.png"
+mask = "2026-11-09-3060-trial/rusty-iron-lantern/mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/spear-leaf-shaped-head/picture.png"
+mask = "2026-11-09-3060-trial/spear-leaf-shaped-head/mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "three-legged-stool-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/three-legged-stool/picture.png"
+mask = "2026-11-09-3060-trial/three-legged-stool/mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "war-hammer-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/war-hammer/picture.png"
+mask = "2026-11-09-3060-trial/war-hammer/mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "an axe head, labelled blind: a flared blade with a square poll and a spike (head-cases.toml)"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/wooden-barrel-iron-hoops/picture.png"
+mask = "2026-11-09-3060-trial/wooden-barrel-iron-hoops/mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-3060-trial-chosen"
+source = "2026-11-09-3060-trial/wooden-treasure-chest/picture.png"
+mask = "2026-11-09-3060-trial/wooden-treasure-chest/mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "broom-11-09-first-trial-refinished-40959"
+source = "2026-11-09-first-trial-refinished/broom/pictures/40959.png"
+mask = "2026-11-09-first-trial-refinished/broom/pictures/40959-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "broom-11-09-first-trial-refinished-40960"
+source = "2026-11-09-first-trial-refinished/broom/pictures/40960.png"
+mask = "2026-11-09-first-trial-refinished/broom/pictures/40960-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "broom-11-09-first-trial-refinished-40961"
+source = "2026-11-09-first-trial-refinished/broom/pictures/40961.png"
+mask = "2026-11-09-first-trial-refinished/broom/pictures/40961-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "broom-11-09-first-trial-refinished-40962"
+source = "2026-11-09-first-trial-refinished/broom/pictures/40962.png"
+mask = "2026-11-09-first-trial-refinished/broom/pictures/40962-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702487"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702487.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702487-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702488"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702488.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702488-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702489"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702489.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702489-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702490"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702490.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702490-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702491"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702491.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702491-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702492"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702492.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702492-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702493"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702493.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702493-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-first-trial-refinished-702494"
+source = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702494.png"
+mask = "2026-11-09-first-trial-refinished/candle-brass-holder/pictures/702494-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "chair-11-09-first-trial-refinished-352965"
+source = "2026-11-09-first-trial-refinished/chair/pictures/352965.png"
+mask = "2026-11-09-first-trial-refinished/chair/pictures/352965-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-first-trial-refinished-352966"
+source = "2026-11-09-first-trial-refinished/chair/pictures/352966.png"
+mask = "2026-11-09-first-trial-refinished/chair/pictures/352966-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-first-trial-refinished-352967"
+source = "2026-11-09-first-trial-refinished/chair/pictures/352967.png"
+mask = "2026-11-09-first-trial-refinished/chair/pictures/352967-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-first-trial-refinished-352968"
+source = "2026-11-09-first-trial-refinished/chair/pictures/352968.png"
+mask = "2026-11-09-first-trial-refinished/chair/pictures/352968-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "clay-jug-11-09-first-trial-refinished-722931"
+source = "2026-11-09-first-trial-refinished/clay-jug/pictures/722931.png"
+mask = "2026-11-09-first-trial-refinished/clay-jug/pictures/722931-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-first-trial-refinished-722932"
+source = "2026-11-09-first-trial-refinished/clay-jug/pictures/722932.png"
+mask = "2026-11-09-first-trial-refinished/clay-jug/pictures/722932-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-first-trial-refinished-722933"
+source = "2026-11-09-first-trial-refinished/clay-jug/pictures/722933.png"
+mask = "2026-11-09-first-trial-refinished/clay-jug/pictures/722933-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-first-trial-refinished-722934"
+source = "2026-11-09-first-trial-refinished/clay-jug/pictures/722934.png"
+mask = "2026-11-09-first-trial-refinished/clay-jug/pictures/722934-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-09-first-trial-refinished-230143"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230143.png"
+mask = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230143-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-09-first-trial-refinished-230144"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230144.png"
+mask = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230144-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-09-first-trial-refinished-230145"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230145.png"
+mask = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230145-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-09-first-trial-refinished-230146"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230146.png"
+mask = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230146-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "iron-sword-11-09-first-trial-refinished-127911"
+source = "2026-11-09-first-trial-refinished/iron-sword/pictures/127911.png"
+mask = "2026-11-09-first-trial-refinished/iron-sword/pictures/127911-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "iron-sword-11-09-first-trial-refinished-127912"
+source = "2026-11-09-first-trial-refinished/iron-sword/pictures/127912.png"
+mask = "2026-11-09-first-trial-refinished/iron-sword/pictures/127912-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "iron-sword-11-09-first-trial-refinished-127913"
+source = "2026-11-09-first-trial-refinished/iron-sword/pictures/127913.png"
+mask = "2026-11-09-first-trial-refinished/iron-sword/pictures/127913-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "iron-sword-11-09-first-trial-refinished-127914"
+source = "2026-11-09-first-trial-refinished/iron-sword/pictures/127914.png"
+mask = "2026-11-09-first-trial-refinished/iron-sword/pictures/127914-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-first-trial-refinished-329790"
+source = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329790.png"
+mask = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329790-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-first-trial-refinished-329791"
+source = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329791.png"
+mask = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329791-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-first-trial-refinished-329792"
+source = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329792.png"
+mask = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329792-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-first-trial-refinished-329793"
+source = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329793.png"
+mask = "2026-11-09-first-trial-refinished/leather-bound-book-closed/pictures/329793-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "round-table-11-09-first-trial-refinished-406699"
+source = "2026-11-09-first-trial-refinished/round-table/pictures/406699.png"
+mask = "2026-11-09-first-trial-refinished/round-table/pictures/406699-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-first-trial-refinished-406700"
+source = "2026-11-09-first-trial-refinished/round-table/pictures/406700.png"
+mask = "2026-11-09-first-trial-refinished/round-table/pictures/406700-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-first-trial-refinished-406701"
+source = "2026-11-09-first-trial-refinished/round-table/pictures/406701.png"
+mask = "2026-11-09-first-trial-refinished/round-table/pictures/406701-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-first-trial-refinished-406702"
+source = "2026-11-09-first-trial-refinished/round-table/pictures/406702.png"
+mask = "2026-11-09-first-trial-refinished/round-table/pictures/406702-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524502"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524502.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524502-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524503"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524503.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524503-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524504"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524504.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524504-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524505"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524505.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524505-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524506"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524506.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524506-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524507"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524507.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524507-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524508"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524508.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524508-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-first-trial-refinished-524509"
+source = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524509.png"
+mask = "2026-11-09-first-trial-refinished/round-wooden-shield-iron/pictures/524509-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-first-trial-refinished-385547"
+source = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385547.png"
+mask = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385547-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-first-trial-refinished-385548"
+source = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385548.png"
+mask = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385548-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-first-trial-refinished-385549"
+source = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385549.png"
+mask = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385549-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-first-trial-refinished-385550"
+source = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385550.png"
+mask = "2026-11-09-first-trial-refinished/rusty-iron-lantern/pictures/385550-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-09-first-trial-refinished-529265"
+source = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529265.png"
+mask = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529265-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-09-first-trial-refinished-529266"
+source = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529266.png"
+mask = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529266-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-09-first-trial-refinished-529267"
+source = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529267.png"
+mask = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529267-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-09-first-trial-refinished-529268"
+source = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529268.png"
+mask = "2026-11-09-first-trial-refinished/spear-leaf-shaped-head/pictures/529268-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "three-legged-stool-11-09-first-trial-refinished-775048"
+source = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775048.png"
+mask = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775048-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-09-first-trial-refinished-775049"
+source = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775049.png"
+mask = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775049-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-09-first-trial-refinished-775050"
+source = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775050.png"
+mask = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775050-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-09-first-trial-refinished-775051"
+source = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775051.png"
+mask = "2026-11-09-first-trial-refinished/three-legged-stool/pictures/775051-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "war-hammer-11-09-first-trial-refinished-141079"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141079.png"
+mask = "2026-11-09-first-trial-refinished/war-hammer/pictures/141079-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: two flared ends and a spike, no clear blade or face (head-cases.toml)"
+
+[[picture]]
+name = "war-hammer-11-09-first-trial-refinished-141080"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141080.png"
+mask = "2026-11-09-first-trial-refinished/war-hammer/pictures/141080-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: two thin flared ends and a spike, no clear face (head-cases.toml)"
+
+[[picture]]
+name = "war-hammer-11-09-first-trial-refinished-141081"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141081.png"
+mask = "2026-11-09-first-trial-refinished/war-hammer/pictures/141081-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "an axe head, labelled blind: a flared blade with a square poll and a spike (head-cases.toml)"
+
+[[picture]]
+name = "war-hammer-11-09-first-trial-refinished-141082"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141082.png"
+mask = "2026-11-09-first-trial-refinished/war-hammer/pictures/141082-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: a small crescent blade one side, a flared blunt end the other (head-cases.toml)"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-first-trial-refinished-838480"
+source = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838480.png"
+mask = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838480-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-first-trial-refinished-838481"
+source = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838481.png"
+mask = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838481-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-first-trial-refinished-838482"
+source = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838482.png"
+mask = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838482-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-first-trial-refinished-838483"
+source = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838483.png"
+mask = "2026-11-09-first-trial-refinished/wooden-barrel-iron-hoops/pictures/838483-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878511"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878511.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878511-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878512"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878512.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878512-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878513"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878513.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878513-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878514"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878514.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878514-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878515"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878515.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878515-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878516"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878516.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878516-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878517"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878517.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878517-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-first-trial-refinished-878518"
+source = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878518.png"
+mask = "2026-11-09-first-trial-refinished/wooden-treasure-chest/pictures/878518-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108639"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108639.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108639-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108640"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108640.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108640-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108641"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108641.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108641-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108642"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108642.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108642-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108643"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108643.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108643-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108644"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108644.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108644-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108645"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108645.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108645-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-fixes-refinished-108646"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108646.png"
+mask = "2026-11-09-second-run/fixes-refinished/chair/pictures/108646-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "round-table-11-09-second-run-fixes-refinished-719531"
+source = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719531.png"
+mask = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719531-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-second-run-fixes-refinished-719532"
+source = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719532.png"
+mask = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719532-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-second-run-fixes-refinished-719533"
+source = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719533.png"
+mask = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719533-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-second-run-fixes-refinished-719534"
+source = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719534.png"
+mask = "2026-11-09-second-run/fixes-refinished/round-table/pictures/719534-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-cutout-501739"
+source = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501739.png"
+mask = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501739-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-cutout-501740"
+source = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501740.png"
+mask = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501740-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-cutout-501741"
+source = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501741.png"
+mask = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501741-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-cutout-501742"
+source = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501742.png"
+mask = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501742-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-cutout-153235"
+source = "2026-11-09-second-run/lead-cutout/chair/pictures/153235.png"
+mask = "2026-11-09-second-run/lead-cutout/chair/pictures/153235-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-cutout-153236"
+source = "2026-11-09-second-run/lead-cutout/chair/pictures/153236.png"
+mask = "2026-11-09-second-run/lead-cutout/chair/pictures/153236-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-cutout-153237"
+source = "2026-11-09-second-run/lead-cutout/chair/pictures/153237.png"
+mask = "2026-11-09-second-run/lead-cutout/chair/pictures/153237-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-cutout-153238"
+source = "2026-11-09-second-run/lead-cutout/chair/pictures/153238.png"
+mask = "2026-11-09-second-run/lead-cutout/chair/pictures/153238-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-cutout-371213"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371213.png"
+mask = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371213-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-cutout-371214"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371214.png"
+mask = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371214-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-cutout-371215"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371215.png"
+mask = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371215-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-cutout-371216"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371216.png"
+mask = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371216-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-cutout-871844"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871844.png"
+mask = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871844-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-cutout-871845"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871845.png"
+mask = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871845-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-cutout-871846"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871846.png"
+mask = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871846-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-cutout-871847"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871847.png"
+mask = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871847-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-cutout-28339"
+source = "2026-11-09-second-run/lead-cutout/round-table/pictures/28339.png"
+mask = "2026-11-09-second-run/lead-cutout/round-table/pictures/28339-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-cutout-28340"
+source = "2026-11-09-second-run/lead-cutout/round-table/pictures/28340.png"
+mask = "2026-11-09-second-run/lead-cutout/round-table/pictures/28340-mask.png"
+prompt = "a small round table"
+shows = "unclear"
+why = "a round top seen from straight above, no leg in sight"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-cutout-28341"
+source = "2026-11-09-second-run/lead-cutout/round-table/pictures/28341.png"
+mask = "2026-11-09-second-run/lead-cutout/round-table/pictures/28341-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-cutout-28342"
+source = "2026-11-09-second-run/lead-cutout/round-table/pictures/28342.png"
+mask = "2026-11-09-second-run/lead-cutout/round-table/pictures/28342-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-cutout-595236"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595236.png"
+mask = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595236-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-cutout-595237"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595237.png"
+mask = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595237-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-cutout-595238"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595238.png"
+mask = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595238-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-cutout-595239"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595239.png"
+mask = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595239-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-cutout-908369"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908369.png"
+mask = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908369-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-cutout-908370"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908370.png"
+mask = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908370-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-cutout-908371"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908371.png"
+mask = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908371-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-cutout-908372"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908372.png"
+mask = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908372-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-cutout-638976"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638976.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638976-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-cutout-638977"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638977.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638977-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-cutout-638978"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638978.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638978-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-cutout-638979"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638979.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638979-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-cutout-604625"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604625.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604625-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-cutout-604626"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604626.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604626-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-cutout-604627"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604627.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604627-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-cutout-604628"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604628.png"
+mask = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604628-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-floating-115213"
+source = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115213.png"
+mask = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115213-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-floating-115214"
+source = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115214.png"
+mask = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115214-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-floating-115215"
+source = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115215.png"
+mask = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115215-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-floating-115216"
+source = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115216.png"
+mask = "2026-11-09-second-run/lead-floating/candle-brass-holder/pictures/115216-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-floating-50185"
+source = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50185.png"
+mask = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50185-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-floating-50186"
+source = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50186.png"
+mask = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50186-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-floating-50187"
+source = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50187.png"
+mask = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50187-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-floating-50188"
+source = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50188.png"
+mask = "2026-11-09-second-run/lead-floating/clay-jug/pictures/50188-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-floating-628200"
+source = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628200.png"
+mask = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628200-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-floating-628201"
+source = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628201.png"
+mask = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628201-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-floating-628202"
+source = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628202.png"
+mask = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628202-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-floating-628203"
+source = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628203.png"
+mask = "2026-11-09-second-run/lead-floating/leather-bound-book-closed/pictures/628203-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-floating-141221"
+source = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141221.png"
+mask = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141221-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-floating-141222"
+source = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141222.png"
+mask = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141222-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-floating-141223"
+source = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141223.png"
+mask = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141223-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-floating-141224"
+source = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141224.png"
+mask = "2026-11-09-second-run/lead-floating/rusty-iron-lantern/pictures/141224-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-floating-465416"
+source = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465416.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465416-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-floating-465417"
+source = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465417.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465417-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-floating-465418"
+source = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465418.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465418-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-floating-465419"
+source = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465419.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-barrel-iron-hoops/pictures/465419-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-floating-962711"
+source = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962711.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962711-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-floating-962712"
+source = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962712.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962712-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-floating-962713"
+source = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962713.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962713-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-floating-962714"
+source = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962714.png"
+mask = "2026-11-09-second-run/lead-floating/wooden-treasure-chest/pictures/962714-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-isolated-455542"
+source = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455542.png"
+mask = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455542-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-isolated-455543"
+source = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455543.png"
+mask = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455543-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-isolated-455544"
+source = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455544.png"
+mask = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455544-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-09-second-run-lead-isolated-455545"
+source = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455545.png"
+mask = "2026-11-09-second-run/lead-isolated/candle-brass-holder/pictures/455545-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-isolated-648358"
+source = "2026-11-09-second-run/lead-isolated/chair/pictures/648358.png"
+mask = "2026-11-09-second-run/lead-isolated/chair/pictures/648358-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-isolated-648359"
+source = "2026-11-09-second-run/lead-isolated/chair/pictures/648359.png"
+mask = "2026-11-09-second-run/lead-isolated/chair/pictures/648359-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-isolated-648360"
+source = "2026-11-09-second-run/lead-isolated/chair/pictures/648360.png"
+mask = "2026-11-09-second-run/lead-isolated/chair/pictures/648360-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-09-second-run-lead-isolated-648361"
+source = "2026-11-09-second-run/lead-isolated/chair/pictures/648361.png"
+mask = "2026-11-09-second-run/lead-isolated/chair/pictures/648361-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-isolated-527968"
+source = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527968.png"
+mask = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527968-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-isolated-527969"
+source = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527969.png"
+mask = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527969-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-isolated-527970"
+source = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527970.png"
+mask = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527970-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-09-second-run-lead-isolated-527971"
+source = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527971.png"
+mask = "2026-11-09-second-run/lead-isolated/clay-jug/pictures/527971-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-isolated-233815"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233815.png"
+mask = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233815-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-isolated-233816"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233816.png"
+mask = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233816-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-isolated-233817"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233817.png"
+mask = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233817-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-09-second-run-lead-isolated-233818"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233818.png"
+mask = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233818-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-isolated-568374"
+source = "2026-11-09-second-run/lead-isolated/round-table/pictures/568374.png"
+mask = "2026-11-09-second-run/lead-isolated/round-table/pictures/568374-mask.png"
+prompt = "a small round table"
+shows = "unclear"
+why = "a round top seen from straight above, no leg in sight"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-isolated-568375"
+source = "2026-11-09-second-run/lead-isolated/round-table/pictures/568375.png"
+mask = "2026-11-09-second-run/lead-isolated/round-table/pictures/568375-mask.png"
+prompt = "a small round table"
+shows = "unclear"
+why = "a round top seen from straight above, no leg in sight"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-isolated-568376"
+source = "2026-11-09-second-run/lead-isolated/round-table/pictures/568376.png"
+mask = "2026-11-09-second-run/lead-isolated/round-table/pictures/568376-mask.png"
+prompt = "a small round table"
+shows = "unclear"
+why = "a round top seen from straight above, only its feet's tips showing: a table or a stool alike"
+
+[[picture]]
+name = "round-table-11-09-second-run-lead-isolated-568377"
+source = "2026-11-09-second-run/lead-isolated/round-table/pictures/568377.png"
+mask = "2026-11-09-second-run/lead-isolated/round-table/pictures/568377-mask.png"
+prompt = "a small round table"
+shows = "unclear"
+why = "a round top seen from straight above, only its feet's tips showing: a table or a stool alike"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-isolated-752047"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752047.png"
+mask = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752047-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-isolated-752048"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752048.png"
+mask = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752048-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-isolated-752049"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752049.png"
+mask = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752049-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-09-second-run-lead-isolated-752050"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752050.png"
+mask = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752050-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-isolated-218244"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218244.png"
+mask = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218244-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-isolated-218245"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218245.png"
+mask = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218245-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-isolated-218246"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218246.png"
+mask = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218246-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-09-second-run-lead-isolated-218247"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218247.png"
+mask = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218247-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-isolated-680963"
+source = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680963.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680963-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-isolated-680964"
+source = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680964.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680964-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-isolated-680965"
+source = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680965.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680965-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-09-second-run-lead-isolated-680966"
+source = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680966.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680966-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-isolated-843116"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843116.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843116-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-isolated-843117"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843117.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843117-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-isolated-843118"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843118.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843118-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-09-second-run-lead-isolated-843119"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843119.png"
+mask = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843119-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "broom-11-10-3060-trial-4-40959"
+source = "2026-11-10-3060-trial-4/broom/pictures/40959.png"
+mask = "2026-11-10-3060-trial-4/broom/pictures/40959-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "broom-11-10-3060-trial-4-40960"
+source = "2026-11-10-3060-trial-4/broom/pictures/40960.png"
+mask = "2026-11-10-3060-trial-4/broom/pictures/40960-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "broom-11-10-3060-trial-4-40961"
+source = "2026-11-10-3060-trial-4/broom/pictures/40961.png"
+mask = "2026-11-10-3060-trial-4/broom/pictures/40961-mask.png"
+prompt = "a broom"
+
+[[picture]]
+name = "candle-brass-holder-11-10-3060-trial-4-115213"
+source = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115213.png"
+mask = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115213-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-10-3060-trial-4-115215"
+source = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115215.png"
+mask = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115215-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "candle-brass-holder-11-10-3060-trial-4-115216"
+source = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115216.png"
+mask = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115216-mask.png"
+prompt = "a candle in a brass holder"
+
+[[picture]]
+name = "chair-11-10-3060-trial-4-108640"
+source = "2026-11-10-3060-trial-4/chair/pictures/108640.png"
+mask = "2026-11-10-3060-trial-4/chair/pictures/108640-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-10-3060-trial-4-108641"
+source = "2026-11-10-3060-trial-4/chair/pictures/108641.png"
+mask = "2026-11-10-3060-trial-4/chair/pictures/108641-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "chair-11-10-3060-trial-4-108642"
+source = "2026-11-10-3060-trial-4/chair/pictures/108642.png"
+mask = "2026-11-10-3060-trial-4/chair/pictures/108642-mask.png"
+prompt = "an old looking chair"
+
+[[picture]]
+name = "clay-jug-11-10-3060-trial-4-50185"
+source = "2026-11-10-3060-trial-4/clay-jug/pictures/50185.png"
+mask = "2026-11-10-3060-trial-4/clay-jug/pictures/50185-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-10-3060-trial-4-50187"
+source = "2026-11-10-3060-trial-4/clay-jug/pictures/50187.png"
+mask = "2026-11-10-3060-trial-4/clay-jug/pictures/50187-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "clay-jug-11-10-3060-trial-4-50188"
+source = "2026-11-10-3060-trial-4/clay-jug/pictures/50188.png"
+mask = "2026-11-10-3060-trial-4/clay-jug/pictures/50188-mask.png"
+prompt = "a clay jug"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-10-3060-trial-4-230143"
+source = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230143.png"
+mask = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230143-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-10-3060-trial-4-230144"
+source = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230144.png"
+mask = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230144-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "double-bitted-battle-axe-11-10-3060-trial-4-230145"
+source = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230145.png"
+mask = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230145-mask.png"
+prompt = "a double-bitted battle axe"
+
+[[picture]]
+name = "iron-sword-11-10-3060-trial-4-127911"
+source = "2026-11-10-3060-trial-4/iron-sword/pictures/127911.png"
+mask = "2026-11-10-3060-trial-4/iron-sword/pictures/127911-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "iron-sword-11-10-3060-trial-4-127913"
+source = "2026-11-10-3060-trial-4/iron-sword/pictures/127913.png"
+mask = "2026-11-10-3060-trial-4/iron-sword/pictures/127913-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "iron-sword-11-10-3060-trial-4-127914"
+source = "2026-11-10-3060-trial-4/iron-sword/pictures/127914.png"
+mask = "2026-11-10-3060-trial-4/iron-sword/pictures/127914-mask.png"
+prompt = "an old iron sword"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-3060-trial-4-935318"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935318.png"
+mask = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935318-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-3060-trial-4-935319"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935319.png"
+mask = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935319-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-3060-trial-4-935321"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935321.png"
+mask = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935321-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "round-table-11-10-3060-trial-4-719531"
+source = "2026-11-10-3060-trial-4/round-table/pictures/719531.png"
+mask = "2026-11-10-3060-trial-4/round-table/pictures/719531-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-10-3060-trial-4-719533"
+source = "2026-11-10-3060-trial-4/round-table/pictures/719533.png"
+mask = "2026-11-10-3060-trial-4/round-table/pictures/719533-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-table-11-10-3060-trial-4-719534"
+source = "2026-11-10-3060-trial-4/round-table/pictures/719534.png"
+mask = "2026-11-10-3060-trial-4/round-table/pictures/719534-mask.png"
+prompt = "a small round table"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-10-3060-trial-4-524502"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524502.png"
+mask = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524502-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-10-3060-trial-4-524504"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524504.png"
+mask = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524504-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "round-wooden-shield-iron-11-10-3060-trial-4-524505"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524505.png"
+mask = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524505-mask.png"
+prompt = "a round wooden shield with an iron boss"
+
+[[picture]]
+name = "rusty-iron-lantern-11-10-3060-trial-4-141222"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141222.png"
+mask = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141222-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-10-3060-trial-4-141223"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141223.png"
+mask = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141223-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "rusty-iron-lantern-11-10-3060-trial-4-141224"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141224.png"
+mask = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141224-mask.png"
+prompt = "a rusty iron lantern"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-10-3060-trial-4-529266"
+source = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529266.png"
+mask = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529266-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-10-3060-trial-4-529267"
+source = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529267.png"
+mask = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529267-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "spear-leaf-shaped-head-11-10-3060-trial-4-529268"
+source = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529268.png"
+mask = "2026-11-10-3060-trial-4/spear-leaf-shaped-head/pictures/529268-mask.png"
+prompt = "a spear with a leaf-shaped head"
+
+[[picture]]
+name = "three-legged-stool-11-10-3060-trial-4-530723"
+source = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530723.png"
+mask = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530723-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-10-3060-trial-4-530724"
+source = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530724.png"
+mask = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530724-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-10-3060-trial-4-530725"
+source = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530725.png"
+mask = "2026-11-10-3060-trial-4/three-legged-stool/pictures/530725-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "war-hammer-11-10-3060-trial-4-141079"
+source = "2026-11-10-3060-trial-4/war-hammer/pictures/141079.png"
+mask = "2026-11-10-3060-trial-4/war-hammer/pictures/141079-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: two flared ends and a spike, no clear blade or face (head-cases.toml)"
+
+[[picture]]
+name = "war-hammer-11-10-3060-trial-4-141080"
+source = "2026-11-10-3060-trial-4/war-hammer/pictures/141080.png"
+mask = "2026-11-10-3060-trial-4/war-hammer/pictures/141080-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: two thin flared ends and a spike, no clear face (head-cases.toml)"
+
+[[picture]]
+name = "war-hammer-11-10-3060-trial-4-141082"
+source = "2026-11-10-3060-trial-4/war-hammer/pictures/141082.png"
+mask = "2026-11-10-3060-trial-4/war-hammer/pictures/141082-mask.png"
+prompt = "a war hammer"
+shows = "unclear"
+why = "a hybrid head, labelled blind: a small crescent blade one side, a flared blunt end the other (head-cases.toml)"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-10-3060-trial-4-465416"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465416.png"
+mask = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465416-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-10-3060-trial-4-465418"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465418.png"
+mask = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465418-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-barrel-iron-hoops-11-10-3060-trial-4-465419"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465419.png"
+mask = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465419-mask.png"
+prompt = "a wooden barrel with iron hoops"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-3060-trial-4-581160"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581160.png"
+mask = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581160-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-3060-trial-4-581161"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581161.png"
+mask = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581161-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-3060-trial-4-581163"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581163.png"
+mask = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581163-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-fix-check-935318"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935318.png"
+mask = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935318-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-fix-check-935319"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935319.png"
+mask = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935319-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-fix-check-935320"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935320.png"
+mask = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935320-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "leather-bound-book-closed-11-10-fix-check-935321"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935321.png"
+mask = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935321-mask.png"
+prompt = "a leather-bound book, closed"
+
+[[picture]]
+name = "three-legged-stool-11-10-fix-check-530722"
+source = "2026-11-10-fix-check/three-legged-stool/pictures/530722.png"
+mask = "2026-11-10-fix-check/three-legged-stool/pictures/530722-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-10-fix-check-530723"
+source = "2026-11-10-fix-check/three-legged-stool/pictures/530723.png"
+mask = "2026-11-10-fix-check/three-legged-stool/pictures/530723-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-10-fix-check-530724"
+source = "2026-11-10-fix-check/three-legged-stool/pictures/530724.png"
+mask = "2026-11-10-fix-check/three-legged-stool/pictures/530724-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "three-legged-stool-11-10-fix-check-530725"
+source = "2026-11-10-fix-check/three-legged-stool/pictures/530725.png"
+mask = "2026-11-10-fix-check/three-legged-stool/pictures/530725-mask.png"
+prompt = "a three-legged stool"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-fix-check-581160"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581160.png"
+mask = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581160-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-fix-check-581161"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581161.png"
+mask = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581161-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-fix-check-581162"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581162.png"
+mask = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581162-mask.png"
+prompt = "a wooden treasure chest"
+
+[[picture]]
+name = "wooden-treasure-chest-11-10-fix-check-581163"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581163.png"
+mask = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581163-mask.png"
+prompt = "a wooden treasure chest"

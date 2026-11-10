@@ -1,0 +1,328 @@
+# The state judge's labelled pictures: every book and chest the trials painted (one copy of each picture), labelled by
+# eye. `regression.py build` copies them into DATA/states and `regression.py run` judges them as the case
+# "state-pictures": a picture showing the state its prompt asks for must pass "shows what the words ask", one showing the
+# other state must fail it. `known_miss = true` marks a picture the judge still gets wrong: it is shown, not held, and
+# the run says when it is caught. Labels are never changed to make a run hold (docs/metrics.md, the honesty rules).
+# The pictures themselves are not published (docs/objects.md, "The regression set"); "3060" in a name or folder marks
+# a picture painted on the 12 GB card.
+
+[[picture]]
+name = "book-first-trial-329790"
+source = "2026-11-09-first-trial/leather-bound-book-closed/pictures/329790.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-first-trial-329791"
+source = "2026-11-09-first-trial/leather-bound-book-closed/pictures/329791.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-first-trial-329792"
+source = "2026-11-09-first-trial/leather-bound-book-closed/pictures/329792.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-first-trial-329793"
+source = "2026-11-09-first-trial/leather-bound-book-closed/pictures/329793.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-second-run-lead-cutout-871844"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871844.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-second-run-lead-cutout-871845"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871845.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+why = "standing open in a V on its spine, seen from behind its covers"
+known_miss = true
+
+[[picture]]
+name = "book-second-run-lead-cutout-871846"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871846.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+why = "open, its halves painted in the cover's leather"
+
+[[picture]]
+name = "book-second-run-lead-cutout-871847"
+source = "2026-11-09-second-run/lead-cutout/leather-bound-book-closed/pictures/871847.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+
+[[picture]]
+name = "book-third-trial-628200"
+source = "2026-11-10-third-trial/leather-bound-book-closed/pictures/628200.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+
+[[picture]]
+name = "book-third-trial-628201"
+source = "2026-11-10-third-trial/leather-bound-book-closed/pictures/628201.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+
+[[picture]]
+name = "book-third-trial-628202"
+source = "2026-11-10-third-trial/leather-bound-book-closed/pictures/628202.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-third-trial-628203"
+source = "2026-11-10-third-trial/leather-bound-book-closed/pictures/628203.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-second-run-lead-isolated-233815"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233815.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+why = "open, its halves painted in the cover's leather, a valley down the middle"
+
+[[picture]]
+name = "book-second-run-lead-isolated-233816"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233816.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-second-run-lead-isolated-233817"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233817.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-second-run-lead-isolated-233818"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233818.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-3060-trial-4-935318"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935318.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+
+[[picture]]
+name = "book-3060-trial-4-935319"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935319.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-3060-trial-4-935320"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935320.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+why = "the 12 GB card's rendering of try 935320: an open book whose halves are painted in the cover's leather, two blocks of page edges, a valley down the middle; scored 0.88 shut with the state-name wordings and was shaped in two lobes"
+
+[[picture]]
+name = "book-3060-trial-4-935321"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935321.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-fix-check-935318"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935318.png"
+prompt = "a leather-bound book, closed"
+shows = "open"
+
+[[picture]]
+name = "book-fix-check-935319"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935319.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "book-fix-check-935320"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935320.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+why = "the same seed on the 16 GB card: shut, one cover, a ribbon between the page edges; the harder look-alike of the open one"
+
+[[picture]]
+name = "book-fix-check-935321"
+source = "2026-11-10-fix-check/leather-bound-book-closed/pictures/935321.png"
+prompt = "a leather-bound book, closed"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878511"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878511.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878512"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878512.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878513"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878513.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878514"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878514.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878515"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878515.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878516"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878516.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878517"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878517.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-first-trial-878518"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878518.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-second-run-lead-cutout-604625"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604625.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-second-run-lead-cutout-604626"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604626.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-second-run-lead-cutout-604627"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604627.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+why = "small in the picture, its lid up"
+
+[[picture]]
+name = "chest-second-run-lead-cutout-604628"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604628.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-third-trial-962711"
+source = "2026-11-10-third-trial/wooden-treasure-chest/pictures/962711.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-third-trial-962712"
+source = "2026-11-10-third-trial/wooden-treasure-chest/pictures/962712.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-third-trial-962713"
+source = "2026-11-10-third-trial/wooden-treasure-chest/pictures/962713.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-third-trial-962714"
+source = "2026-11-10-third-trial/wooden-treasure-chest/pictures/962714.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-second-run-lead-isolated-843116"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843116.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-second-run-lead-isolated-843117"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843117.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-second-run-lead-isolated-843118"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843118.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-second-run-lead-isolated-843119"
+source = "2026-11-09-second-run/lead-isolated/wooden-treasure-chest/pictures/843119.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-3060-trial-4-581160"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581160.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+why = "its lid down, a dark seam under it"
+
+[[picture]]
+name = "chest-3060-trial-4-581161"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581161.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-3060-trial-4-581162"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581162.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-3060-trial-4-581163"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581163.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-fix-check-581160"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581160.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+why = "its lid down, a dark seam under it"
+
+[[picture]]
+name = "chest-fix-check-581161"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581161.png"
+prompt = "a wooden treasure chest"
+shows = "open"
+
+[[picture]]
+name = "chest-fix-check-581162"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581162.png"
+prompt = "a wooden treasure chest"
+shows = "closed"
+
+[[picture]]
+name = "chest-fix-check-581163"
+source = "2026-11-10-fix-check/wooden-treasure-chest/pictures/581163.png"
+prompt = "a wooden treasure chest"
+shows = "open"

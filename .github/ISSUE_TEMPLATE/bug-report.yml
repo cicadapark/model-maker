@@ -1,0 +1,58 @@
+name: Bug report
+description: Something model-maker made, or did, is not what you expected.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for telling us. Before you write, please make the bug report file for the job:
+
+            ./model-maker bug-report <the job's folder>
+
+        It writes one file (a .zip) and says what it left out. It holds the job's record, its sidecar, its report,
+        the picture it was made from, its prompt (whole: the remake needs it) and the versions it was made with. It
+        leaves out your home folder, your user name, your machine's name, tokens and the large in-between files. Add
+        `--with-model` to put the 3-D object (.glb) in too.
+
+        We claim no rights in what you make; the models' terms apply (NOTICE). We cannot take a model made on your
+        own machine as proof: the code that made it is on your machine. A maintainer checks a report by making the
+        same prompt with the same seeds and version on a card of their own.
+
+        Please never put a token, a password or a key in an issue (see SECURITY.md for security problems).
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      description: The 3-D object or the result you expected, in plain words.
+      placeholder: "A chair standing on four legs."
+    validations:
+      required: true
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened?
+      description: What you got instead. Name the check or the part of the report, if one shows it.
+      placeholder: "The back legs are joined into one, and the report says every check passes."
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: The bug report file
+      description: Drag the file made by `./model-maker bug-report` into this box. It must be 25 MB or less (leave out
+        `--with-model` if it is larger).
+      placeholder: "bug-report-chair-1a2b3c4d.zip"
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: The command you ran
+      description: For example `./model-maker make "an old looking chair"`. Leave out any folder names you would
+        rather not show.
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Pictures, a screenshot of the 3-D object in the tool you opened it in, or other notes.

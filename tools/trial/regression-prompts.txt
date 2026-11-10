@@ -1,0 +1,12 @@
+# The prompts whose models a check caught (regression.toml), made again end to end on the card before a release:
+# each must come out passing, or failing only where its case says why. One a line; # starts a note.
+an old looking chair
+a small round table
+a rusty iron lantern
+a clay jug
+a wooden barrel with iron hoops
+a three-legged stool
+a wooden treasure chest
+a leather-bound book, closed
+a round wooden shield with an iron boss
+a candle in a brass holder

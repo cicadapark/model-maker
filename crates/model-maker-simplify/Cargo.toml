@@ -1,0 +1,16 @@
+[package]
+name = "model-maker-simplify"
+description = "Brings a shape model's dense surface down to a triangle budget, keeping its shape (meshoptimizer)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# meshoptimizer's edge collapses by quadric error (MIT): the shape kept where a grid clustering steps the outline.
+meshopt = "0.6"

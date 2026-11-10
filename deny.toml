@@ -1,0 +1,34 @@
+# cargo-deny: which licences and sources a dependency may have.
+# Allowed: what Cargo.lock's crates need (MIT, Apache-2.0, and Unicode-3.0 for unicode-ident's tables). A new
+# dependency's licence is read before it is added here, and only a permissive one is.
+# Refused: GPL, AGPL, LGPL, non-commercial — never added below.
+
+[graph]
+all-features = true
+
+[licenses]
+confidence-threshold = 0.9
+unused-allowed-license = "allow"
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+]
+# This repository's own crates are not published to crates.io.
+[licenses.private]
+ignore = true
+
+[bans]
+multiple-versions = "allow"
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+
+[advisories]
+yanked = "warn"
+# Vulnerabilities fail everywhere; "unmaintained" notices fail only for our
+# direct dependencies (transitive ones are reviewed when they appear).
+unmaintained = "workspace"

@@ -1,0 +1,12 @@
+/target
+/.venv
+__pycache__/
+*.pyc
+/metrics/
+/models
+/sources
+/.tools
+# What model-maker makes and the bug reports it writes stay out of commits.
+/made/
+bug-report-*.zip
+bug-report-*.tar.gz

@@ -1,0 +1,21 @@
+name: Question
+description: Ask how to do something with model-maker.
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask anything about setting up or using model-maker. If something went wrong with a 3-D object, please use the
+        Bug report form instead, with its bug report file.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried
+      description: The commands you ran and what they printed, if any. Leave out tokens and anything personal.

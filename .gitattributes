@@ -1,0 +1,2 @@
+# A release tarball made by git archive carries its commit (python/model_maker/pipeline.py, repository_version).
+python/model_maker/version.txt export-subst

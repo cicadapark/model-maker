@@ -1,0 +1,1231 @@
+# The war hammer family's and the axes' pictures, their heads labelled by eye (10 November 2026; docs/objects.md, "War
+# hammers"). Painted on the 12 GB card ("3060" in names and folders) by tools/trial/paint_tries.py with the picture
+# words before the change ("old": "its point or head at the top", no head words), after it ("new": no "point" for a
+# head on a haft, and the war hammer family's head described), and with a three-quarter turn tried and not kept
+# ("turn"), 8 seeds a prompt; and the first trial's war hammers and battle axes painted on the 16 GB card ("trial";
+# the 12 GB card's copies are bit-identical to the "old" ones). Labelled blind: each head cropped from the top of its
+# cut-out, shuffled under a random code, with no word of its prompt or wording (tools/trial/head_sheets.py), then
+# unblinded. Where the crop missed a second head at the foot or a head painted lying down, the label was corrected
+# from the whole picture, and its `why` says so.
+#
+# `head`: "hammer" (blunt striking faces; a spike on top or a pointed beak allowed), "axe" (a broad sharp blade), "hybrid"
+# (a blade and a blunt face, or flared ends between the two, or a hammer and a blade on one haft), "other" (neither: a
+# bare pole, a spike, a pick, two heads). `regression.py run` judges them as the case "head-pictures": a clear head of
+# the prompt's own kind must pass "shows the thing asked for", a clear head of the other kind must fail it; a hybrid or
+# another thing is shown, not held. Labels are never changed to make a run hold (docs/metrics.md, the honesty rules).
+
+[[picture]]
+name = "battle-axe-old-222588"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222588.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "two crescent blades"
+
+[[picture]]
+name = "battle-axe-old-222589"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222589.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "two blades with bright edges and a spike"
+
+[[picture]]
+name = "battle-axe-old-222590"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222590.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "two blades with bright edges and a spike"
+
+[[picture]]
+name = "battle-axe-old-222591"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222591.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "a blade and a spike, two hafts"
+
+[[picture]]
+name = "battle-axe-old-222592"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222592.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "a broad blade"
+
+[[picture]]
+name = "battle-axe-old-222593"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222593.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "a crescent blade, a spike and a small lug"
+
+[[picture]]
+name = "battle-axe-old-222594"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222594.png"
+prompt = "a battle axe"
+wording = "old"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "battle-axe-old-222595"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222595.png"
+prompt = "a battle axe"
+wording = "old"
+head = "hybrid"
+why = "a crescent blade one side, a flared blunt end the other, a spike on top"
+
+[[picture]]
+name = "battle-axe-new-454595"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454595.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "a blade with a poll"
+
+[[picture]]
+name = "battle-axe-new-454596"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454596.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "a small blade"
+
+[[picture]]
+name = "battle-axe-new-454597"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454597.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two blades, one with a bright edge"
+
+[[picture]]
+name = "battle-axe-new-454598"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454598.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two blades, one with a bright edge"
+
+[[picture]]
+name = "battle-axe-new-454599"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454599.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two crescent blades"
+
+[[picture]]
+name = "battle-axe-new-454600"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454600.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two broad blades"
+
+[[picture]]
+name = "battle-axe-new-454601"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454601.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two broad blades"
+
+[[picture]]
+name = "battle-axe-new-454602"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454602.png"
+prompt = "a battle axe"
+wording = "new"
+head = "axe"
+why = "two crescent blades"
+
+[[picture]]
+name = "double-bitted-battle-axe-first-trial-230143"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230143.png"
+prompt = "a double-bitted battle axe"
+wording = "trial"
+head = "hybrid"
+why = "a crescent blade one side, a flared blunt end the other, a point on top"
+
+[[picture]]
+name = "double-bitted-battle-axe-first-trial-230144"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230144.png"
+prompt = "a double-bitted battle axe"
+wording = "trial"
+head = "axe"
+why = "a broad blade with a round lug behind"
+
+[[picture]]
+name = "double-bitted-battle-axe-first-trial-230145"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230145.png"
+prompt = "a double-bitted battle axe"
+wording = "trial"
+head = "axe"
+why = "a crescent blade and a spike"
+
+[[picture]]
+name = "double-bitted-battle-axe-first-trial-230146"
+source = "2026-11-09-first-trial-refinished/double-bitted-battle-axe/pictures/230146.png"
+prompt = "a double-bitted battle axe"
+wording = "trial"
+head = "axe"
+why = "two flared blades with bright edges and a spike"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230143"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230143.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "hybrid"
+why = "a crescent blade one side, a flared blunt end the other, a point on top"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230144"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230144.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "a broad blade with a round knob behind"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230145"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230145.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "a crescent blade and a spike"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230146"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230146.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "two flared blades with bright edges and a spike"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230147"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230147.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "two blades with a bright edge and a spike"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230148"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230148.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "a broad blade with a hook behind"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230149"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230149.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "a broad bearded blade"
+
+[[picture]]
+name = "double-bitted-battle-axe-old-230150"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230150.png"
+prompt = "a double-bitted battle axe"
+wording = "old"
+head = "axe"
+why = "a broad bearded blade"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2112"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2112.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "a broad bearded blade"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2113"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2113.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "a broad bearded blade"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2114"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2114.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "hybrid"
+why = "a crescent blade one side, a flared blunt end the other"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2115"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2115.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "a crescent blade and a smaller flared bit"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2116"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2116.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "a broad blade, a round cap on top"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2117"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2117.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "two crescent blades"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2118"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2118.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "two crescent blades"
+
+[[picture]]
+name = "double-bitted-battle-axe-new-2119"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2119.png"
+prompt = "a double-bitted battle axe"
+wording = "new"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "hatchet-old-9391"
+source = "2026-11-10-war-hammer-words/old/hatchet/9391.png"
+prompt = "a hatchet"
+wording = "old"
+head = "axe"
+why = "two flared blades with bright edges"
+
+[[picture]]
+name = "hatchet-old-9392"
+source = "2026-11-10-war-hammer-words/old/hatchet/9392.png"
+prompt = "a hatchet"
+wording = "old"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "hatchet-old-9393"
+source = "2026-11-10-war-hammer-words/old/hatchet/9393.png"
+prompt = "a hatchet"
+wording = "old"
+head = "other"
+why = "a spike on top and a spade-like blade at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "hatchet-old-9394"
+source = "2026-11-10-war-hammer-words/old/hatchet/9394.png"
+prompt = "a hatchet"
+wording = "old"
+head = "hybrid"
+why = "flared ends, one with a bright edge"
+
+[[picture]]
+name = "hatchet-old-9395"
+source = "2026-11-10-war-hammer-words/old/hatchet/9395.png"
+prompt = "a hatchet"
+wording = "old"
+head = "axe"
+why = "a broad blade"
+
+[[picture]]
+name = "hatchet-old-9396"
+source = "2026-11-10-war-hammer-words/old/hatchet/9396.png"
+prompt = "a hatchet"
+wording = "old"
+head = "other"
+why = "a bent handle with a tiny cap, no head (whole picture)"
+
+[[picture]]
+name = "hatchet-old-9397"
+source = "2026-11-10-war-hammer-words/old/hatchet/9397.png"
+prompt = "a hatchet"
+wording = "old"
+head = "hybrid"
+why = "a bar with flared ends, no clear face"
+
+[[picture]]
+name = "hatchet-old-9398"
+source = "2026-11-10-war-hammer-words/old/hatchet/9398.png"
+prompt = "a hatchet"
+wording = "old"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "hatchet-new-268549"
+source = "2026-11-10-war-hammer-words/new/hatchet/268549.png"
+prompt = "a hatchet"
+wording = "new"
+head = "hammer"
+why = "a square face and a flared face"
+
+[[picture]]
+name = "hatchet-new-268550"
+source = "2026-11-10-war-hammer-words/new/hatchet/268550.png"
+prompt = "a hatchet"
+wording = "new"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "hatchet-new-268551"
+source = "2026-11-10-war-hammer-words/new/hatchet/268551.png"
+prompt = "a hatchet"
+wording = "new"
+head = "hybrid"
+why = "a hammer head on top and an axe blade at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "hatchet-new-268552"
+source = "2026-11-10-war-hammer-words/new/hatchet/268552.png"
+prompt = "a hatchet"
+wording = "new"
+head = "hybrid"
+why = "a bar with flared ends, no clear face"
+
+[[picture]]
+name = "hatchet-new-268553"
+source = "2026-11-10-war-hammer-words/new/hatchet/268553.png"
+prompt = "a hatchet"
+wording = "new"
+head = "axe"
+why = "a broad blade with a square poll"
+
+[[picture]]
+name = "hatchet-new-268554"
+source = "2026-11-10-war-hammer-words/new/hatchet/268554.png"
+prompt = "a hatchet"
+wording = "new"
+head = "axe"
+why = "a broad blade"
+
+[[picture]]
+name = "hatchet-new-268555"
+source = "2026-11-10-war-hammer-words/new/hatchet/268555.png"
+prompt = "a hatchet"
+wording = "new"
+head = "axe"
+why = "a broad blade with a square poll"
+
+[[picture]]
+name = "hatchet-new-268556"
+source = "2026-11-10-war-hammer-words/new/hatchet/268556.png"
+prompt = "a hatchet"
+wording = "new"
+head = "axe"
+why = "a broad blade with a poll"
+
+[[picture]]
+name = "mallet-old-502356"
+source = "2026-11-10-war-hammer-words/old/mallet/502356.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a small mallet lying head down on the floor (whole picture; the crop showed the handle only)"
+
+[[picture]]
+name = "mallet-old-502357"
+source = "2026-11-10-war-hammer-words/old/mallet/502357.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden block head"
+
+[[picture]]
+name = "mallet-old-502358"
+source = "2026-11-10-war-hammer-words/old/mallet/502358.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a small mallet lying head down on the floor (whole picture; the crop showed the handle only)"
+
+[[picture]]
+name = "mallet-old-502359"
+source = "2026-11-10-war-hammer-words/old/mallet/502359.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden block head"
+
+[[picture]]
+name = "mallet-old-502360"
+source = "2026-11-10-war-hammer-words/old/mallet/502360.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden mallet head"
+
+[[picture]]
+name = "mallet-old-502361"
+source = "2026-11-10-war-hammer-words/old/mallet/502361.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden block head"
+
+[[picture]]
+name = "mallet-old-502362"
+source = "2026-11-10-war-hammer-words/old/mallet/502362.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden block head"
+
+[[picture]]
+name = "mallet-old-502363"
+source = "2026-11-10-war-hammer-words/old/mallet/502363.png"
+prompt = "a mallet"
+wording = "old"
+head = "hammer"
+why = "a wooden head with flared blunt ends"
+
+[[picture]]
+name = "mallet-new-267616"
+source = "2026-11-10-war-hammer-words/new/mallet/267616.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267617"
+source = "2026-11-10-war-hammer-words/new/mallet/267617.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267618"
+source = "2026-11-10-war-hammer-words/new/mallet/267618.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267619"
+source = "2026-11-10-war-hammer-words/new/mallet/267619.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267620"
+source = "2026-11-10-war-hammer-words/new/mallet/267620.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267621"
+source = "2026-11-10-war-hammer-words/new/mallet/267621.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a stone-like block"
+
+[[picture]]
+name = "mallet-new-267622"
+source = "2026-11-10-war-hammer-words/new/mallet/267622.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-new-267623"
+source = "2026-11-10-war-hammer-words/new/mallet/267623.png"
+prompt = "a mallet"
+wording = "new"
+head = "hammer"
+why = "a stone-like block"
+
+[[picture]]
+name = "mallet-turn-617905"
+source = "2026-11-10-war-hammer-words/turn/mallet/617905.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617906"
+source = "2026-11-10-war-hammer-words/turn/mallet/617906.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617907"
+source = "2026-11-10-war-hammer-words/turn/mallet/617907.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617908"
+source = "2026-11-10-war-hammer-words/turn/mallet/617908.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617909"
+source = "2026-11-10-war-hammer-words/turn/mallet/617909.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a stone-like block"
+
+[[picture]]
+name = "mallet-turn-617910"
+source = "2026-11-10-war-hammer-words/turn/mallet/617910.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617911"
+source = "2026-11-10-war-hammer-words/turn/mallet/617911.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "mallet-turn-617912"
+source = "2026-11-10-war-hammer-words/turn/mallet/617912.png"
+prompt = "a mallet"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-old-987720"
+source = "2026-11-10-war-hammer-words/old/maul/987720.png"
+prompt = "a maul"
+wording = "old"
+head = "other"
+why = "a pick head with two curved points (whole picture)"
+
+[[picture]]
+name = "maul-old-987721"
+source = "2026-11-10-war-hammer-words/old/maul/987721.png"
+prompt = "a maul"
+wording = "old"
+head = "hammer"
+why = "a thin bar with round blunt ends"
+
+[[picture]]
+name = "maul-old-987722"
+source = "2026-11-10-war-hammer-words/old/maul/987722.png"
+prompt = "a maul"
+wording = "old"
+head = "hammer"
+why = "a bar with round blunt ends"
+
+[[picture]]
+name = "maul-old-987723"
+source = "2026-11-10-war-hammer-words/old/maul/987723.png"
+prompt = "a maul"
+wording = "old"
+head = "hybrid"
+why = "a hammer head on top and an axe-like blade at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "maul-old-987724"
+source = "2026-11-10-war-hammer-words/old/maul/987724.png"
+prompt = "a maul"
+wording = "old"
+head = "hybrid"
+why = "a thin bar with flared ends, no clear face"
+
+[[picture]]
+name = "maul-old-987725"
+source = "2026-11-10-war-hammer-words/old/maul/987725.png"
+prompt = "a maul"
+wording = "old"
+head = "other"
+why = "a knob on top and a spade-like blade at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "maul-old-987726"
+source = "2026-11-10-war-hammer-words/old/maul/987726.png"
+prompt = "a maul"
+wording = "old"
+head = "hybrid"
+why = "a bar with flared ends, no clear face"
+
+[[picture]]
+name = "maul-old-987727"
+source = "2026-11-10-war-hammer-words/old/maul/987727.png"
+prompt = "a maul"
+wording = "old"
+head = "other"
+why = "a spear point on top and an axe-like blade at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "maul-new-63640"
+source = "2026-11-10-war-hammer-words/new/maul/63640.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63641"
+source = "2026-11-10-war-hammer-words/new/maul/63641.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a block with a wedge peen"
+
+[[picture]]
+name = "maul-new-63642"
+source = "2026-11-10-war-hammer-words/new/maul/63642.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63643"
+source = "2026-11-10-war-hammer-words/new/maul/63643.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63644"
+source = "2026-11-10-war-hammer-words/new/maul/63644.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63645"
+source = "2026-11-10-war-hammer-words/new/maul/63645.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63646"
+source = "2026-11-10-war-hammer-words/new/maul/63646.png"
+prompt = "a maul"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-new-63647"
+source = "2026-11-10-war-hammer-words/new/maul/63647.png"
+prompt = "a maul"
+wording = "new"
+head = "other"
+why = "a pole with a brush-like end, lying aslant (whole picture)"
+
+[[picture]]
+name = "maul-turn-127883"
+source = "2026-11-10-war-hammer-words/turn/maul/127883.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-turn-127884"
+source = "2026-11-10-war-hammer-words/turn/maul/127884.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-turn-127885"
+source = "2026-11-10-war-hammer-words/turn/maul/127885.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-turn-127886"
+source = "2026-11-10-war-hammer-words/turn/maul/127886.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-turn-127887"
+source = "2026-11-10-war-hammer-words/turn/maul/127887.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "maul-turn-127888"
+source = "2026-11-10-war-hammer-words/turn/maul/127888.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a block with a flared face"
+
+[[picture]]
+name = "maul-turn-127889"
+source = "2026-11-10-war-hammer-words/turn/maul/127889.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a stone-like block"
+
+[[picture]]
+name = "maul-turn-127890"
+source = "2026-11-10-war-hammer-words/turn/maul/127890.png"
+prompt = "a maul"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-old-814605"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814605.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "two round faces"
+
+[[picture]]
+name = "sledgehammer-old-814606"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814606.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a face and a curved pick"
+
+[[picture]]
+name = "sledgehammer-old-814607"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814607.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "two round faces"
+
+[[picture]]
+name = "sledgehammer-old-814608"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814608.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a face and a curved pick"
+
+[[picture]]
+name = "sledgehammer-old-814609"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814609.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a small face and a long curved beak"
+
+[[picture]]
+name = "sledgehammer-old-814610"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814610.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a face and a curved claw"
+
+[[picture]]
+name = "sledgehammer-old-814611"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814611.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a face and a curved claw"
+
+[[picture]]
+name = "sledgehammer-old-814612"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814612.png"
+prompt = "a sledgehammer"
+wording = "old"
+head = "hammer"
+why = "a face and a curved pick"
+
+[[picture]]
+name = "sledgehammer-new-388453"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388453.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block with flat faces"
+
+[[picture]]
+name = "sledgehammer-new-388454"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388454.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block with round faces"
+
+[[picture]]
+name = "sledgehammer-new-388455"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388455.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-new-388456"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388456.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a block with stepped round faces"
+
+[[picture]]
+name = "sledgehammer-new-388457"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388457.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-new-388458"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388458.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-new-388459"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388459.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a stepped block"
+
+[[picture]]
+name = "sledgehammer-new-388460"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388460.png"
+prompt = "a sledgehammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596880"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596880.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596881"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596881.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596882"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596882.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596883"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596883.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596884"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596884.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a stone-like block"
+
+[[picture]]
+name = "sledgehammer-turn-596885"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596885.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "other"
+why = "a hammer head on top and a large block at the foot (whole picture; the crop showed the top only)"
+
+[[picture]]
+name = "sledgehammer-turn-596886"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596886.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "sledgehammer-turn-596887"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596887.png"
+prompt = "a sledgehammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-first-trial-141079"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141079.png"
+prompt = "a war hammer"
+wording = "trial"
+head = "hybrid"
+why = "two flared dark ends, a spike on top"
+
+[[picture]]
+name = "war-hammer-first-trial-141080"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141080.png"
+prompt = "a war hammer"
+wording = "trial"
+head = "hybrid"
+why = "two thin flared ends and a spike"
+
+[[picture]]
+name = "war-hammer-first-trial-141081"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141081.png"
+prompt = "a war hammer"
+wording = "trial"
+head = "axe"
+why = "a flared blade with a square poll and a spike"
+
+[[picture]]
+name = "war-hammer-first-trial-141082"
+source = "2026-11-09-first-trial-refinished/war-hammer/pictures/141082.png"
+prompt = "a war hammer"
+wording = "trial"
+head = "hybrid"
+why = "a small crescent blade one side, a flared blunt end the other, a spike on top"
+
+[[picture]]
+name = "war-hammer-old-141079"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141079.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "two flared ends and a spike, no clear blade or face"
+
+[[picture]]
+name = "war-hammer-old-141080"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141080.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "two thin flared ends and a spike"
+
+[[picture]]
+name = "war-hammer-old-141081"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141081.png"
+prompt = "a war hammer"
+wording = "old"
+head = "axe"
+why = "a flared blade with a square poll and a spike"
+
+[[picture]]
+name = "war-hammer-old-141082"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141082.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "a small crescent blade one side, a flared blunt end the other, a spike on top"
+
+[[picture]]
+name = "war-hammer-old-141083"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141083.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "a small blade one side, a round blunt face the other"
+
+[[picture]]
+name = "war-hammer-old-141084"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141084.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "two flared ends and a spike, no clear blade or face"
+
+[[picture]]
+name = "war-hammer-old-141085"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141085.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hybrid"
+why = "a square end one side, a flared blade-like end the other"
+
+[[picture]]
+name = "war-hammer-old-141086"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141086.png"
+prompt = "a war hammer"
+wording = "old"
+head = "hammer"
+why = "a flared face, a pointed beak and a spike"
+
+[[picture]]
+name = "war-hammer-new-365991"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365991.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-new-365992"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365992.png"
+prompt = "a war hammer"
+wording = "new"
+head = "other"
+why = "two separate steel blocks on the haft"
+
+[[picture]]
+name = "war-hammer-new-365993"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365993.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-new-365994"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365994.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a stepped block"
+
+[[picture]]
+name = "war-hammer-new-365995"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365995.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a block with a wedge peen"
+
+[[picture]]
+name = "war-hammer-new-365996"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365996.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-new-365997"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365997.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-new-365998"
+source = "2026-11-10-war-hammer-words/new/war-hammer/365998.png"
+prompt = "a war hammer"
+wording = "new"
+head = "hammer"
+why = "a notched steel block"
+
+[[picture]]
+name = "war-hammer-turn-288372"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288372.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288373"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288373.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288374"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288374.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288375"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288375.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288376"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288376.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288377"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288377.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288378"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288378.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a steel block"
+
+[[picture]]
+name = "war-hammer-turn-288379"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288379.png"
+prompt = "a war hammer"
+wording = "turn"
+head = "hammer"
+why = "a stone-like block"

@@ -1,0 +1,19 @@
+# Release 1's trial: sixteen prompts as a new user would write them. Ten objects (furniture, tools, containers, decor,
+# some with thin parts: chair and stool legs, a broom's handle, a candle) and six held in the hand (a bow and a spear
+# are the hard thin cases). One a line; # starts a note.
+an old looking chair
+a rusty iron lantern
+a wooden barrel with iron hoops
+a three-legged stool
+a leather-bound book, closed
+a clay jug
+a wooden treasure chest
+a candle in a brass holder
+a small round table
+a broom
+an old iron sword
+a double-bitted battle axe
+a wooden longbow
+a round wooden shield with an iron boss
+a spear with a leaf-shaped head
+a war hammer

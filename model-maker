@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# model-maker's command: runs the Python side of this repository.
+#
+#   ./model-maker make "an old looking chair"
+#   ./model-maker words "a double-bitted battle axe"
+#   ./model-maker --help
+#
+# It uses the repository's own environment (.venv, made by setup.sh) unless MODEL_MAKER_PYTHON names another, and the
+# models and their code setup.sh put in models/ and sources/ unless MODEL_MAKER_MODELS and MODEL_MAKER_SOURCES (or
+# --models and --sources) name others.
+set -euo pipefail
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python="${MODEL_MAKER_PYTHON:-$here/.venv/bin/python}"
+if [ ! -x "$python" ]; then
+    echo "model-maker: no Python environment at $python (run ./setup.sh, or set MODEL_MAKER_PYTHON)" >&2
+    exit 1
+fi
+export PYTHONPATH="$here/python${PYTHONPATH:+:$PYTHONPATH}"
+export MODEL_MAKER_MODELS="${MODEL_MAKER_MODELS:-$here/models}"
+export MODEL_MAKER_SOURCES="${MODEL_MAKER_SOURCES:-$here/sources}"
+# Nothing is fetched from the hub at run time: every model is read from its checked folder. Set here, before Python
+# starts, as the hub's library reads it when it is first imported (set later, it does not count).
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+# The card's memory in pieces that can grow, so the models loaded one after another do not leave it fragmented.
+export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
+exec "$python" -m model_maker "$@"

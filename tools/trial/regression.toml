@@ -1,0 +1,423 @@
+# The regression set: what the checks have caught (and what they once misread), each with the verdicts it must keep.
+# `tools/trial/regression.py run DATA` runs it on the CPU, before any change to the pipeline or its checks; every case
+# must hold. `tools/trial/regression.py build TRIALS DATA` copies each case's files (its picture, cut-out, shape, and
+# paint when the case judges paint) from the trial folders under TRIALS, by `source`, into DATA.
+#
+# A case: `prompt` (how it is read), `must_fail` and `must_pass` (check names), `paint = true` to bake and judge the
+# paint's coverage, `string` ("none" or "drawn") for a bow, `hollows_removed` (at least); `made_must_fail` and
+# `made_must_pass` judge the shape as the model made it, before the finish levels a thing that stands, and `trimmed_mm`
+# = [low, high] is how much that levelling must cut from its feet; `state = true` judges whether the picture shows the
+# state its words ask for (the state judge's model from MODEL_MAKER_MODELS).
+# `laid_deg` = [low, high] is how far a thing that lies (a book) must be turned to rest on its broad face.
+# `fill = true` judges the paint touch-up's fill against the paint round it ("fill matches the paint round it").
+# `carved_holes` is how many holes of the picture's outline the finish must carve a web from (carving): 0 for a chair's
+# back, a stool, a table and a lantern, whose holes the shape keeps open or whose parts merely sit a little off them.
+# `picture_only = true`: the case has only its picture and cut-out (copied as `picture.png` and `mask.png`), and is
+# judged by the picture's checks alone. The state judge's labelled pictures are in `state-cases.toml`.
+#
+# The data is not published: the trials' folders (`source`), the early example (`example`, a commit of the
+# development history) and the built DATA are not in this repository, only the cases and the sums of their files
+# (regression-sums.json). `source` names a case's folder in those trials, the 12 GB card's runs among them as "3060".
+
+[[case]]
+name = "chair-short-back-legs"
+why = """the first trial's chair: its back legs 3 cm short from an eye-level picture, settling 3.6 degrees back as made;
+the finish trims its front legs 28.9 mm to the back legs' floor (2026-11-10), within its limit of 5 % of the height"""
+source = "2026-11-09-first-trial/chair"
+prompt = "an old looking chair"
+made_must_fail = ["base level"]
+must_pass = ["no holes", "one main piece", "base level", "every foot on the ground"]
+trimmed_mm = [25, 33]
+hollows_removed = 4
+carved_holes = 0
+
+[[case]]
+name = "chair-good"
+why = "the second run's chair: right, but overlapped its picture 79 % (thin parts); its edges match"
+source = "2026-11-09-second-run/fixes/chair"
+prompt = "an old looking chair"
+must_pass = ["outline matches the picture", "base level", "centre over the base", "every foot on the ground"]
+carved_holes = 0
+
+[[case]]
+name = "table-short-leg"
+why = """the third trial's round table: one of three legs 24.6 mm short, its top level, settling 3.6 degrees as made;
+the finish trims the other two to its floor"""
+source = "2026-11-10-third-trial/round-table"
+prompt = "a small round table"
+made_must_fail = ["base level", "centre over the base"]
+must_pass = ["base level", "centre over the base", "every foot on the ground", "no holes", "one main piece",
+             "outline matches the picture"]
+trimmed_mm = [20, 30]
+carved_holes = 0
+
+[[case]]
+name = "table-web"
+why = """the first trial's round table: a web between its legs under the top. As made the outline check must catch it;
+since 2026-11-10 the finish carves the two webs the picture shows through (between the legs and their stretchers) and
+it matches its picture (the edges 0.93 % apart on average, as made 1.10 %)"""
+source = "2026-11-09-first-trial/round-table"
+prompt = "a small round table"
+made_must_fail = ["outline matches the picture"]
+must_pass = ["outline matches the picture", "no holes", "one main piece"]
+carved_holes = 2
+
+[[case]]
+name = "table-good"
+why = "the second run's round table: right, but overlapped its picture 83 % (thin legs)"
+source = "2026-11-09-second-run/fixes/round-table"
+prompt = "a small round table"
+must_pass = ["outline matches the picture"]
+carved_holes = 0
+
+[[case]]
+name = "longbow-waving"
+why = "the first trial's longbow, painted edge-on: it waves (a W), no string can be drawn"
+source = "2026-11-09-first-trial/wooden-longbow"
+prompt = "a wooden longbow"
+must_fail = ["no kink", "limbs mirror each other"]
+string = "none"
+
+[[case]]
+name = "longbow-plate"
+why = "the second run's longbow, asked to face the viewer: the space between bow and string filled into a plate"
+source = "2026-11-09-second-run/fixes/wooden-longbow"
+prompt = "a wooden longbow"
+must_fail = ["no kink"]
+
+[[case]]
+name = "barrel-seams-and-folds"
+why = "the first trial's barrel: 3 holes (unjoined seams) and 64 torn edges (folds) from the cut to 60k triangles"
+source = "2026-11-09-first-trial/wooden-barrel-iron-hoops"
+prompt = "a wooden barrel with iron hoops"
+must_pass = ["no holes", "one main piece", "left-right symmetry"]
+
+[[case]]
+name = "stool-seam"
+why = "the first trial's stool: one unjoined seam"
+source = "2026-11-09-first-trial/three-legged-stool"
+prompt = "a three-legged stool"
+must_pass = ["no holes", "base level", "centre over the base", "every foot on the ground"]
+carved_holes = 0
+
+[[case]]
+name = "lantern-hollow-and-paint"
+why = "the first trial's lantern: a sealed hollow of 14 % of its surface; its cage bars' inner sides truly unpainted"
+source = "2026-11-09-first-trial/rusty-iron-lantern"
+prompt = "a rusty iron lantern"
+must_pass = ["one main piece"]
+must_fail = ["paint covers the surface"]
+paint = true
+hollows_removed = 1
+carved_holes = 0
+
+[[case]]
+name = "jug-neck-unseen"
+why = "the first trial's jug: the inside of its neck, seldom seen, counted texel for texel as unpainted"
+source = "2026-11-09-first-trial/clay-jug"
+prompt = "a clay jug"
+must_pass = ["paint covers the surface", "no holes"]
+paint = true
+carved_holes = 0
+
+[[case]]
+name = "sword-good"
+why = "the first trial's sword: passed every check; it must go on passing"
+source = "2026-11-09-first-trial/iron-sword"
+prompt = "an old iron sword"
+must_pass = ["outline matches the picture", "no holes", "one main piece", "blade straight", "no kink", "grip found",
+             "symmetric across the blade"]
+carved_holes = 0
+
+[[case]]
+name = "chest-shadow-left-out"
+why = "the first trial's chest: painted floating, a floor and its shadow on it, none of it in the cut-out"
+source = "2026-11-09-first-trial/wooden-treasure-chest"
+prompt = "a wooden treasure chest"
+must_pass = ["no shadow or floor in the cut-out", "plain backdrop", "one piece", "shows what the words ask"]
+state = true
+
+[[case]]
+name = "book-shadow-left-out"
+why = "the first trial's book: passed every check with a floor shadow well below it"
+source = "2026-11-09-first-trial/leather-bound-book-closed"
+prompt = "a leather-bound book, closed"
+must_pass = ["no shadow or floor in the cut-out", "outline matches the picture", "no holes", "shows what the words ask"]
+state = true
+
+[[case]]
+name = "chest-lid-open"
+why = "the third trial's chest, painted with its lid up and chosen: its inside could not be painted"
+source = "2026-11-10-third-trial/wooden-treasure-chest"
+prompt = "a wooden treasure chest"
+must_fail = ["shows what the words ask"]
+state = true
+
+[[case]]
+name = "book-painted-open"
+why = "the third trial's book, asked closed, painted open and chosen: it settled onto its spread covers"
+source = "2026-11-10-third-trial/leather-bound-book-closed"
+prompt = "a leather-bound book, closed"
+must_fail = ["shows what the words ask"]
+state = true
+
+[[case]]
+name = "book-open-in-cover-colours"
+why = """the 12 GB card's book (2026-11-10), asked closed, painted open with both halves in the cover's leather and no white
+page in sight: the state-name wordings scored it 0.88 shut, and the shape model built an open book in two lobes, caught
+only by "every foot on the ground" 9 card minutes later. Judged by what each state looks like, it must fail"""
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed"
+prompt = "a leather-bound book, closed"
+picture_only = true
+must_fail = ["shows what the words ask"]
+state = true
+
+[[case]]
+name = "book-made-on-its-edge"
+why = """the fix-check's book (2026-11-10), shut, painted from well above: the shape model made it standing on an edge,
+leaning back, its cover to the viewer; set down as made it settled 54.8 degrees. A book lies: the finish lays it on the
+face it most often comes to rest on (its back cover, the front up)"""
+source = "2026-11-10-fix-check/leather-bound-book-closed"
+prompt = "a leather-bound book, closed"
+made_must_fail = ["base level", "centre over the base"]
+must_pass = ["base level", "centre over the base", "no holes", "one main piece"]
+laid_deg = [50, 62]
+
+[[case]]
+name = "chest-through-a-lens"
+why = """the fix-check's chest (2026-11-10): right, but its picture is a photograph (its near front foot lower than its
+far back foot while its lid hardly shows), and it is 2.25 times as wide as high. Straight on, and squeezed to a canvas
+twice as wide as high, its outline read 1.40 % and 4.95 % (failed); unsqueezed 2.17 % and 7.55 %; through a lens 6
+sizes away, 0.68 % and 1.82 %, its feet where the picture has them"""
+source = "2026-11-10-fix-check/wooden-treasure-chest"
+prompt = "a wooden treasure chest"
+must_pass = ["outline matches the picture", "base level", "no holes"]
+carved_holes = 0
+
+[[case]]
+name = "candle-dish-unpainted"
+why = """the fix-check's candle (2026-11-10), painted by the six views alone: the dish's inner wall and the candle's foot
+in it, seen only from above at a slant, are in none of them squarely (85.8 % of the surface as seen). The paint stage
+now adds views chosen to see them (touch_up); as the six left it, it must keep failing"""
+source = "2026-11-10-fix-check/candle-brass-holder"
+prompt = "a candle in a brass holder"
+must_fail = ["paint covers the surface"]
+must_pass = ["outline matches the picture", "no holes"]
+paint = true
+
+[[case]]
+name = "candle-fill-foreign"
+why = """the touch-up's first run on the card (2026-11-10): the candle's dish painted from four views above, its fill
+from noise by SDXL's inpainting. The coverage rose to 98.4 % and every check passed, but the dish came back with dark
+holes and pale grey, mirror-like patches (the backdrop's grey carried in over the rim). The fill check must fail it,
+and the coverage, which counts a texel painted, not painted right, still passes it"""
+source = "2026-11-10-touch-up/candle-brass-holder"
+prompt = "a candle in a brass holder"
+must_fail = ["fill matches the paint round it"]
+must_pass = ["paint covers the surface", "outline matches the picture", "no holes"]
+paint = true
+fill = true
+
+[[case]]
+name = "chair-fill-alike"
+why = """the same run's chair: two views from 20 degrees above filled the legs' and spindles' sides the level views hid,
+in the chair's own wood (coverage 90.7 % to 95.4 %). Its fill must keep passing the fill check"""
+source = "2026-11-10-touch-up/chair"
+prompt = "an old looking chair"
+must_pass = ["fill matches the paint round it", "paint covers the surface"]
+paint = true
+fill = true
+carved_holes = 0
+
+[[case]]
+name = "jug-handle-web"
+why = """the fix-check's clay jug: the shape fills the loop of its handle (a web 15.1 % of the height thick where the
+picture shows a hole); it passed every check before the outline's gap piece was measured (2026-11-10). As made the
+outline check must catch it; the finish carves the web by the picture's silhouette (carving, 2026-11-10), the web
+whole across the loop's lower part, and the carved jug must match its picture, closed and in one piece"""
+source = "2026-11-10-fix-check/clay-jug"
+prompt = "a clay jug"
+made_must_fail = ["outline matches the picture"]
+must_pass = ["outline matches the picture", "no holes", "one main piece"]
+carved_holes = 1
+
+[[case]]
+name = "jug-handle-carved"
+why = """the fifth trial's clay jug (2026-11-10, the 16 GB card, shape seed 43): its web ends inside the loop, open above it
+(13.1 % of the height thick as made). As made the outline check must catch it; carved, the web's front and back are
+joined by a wall round the loop, and it must match its picture, closed and in one piece"""
+source = "2026-11-10-trial-5/clay-jug"
+prompt = "a clay jug"
+made_must_fail = ["outline matches the picture"]
+must_pass = ["outline matches the picture", "no holes", "one main piece", "base level"]
+carved_holes = 1
+
+# Made-up shapes with known answers (the checks were measured so): built by code from
+# python/tests/shapes.py (`made_up`: the shape, its arguments, the view its picture is drawn from), not copied from a
+# trial. The faults must fail; the shapes the checks once misread must pass.
+
+[[case]]
+name = "made-up-chair-leg-missing"
+why = "a chair with its front left leg missing: the symmetry's mean read 1.67 % and passed; its 98th percentile fails it"
+prompt = "an old looking chair"
+made_up = { shape = "chair", args = { missing_leg = true }, view = [20, 12] }
+must_fail = ["left-right symmetry"]
+
+[[case]]
+name = "made-up-chair-leg-out"
+why = "a chair with a leg 8 cm out of its place: the symmetry's mean read 0.95 % and passed"
+prompt = "an old looking chair"
+made_up = { shape = "chair", args = { moved_leg = 0.08 }, view = [20, 12] }
+must_fail = ["left-right symmetry"]
+
+[[case]]
+name = "made-up-chair-one-armrest"
+why = "a chair with an armrest on one side only: the symmetry's mean read 1.97 % and passed"
+prompt = "an old looking chair"
+made_up = { shape = "chair", args = { armrest = true }, view = [20, 12] }
+must_fail = ["left-right symmetry"]
+
+[[case]]
+name = "made-up-table-leaning"
+why = """the three-legged table turned 3 degrees whole: the levelling trimmed 21.7 mm and every base check passed, its
+top still 3 degrees off; it is no short leg, and must stay a failure, untrimmed"""
+prompt = "a small round table"
+made_up = { shape = "three_legged_table", turned_deg = 3.0, view = [20, 12] }
+must_fail = ["base level"]
+trimmed_mm = [0, 0]
+
+[[case]]
+name = "made-up-spear-lug"
+why = "a round spear with a lug on one side of its shaft: it must fail the symmetry across the shaft"
+prompt = "a spear"
+made_up = { shape = "spear", args = { length = 2.0, width = 0.03, lug = [[0.015, 1.6], [0.065, 1.75]] }, view = [0, 0] }
+must_fail = ["symmetric across the shaft"]
+
+[[case]]
+name = "made-up-spear-round"
+why = "a perfectly round spear 3 m by 3 cm: it read 3.57 % across its shaft, the samples' spacing, and failed"
+prompt = "a spear"
+made_up = { shape = "spear", args = { length = 3.0, width = 0.03 }, view = [0, 0] }
+must_pass = ["symmetric across the shaft", "shaft straight"]
+
+[[case]]
+name = "made-up-rapier-thin-blade"
+why = "a rapier whose blade is 2 cm by 1 cm: its blade was taken for an 83 cm grip; its grip is beside its guard"
+prompt = "a thin-bladed rapier"
+made_up = { shape = "rapier", view = [0, 0] }
+must_pass = ["grip found"]
+
+[[case]]
+name = "made-up-rapier-blade-alone"
+why = "a thin blade with no hilt: what is thin enough to hold is the blade, and there is no grip"
+prompt = "a thin-bladed rapier"
+made_up = { shape = "rapier", args = { hilt = false }, view = [0, 0] }
+must_fail = ["grip found"]
+
+[[case]]
+name = "axe-head-corner-beside-haft"
+why = """the remade double-bitted axe (code 471ab9e): its haft is straight within 4 mm, but a slice just under its head
+took the lower corner of one bit (80 mm off the haft, narrow enough to pass) for haft: 9.37 % off its line and a 28.4°
+kink. Its grip mark sat 14 cm from its end on the neck of its black butt piece, not on the wood above its collar"""
+source = "2026-11-10-remake-471ab9e/double-bitted-battle-axe-3cd0a6a9"
+prompt = "a double-bitted battle axe"
+must_pass = ["haft straight", "no kink", "grip found", "symmetric across the haft", "one main piece"]
+grip_from_butt_cm = [20, 32]
+
+[[case]]
+name = "made-up-axe-bent-haft"
+why = "a double-bitted axe whose haft is bent 6 degrees at its middle: it must still fail straight and kink"
+prompt = "a double-bitted battle axe"
+made_up = { shape = "double_axe", args = { kink_deg = 6.0 }, view = [0, 0] }
+must_fail = ["haft straight", "no kink"]
+
+[[case]]
+name = "made-up-bearded-axe"
+why = """a bearded axe: in the slices beside its beard the beard is a larger piece than the haft, and narrow; the haft
+is followed slice to slice, so it is straight"""
+prompt = "a bearded axe"
+made_up = { shape = "bearded_axe", view = [0, 0] }
+must_pass = ["haft straight", "no kink", "grip found"]
+
+[[case]]
+name = "made-up-axe-butt-cap"
+why = """a double-bitted axe with a butt cap like the remade axe's (a flared knob, a neck thinner than the haft, a
+collar ending 14 cm up): its grip is on the haft above the collar, 8 cm in"""
+prompt = "a double-bitted battle axe"
+made_up = { shape = "double_axe", args = { butt_cap = true }, view = [0, 0] }
+must_pass = ["haft straight", "no kink", "grip found"]
+grip_from_butt_cm = [19, 26]
+
+[[case]]
+name = "shield-two-handles"
+why = """the remade shield (code 471ab9e): two D-handles on its back, left and right of its middle; its grip was on the
+bare boards between them, by convention. The hand holds one of them"""
+source = "2026-11-10-remake-471ab9e/round-wooden-shield-iron-5c2e8fae"
+prompt = "a round wooden shield with an iron boss"
+must_pass = ["handle found", "one main piece"]
+handles = 2
+
+[[case]]
+name = "made-up-shield-two-handles"
+why = "a shield with two D-handles on its back: the grip is on the one the hand holds, by the convention"
+prompt = "a wooden shield"
+made_up = { shape = "shield", view = [0, 0] }
+must_pass = ["handle found"]
+handles = 2
+
+[[case]]
+name = "made-up-bench"
+why = """a bench 3.3 times as long as high, pictured from its own surface at 10 degrees round and 12 above: the view
+search matched it through a lens 3 sizes away and failed its outline"""
+prompt = "a wooden bench"
+made_up = { shape = "bench", view = [10, 12] }
+must_pass = ["outline matches the picture"]
+
+[[case]]
+name = "made-up-ring-filled"
+why = """a box with a ring on top, its 4 cm hole (6.5 % of the height) filled by a web 1 cm thick where the picture shows
+it open: under the carving's 7.8 % and the outline's 8 % gap piece, it was caught by nothing"""
+prompt = "a rusty iron lantern"
+made_up = { shape = "ringed_box", args = { web = true }, picture_args = { web = false }, view = [0, 0] }
+must_fail = ["holes the picture shows are open"]
+carved_holes = 0
+
+[[case]]
+name = "made-up-ring-open"
+why = "the same box with its ring open, as its picture shows it: the holes check must pass it"
+prompt = "a rusty iron lantern"
+made_up = { shape = "ringed_box", view = [0, 0] }
+must_pass = ["holes the picture shows are open"]
+
+[[case]]
+name = "made-up-chair-back-panel"
+why = """a chair whose back has a solid panel between its spindles where the picture shows the gaps open (5.6 cm, under
+the carving's 7.8 %)"""
+prompt = "an old looking chair"
+made_up = { shape = "spindle_chair", args = { panel = true }, picture_args = { panel = false }, view = [20, 12] }
+must_fail = ["holes the picture shows are open"]
+
+[[case]]
+name = "made-up-chair-spindles"
+why = "the same chair with its back's gaps open, as its picture shows them: it must pass the holes check"
+prompt = "an old looking chair"
+made_up = { shape = "spindle_chair", view = [20, 12] }
+must_pass = ["holes the picture shows are open"]
+
+[[case]]
+name = "made-up-panel-miscut"
+why = """a frame with a thin panel in it (a mirror's glass) whose cut-out missed the panel: the hole the cut-out shows is
+the panel's colour, not the backdrop's, and the panel must not be carved away"""
+prompt = "a framed mirror"
+made_up = { shape = "framed_panel", args = { panel = true }, mask_args = { panel = false }, view = [0, 0] }
+carved_holes = 0
+
+[[case]]
+name = "example-jug-handle-filled"
+why = """an early clay jug (made before the handle fix, kept in the development history, not published): its
+handle's loop is filled where its picture shows it open, and it passed every check then. Built from git by code (its
+picture cut again by our BiRefNet, its model.glb read as the shape); the holes check must fail it by name"""
+prompt = "a clay jug"
+# A folder in the repository's history, as git names it (<commit>:<folder>).
+example = "cb8ec04:examples/clay-jug"
+made_must_fail = ["holes the picture shows are open"]

@@ -1,0 +1,176 @@
+# The AI models model-maker uses, with their licences, hub revisions and the sha256 of every file.
+# Each model's files are checked against these sums before anything is loaded; a file in a model's folder that runs
+# code and is not listed is refused, and a model's own code checked out from its repository (`source`) is checked to be
+# at its commit, with nothing changed or added, before it is imported. Only models whose licence allows commercial use
+# without a fee are listed here.
+#
+# For setup.sh (setup/fetch_models.py): `folders` names the folder under models/ each hub repository's files go to
+# (each file at its path within the repository); `source` is the model's own code (`files`: fetched file by file from
+# its `raw` address, each checked against its sum; else checked out whole) at its commit into
+# sources/; `gated` says the hub needs a signed-in account; `licence_text` is a licence's full text, shown before the
+# download; a part with `fetch = false` is listed but not downloaded.
+
+format = 1
+
+[[model]]
+id = "flux1-schnell"
+name = "FLUX.1 [schnell]"
+role = "picture"
+job = "Paints the object's picture from the prompt (several tries; the picture checks choose)."
+version = "1 (hub revision 741f7c3ce8b3)"
+licence = "Apache-2.0"
+licence_url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell"
+conditions = "Weights Apache-2.0 (its text encoders, CLIP ViT-L/14 and T5 v1.1 XXL, shipped in its folder under the same terms). Loaded from the diffusers layout at the revision above; its transformer and second text encoder quantised to 4 bits so it fits a 12 GB card. The hub asks each downloader to accept its terms once, which shares the account's user name and e-mail address with Black Forest Labs."
+folders = { "black-forest-labs/FLUX.1-schnell" = "flux1-schnell" }
+# The hub hands its files only to a signed-in account that has accepted its terms on the model's page (once, approved
+# at once; accepting shares the account's user name and e-mail address with Black Forest Labs): setup.sh needs that
+# account's access token (see docs/setup.md).
+gated = true
+parts = [
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder/model.safetensors", sha256 = "893d67a23f4693ed42cdab4cbad7fe3e727cf59609c40da28a46b5470f9ed082", size_mb = 246 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder_2/model-00001-of-00002.safetensors", sha256 = "ec87bffd1923e8b2774a6d240c922a41f6143081d52cf83b8fe39e9d838c893e", size_mb = 4995 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder_2/model-00002-of-00002.safetensors", sha256 = "a5640855b301fcdbceddfa90ae8066cd9414aff020552a201a255ecf2059da00", size_mb = 4530 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer_2/spiece.model", sha256 = "d60acb128cf7b7f2536e8f38a5b18a05535c9e14c7a355904270e15b0945ea86", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/transformer/diffusion_pytorch_model-00001-of-00003.safetensors", sha256 = "9b633dbe87316385c5b1c262bd4b5a01e3d955170661d63dcec8a01e89c0d820", size_mb = 9963 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/transformer/diffusion_pytorch_model-00002-of-00003.safetensors", sha256 = "58b4434078f0c2567ddc54e3b5cbf39626ab55fbd9d5c22956e183668f535dec", size_mb = 9949 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/transformer/diffusion_pytorch_model-00003-of-00003.safetensors", sha256 = "e2cbc25471ed5186e69a9b51098300cb2f612556453e38a372c851a220ed238d", size_mb = 3871 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/vae/diffusion_pytorch_model.safetensors", sha256 = "f5b59a26851551b67ae1fe58d32e76486e1e812def4696a4bea97f16604d40a3", size_mb = 168 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/model_index.json", sha256 = "24946df21ff25e210486b5f6b14208983a90c9c73f8d48cfa724c0e4e03f7201", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/scheduler/scheduler_config.json", sha256 = "b129cebacf8f851867ec5c7c4d3f4bf787e232525a53becf4df5a72278a788d5", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder/config.json", sha256 = "d79d5c8c6ce85112a923d621a5412886ddbbb0636210fc0f72f450582e675542", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder_2/config.json", sha256 = "9001e5a8ae0571a362f806b87b6105dd1a15c33dca237b606d2561164109beeb", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/text_encoder_2/model.safetensors.index.json", sha256 = "3bacec0f0cf392399d4a385908f67dd73df99c9e9cfee669f148858ba9fbdb0a", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer/merges.txt", sha256 = "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer/special_tokens_map.json", sha256 = "2cdb3b8331a60c92fc1e55a13e9fd61fd2293c5a51275fdcccd62b780052530e", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer/tokenizer_config.json", sha256 = "6bdcee9ccce2a16ca2b4c0c5ed00b42c50ea225f4472a8c4c1e963a2902c2881", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer/vocab.json", sha256 = "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349", size_mb = 2 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer_2/special_tokens_map.json", sha256 = "7a1985a994c41886db38c719d2a3d2f40606663cc19d7c5d6a85d349320e06d2", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer_2/tokenizer.json", sha256 = "f5dfec163765e18e270537fe896c49f5fad74db1525641d9b255a3008b999596", size_mb = 3 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/tokenizer_2/tokenizer_config.json", sha256 = "1a3d2db64215ed77854dd4208aac5f8361c1b5471cabd19c0ef1472d1a895eb0", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/transformer/config.json", sha256 = "397cfb92299488013ec3af6142a2a877366f8d2e44efbb4f3e33479e7960d3d0", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/transformer/diffusion_pytorch_model.safetensors.index.json", sha256 = "783f857a5872f069e75daf4a5abe5efd6ff9ec2f37d71159767910cebfe048a6", size_mb = 1 },
+  { url = "https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/741f7c3ce8b383c54771c7003378a50191e9efe9/vae/config.json", sha256 = "bc1e208f414a315365fbecf426838f43b87c9d5c051219e0968a56e2644b2998", size_mb = 1 },
+]
+
+[[model]]
+id = "birefnet"
+name = "BiRefNet"
+role = "cut-out"
+job = "Cuts the object from the picture's backdrop."
+version = "hub revision e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4"
+licence = "MIT"
+licence_url = "https://huggingface.co/ZhengPeng7/BiRefNet"
+conditions = "Weights and code MIT (its backbone, Swin-L, by Microsoft, MIT, inside the same weights). Its own model code (birefnet.py) is read from the downloaded folder, each file checked against the sums below first."
+folders = { "ZhengPeng7/BiRefNet" = "birefnet" }
+parts = [
+  { url = "https://huggingface.co/ZhengPeng7/BiRefNet/resolve/e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4/model.safetensors", sha256 = "9ab37426bf4de0567af6b5d21b16151357149139362e6e8992021b8ce356a154", size_mb = 424 },
+  { url = "https://huggingface.co/ZhengPeng7/BiRefNet/resolve/e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4/birefnet.py", sha256 = "208771ae626f653d64128fbf2d6ac9f8e645c5cc5e286258a73ec3322bbfe5ef", size_mb = 0 },
+  { url = "https://huggingface.co/ZhengPeng7/BiRefNet/resolve/e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4/BiRefNet_config.py", sha256 = "e7b8c2a74f6cea6a59553d517f71d47f2c1d90e670a13416af17c25fe2f3dc52", size_mb = 0 },
+  { url = "https://huggingface.co/ZhengPeng7/BiRefNet/resolve/e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4/config.json", sha256 = "c97ea21569daf66b205491a4635147dd3bc42c7c168b89d7d75b53f67ef548ae", size_mb = 0 },
+]
+
+[[model]]
+id = "triposg"
+name = "TripoSG (shape), its weights run with our own code"
+role = "shape"
+job = "Makes the object's shape from the cut-out picture."
+version = "hub revision 2c1c516d22d5"
+licence = "MIT"
+licence_url = "https://huggingface.co/VAST-AI/TripoSG/blob/2c1c516d22d58db486a058d98d31bb6177344e06/README.md"
+conditions = "Weights MIT (the model card), at the revision above. Only the weights and their configuration files are downloaded; no code of its repository is fetched or run. model-maker runs them with its own code (python/model_maker/shape_net.py: the denoiser; python/model_maker/shape_vae.py: the decoder from the latent to the field, the attention processor and the point embedding), written from diffusers' Apache-2.0 parts, the TripoSG paper and the weights' tensor names, shapes and configuration; its behaviour was confirmed by comparing its outputs with the upstream code's on the same inputs, before that code was removed from setup. Never used: the repository's code (its transformer file is under the Tencent Hunyuan Community License, its code folder holds the Tencent Hunyuan FlashVDM Community License, which excludes the European Union, the United Kingdom and South Korea), its FlashVDM decoder, diso (non-commercial), pymeshlab (GPL), OpenCV (LGPL parts), RMBG-1.4 (non-commercial). The surface is found with scikit-image's marching cubes (BSD). Its image encoder is DINOv2-large (Apache-2.0) as the hub folder ships it."
+folders = { "VAST-AI/TripoSG" = "triposg" }
+# The weights alone (docs/setup.md, "The models' code").
+parts = [
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/transformer/diffusion_pytorch_model.safetensors", sha256 = "9192b5923f7b605b394192809aa2ceb73bf0f4009674d8e3b999b45bb97d4bf2", size_mb = 5492 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/vae/diffusion_pytorch_model.safetensors", sha256 = "a2e667c24927a5a35e5f19fcb4c75890e9399aa966b6db8131d7df733a750c8b", size_mb = 926 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/image_encoder_dinov2/model.safetensors", sha256 = "399fba97a95f22c36834418bc69373364a99af3a1153da1c0fb31db567c92e23", size_mb = 1162 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/model_index.json", sha256 = "750af638d10fc67a5f43d19ef0a0d1d3d446174e24b73bddd0a49226016c80c2", size_mb = 1 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/scheduler/scheduler_config.json", sha256 = "ea7c9b4d502dcaba97cd85291cfd7dbd3c6c82cbc4c775af5c6d9224864279c9", size_mb = 1 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/transformer/config.json", sha256 = "54ad779e68f9bc7303122cdf291f6db48dec7c67e41d28c05ac359daf914128a", size_mb = 1 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/vae/config.json", sha256 = "2fb6ba9b364d42c9681879dca0f7edcb978f2db974a1ca4b15d28f9b15a5baed", size_mb = 1 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/image_encoder_dinov2/config.json", sha256 = "8ed81b0d5ffd2c8b2cecd7dc1326d3eefa409bc9d525537b6b2a3c70a992fd02", size_mb = 1 },
+  { url = "https://huggingface.co/VAST-AI/TripoSG/resolve/2c1c516d22d58db486a058d98d31bb6177344e06/feature_extractor_dinov2/preprocessor_config.json", sha256 = "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828", size_mb = 1 },
+]
+
+[[model]]
+id = "mv-adapter-ig2mv-sdxl"
+name = "MV-Adapter image-and-geometry to multiview (SDXL)"
+role = "paint"
+job = "Paints six views of the object to fit its shape; they go back onto it as colour."
+version = "hub revision 6de4033df6b5"
+licence = "Apache-2.0"
+licence_url = "https://huggingface.co/huanngzh/mv-adapter"
+conditions = "Weights and code Apache-2.0, at commit 4277e0018232bac82bb2c103caf0893cedb711be of its repository. Conditioned on the shape's position and normal pictures, drawn by model-maker's own rasteriser: its renderer needs nvdiffrast (non-commercial), which is never installed or imported. Runs on SDXL base 1.0 with the fp16-safe SDXL autoencoder (MIT, its own entry)."
+folders = { "huanngzh/mv-adapter" = "mv-adapter" }
+source = { url = "https://github.com/huanngzh/MV-Adapter.git", commit = "4277e0018232bac82bb2c103caf0893cedb711be", folder = "mv-adapter", licence = "Apache-2.0" }
+parts = [
+  { url = "https://huggingface.co/huanngzh/mv-adapter/resolve/6de4033df6b53366f3c009d22f5ec434bb55e59f/mvadapter_ig2mv_sdxl.safetensors", sha256 = "e89a40d81c3977d946183c419690d62bd2d62c6b6683c683e2981776e2e17be7", size_mb = 3436 },
+]
+
+[[model]]
+id = "sdxl-vae-fp16-fix"
+name = "SDXL-VAE-FP16-Fix"
+role = "paint (autoencoder)"
+job = "SDXL's autoencoder, made safe in 16-bit floats: the view painter's and the touch-up's pictures go through it."
+version = "hub revision 207b116dae70"
+licence = "MIT"
+licence_url = "https://huggingface.co/madebyollin/sdxl-vae-fp16-fix"
+conditions = "Weights MIT."
+folders = { "madebyollin/sdxl-vae-fp16-fix" = "sdxl-vae-fp16-fix" }
+parts = [
+  { url = "https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/diffusion_pytorch_model.safetensors", sha256 = "1b909373b28f2137098b0fd9dbc6f97f8410854f31f84ddc9fa04b077b0ace2c", size_mb = 335 },
+  { url = "https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/207b116dae70ace3637169f1ddd2434b91b3a8cd/config.json", sha256 = "f18b16fa4381c90ab44a3d7abd2e90afd05a2c31b8ca69998bc93c6453aeb7b7", size_mb = 1 },
+]
+
+[[model]]
+id = "sdxl-base-1.0"
+name = "Stable Diffusion XL base 1.0"
+role = "paint (base)"
+job = "The image model under the view painter."
+version = "1.0 (hub revision 462165984030)"
+licence = "CreativeML Open RAIL++-M"
+licence_url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/blob/462165984030d82259a11f4367a4eed129e94a7b/LICENSE.md"
+conditions = "CreativeML Open RAIL++-M: commercial use is allowed with the use restrictions of its Attachment A, which pass on to everyone who uses what is made with it. The licensor claims no rights in the output."
+folders = { "stabilityai/stable-diffusion-xl-base-1.0" = "sdxl-base-1.0" }
+# Its use restrictions pass on to everyone who uses what is made: setup.sh shows the whole text before downloading.
+licence_text = { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/LICENSE.md", sha256 = "19b6998b569b53ac1fc2158a8a3202c8699a9a4605b47075715d9c96be7fb6d0" }
+parts = [
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/unet/diffusion_pytorch_model.fp16.safetensors", sha256 = "83e012a805b84c7ca28e5646747c90a243c65c8ba4f070e2d7ddc9d74661e139", size_mb = 5136 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/text_encoder_2/model.fp16.safetensors", sha256 = "ec310df2af79c318e24d20511b601a591ca8cd4f1fce1d8dff822a356bcdb1f4", size_mb = 1390 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/text_encoder/model.fp16.safetensors", sha256 = "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd", size_mb = 247 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/vae/diffusion_pytorch_model.fp16.safetensors", sha256 = "bcb60880a46b63dea58e9bc591abe15f8350bde47b405f9c38f4be70c6161e68", size_mb = 168 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer/vocab.json", sha256 = "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349", size_mb = 2 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer_2/vocab.json", sha256 = "e089ad92ba36837a0d31433e555c8f45fe601ab5c221d4f607ded32d9f7a4349", size_mb = 2 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer/merges.txt", sha256 = "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer_2/merges.txt", sha256 = "9fd691f7c8039210e0fced15865466c65820d09b63988b0174bfe25de299051a", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/unet/config.json", sha256 = "30ebc70750223e59006f7f2b4e1e6c102570aa19a9c4ae3e1fbe7591332dbae6", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer/tokenizer_config.json", sha256 = "19d7b034cb0cc3ce9766c2231373ab8aa8991fc72e2c8f76558bfaae3de0d563", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer_2/tokenizer_config.json", sha256 = "c9d23941f76a41cbd50eda9290f57be7828f0a7a677939e9ef181f7e12bd1bdf", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/vae/config.json", sha256 = "0b331c8ac22ded5f9997a144a575c1d113d6169aff262c353f39015bd24a6264", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/model_index.json", sha256 = "6d7b93508390ab91ac5bfbe4aeb4dc2d83f7bb1b05fb069d714b5b0c75f70d44", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/text_encoder_2/config.json", sha256 = "a892d1c3a69a7e9247a24de2bc1d5891e3109a54696e53be20093af671072c34", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/text_encoder/config.json", sha256 = "39b8b2e4b1949e36969caa425b6c81c68bace99198dd9078ce05d16ad401fe7f", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/scheduler/scheduler_config.json", sha256 = "af3e45a949aff8b8341ab8b811429ec03fee857a700a1d9477363e4fff9666e2", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer/special_tokens_map.json", sha256 = "c4864a9376a8401918425bed71fc14fc0e81f9b59ec45c1cf96cccb2df508eac", size_mb = 1 },
+  { url = "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/462165984030d82259a11f4367a4eed129e94a7b/tokenizer_2/special_tokens_map.json", sha256 = "f118ab3a983206e4f32583448de6bd6aae4ee21869135cef1f5848a753cdaab6", size_mb = 1 },
+]
+
+[[model]]
+id = "siglip2-so400m"
+name = "SigLIP 2 (So400m, patch 14, 384)"
+role = "picture check"
+job = "Judges whether a picture shows the state its words ask for (a lid shut, a book closed), by comparing it with words for that state and for the other."
+version = "hub revision e8e487298228"
+licence = "Apache-2.0"
+licence_url = "https://huggingface.co/google/siglip2-so400m-patch14-384/blob/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/README.md"
+conditions = "Weights Apache-2.0 (Google; trained on its WebLI data). Only its image and text encoders are run, through transformers' SigLIP model and its shipped Gemma tokenizer; it makes nothing that goes into the model, only a verdict on a picture."
+folders = { "google/siglip2-so400m-patch14-384" = "siglip2-so400m-patch14-384" }
+parts = [
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/model.safetensors", sha256 = "9f4f4a49f908ef0c979bce8ff5a5c0e88882dc6c5dc4304387cbbd152558e2c2", size_mb = 4334 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/config.json", sha256 = "73477b47ae9a395f008f993ebd8fb5c16ce0b5e8419ffdf2f5b2183b260f9cff", size_mb = 1 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/preprocessor_config.json", sha256 = "fb2817d3523ca3b666c859f15320c7138416bc38ffc515e2963f78c868c51c90", size_mb = 1 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/special_tokens_map.json", sha256 = "baec30ea10906f16adb8c18af7a34023002c1746542612b8b41c9f09e1351351", size_mb = 1 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/tokenizer.json", sha256 = "cb9140fae3ac5122c972d37adf83e1248471a38147ad76f8215c8872c6fd8322", size_mb = 33 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/tokenizer.model", sha256 = "61a7b147390c64585d6c3543dd6fc636906c9af3865a5548f27f31aee1d4c8e2", size_mb = 4 },
+  { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/tokenizer_config.json", sha256 = "14afe629fe4959b9e0d51e1852b8d9f7ad074f90a1a7125a4fcdd17f06e78fc8", size_mb = 1 },
+]

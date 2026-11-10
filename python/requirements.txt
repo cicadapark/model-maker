@@ -1,0 +1,30 @@
+# The pipeline's Python packages, each with its licence. ./setup.sh installs them, with everything they need, from
+# python/requirements.lock (every version pinned, every wheel's sha256), then checks them:
+#   .venv/bin/python -I python/model_maker/check_licences.py
+#
+# Measuring and exporting (the checks, the bake, the .glb, the report; CPU only)
+numpy==2.4.6                # BSD-3-Clause
+scipy==1.17.1               # BSD-3-Clause
+pillow==12.3.0              # MIT-CMU
+scikit-image==0.26.0        # BSD-3-Clause (marching cubes)
+trimesh==5.1.1              # MIT (reading meshes made elsewhere; MV-Adapter's camera helpers import it)
+# The models (an NVIDIA card)
+torch==2.5.1                # BSD-3-Clause (from PyPI on Linux x86_64: the CUDA 12.4 build)
+torchvision==0.20.1         # BSD-3-Clause (BiRefNet's backbone)
+diffusers==0.31.0           # Apache-2.0
+transformers==4.46.3        # Apache-2.0
+accelerate==1.1.1           # Apache-2.0
+bitsandbytes==0.44.1        # MIT (FLUX.1 [schnell] in 4 bits)
+setuptools==80.9.0          # MIT (triton, under bitsandbytes, imports it; a venv made by uv has none)
+safetensors==0.8.0          # Apache-2.0
+huggingface-hub==0.26.2     # Apache-2.0
+sentencepiece==0.2.2        # Apache-2.0
+protobuf==7.36.2            # BSD-3-Clause
+timm==1.0.30                # Apache-2.0 (BiRefNet)
+kornia==0.8.3               # Apache-2.0 (BiRefNet)
+einops==0.8.2               # MIT
+# Not imported by model-maker's own code; kept because every model was made and measured with them installed (diffusers
+# takes another code path when peft is there), so leaving them out would need the pipeline tried again.
+jaxtyping==0.2.36           # MIT
+typeguard==4.4.1            # MIT
+peft==0.13.2                # Apache-2.0

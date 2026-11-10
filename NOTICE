@@ -1,0 +1,68 @@
+model-maker
+Copyright 2026 the model-maker authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+AI models the pipeline uses
+---------------------------
+
+No model weights are included in this repository. Release 1 uses the models below; registry/models.toml
+lists each one's files, hub revision and licence, and setup.sh downloads them after their licences are
+shown. Each object's sidecar says which models made it.
+
+  FLUX.1 [schnell] (Black Forest Labs)          Apache-2.0
+    https://huggingface.co/black-forest-labs/FLUX.1-schnell
+    Its hub folder holds two text encoders: CLIP ViT-L/14 (OpenAI; MIT) and T5 v1.1 XXL (Google;
+    Apache-2.0), shipped there under FLUX.1 [schnell]'s licence.
+  BiRefNet                                      MIT (weights and its own model code)
+    https://huggingface.co/ZhengPeng7/BiRefNet
+    Its backbone is a Swin Transformer, Swin-L (Microsoft; MIT), inside the same weights.
+  TripoSG (VAST)                                MIT (the shape model's weights only, at the revision
+    https://huggingface.co/VAST-AI/TripoSG       registry/models.toml pins)
+    Its image encoder is DINOv2-large (Meta; Apache-2.0), in the same hub folder.
+    No code of TripoSG's repository is fetched or run. The weights run with model-maker's own code
+    (below), written from diffusers, the TripoSG paper and the weights' tensor names, shapes and
+    configuration; its behaviour was confirmed by comparing its outputs with the upstream code's on
+    the same inputs, before that code was removed from setup.
+  MV-Adapter (SDXL)                             Apache-2.0 (weights and code)
+    https://huggingface.co/huanngzh/mv-adapter
+    https://github.com/huanngzh/MV-Adapter (its code, checked out at the commit the registry names)
+  Stable Diffusion XL base 1.0 (Stability AI)   CreativeML Open RAIL++-M
+    https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+    The use restrictions of its Attachment A apply to anything made with it. Its hub folder holds two
+    text encoders, CLIP ViT-L/14 (OpenAI) and OpenCLIP ViT-bigG/14 (LAION), shipped there under the
+    same licence.
+  SDXL VAE fp16 fix (madebyollin)               MIT
+    https://huggingface.co/madebyollin/sdxl-vae-fp16-fix
+  SigLIP 2 So400m (Google)                      Apache-2.0 (the check that a picture shows what was asked for)
+    https://huggingface.co/google/siglip2-so400m-patch14-384
+
+Code written after other projects' designs
+------------------------------------------
+
+python/model_maker/shape_net.py: the shape model's transformer block and denoiser are our own, written
+from diffusers' HunyuanDiT block (Apache-2.0, Copyright The HuggingFace Team; diffusers/models/
+transformers/hunyuan_transformer_2d.py) and the TripoSG weights' tensor names and shapes.
+
+python/model_maker/shape_vae.py: the shape model's decoder (latent to field), its attention processor and
+its query points' embedding are our own, written from diffusers' AttnProcessor2_0 (Apache-2.0, Copyright
+The HuggingFace Team; diffusers/models/attention_processor.py), built on diffusers' Attention,
+FeedForward and FP32LayerNorm, and from the TripoSG paper and the weights' tensor names, shapes and
+configuration.
+
+Packages the pipeline installs
+------------------------------
+
+setup.sh installs the Python packages pinned in python/requirements.lock into this folder's own .venv;
+none is shipped in this repository. Some of their wheels bundle shared libraries under other licences
+(python/model_maker/check_licences.py lists each one; docs/setup.md, "What the wheels bundle"):
+
+  NVIDIA's CUDA libraries (CUDA runtime, cuBLAS, cuDNN, cuFFT, cuRAND, cuSOLVER, cuSPARSE, cuSPARSELt,
+    NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG), in the nvidia-*-cu12 wheels and in torch's and torchvision's:
+    NVIDIA's own licences (CUDA, cuDNN, cuSPARSELt). Free to use and to ship with an application; not
+    open source.
+  libgfortran (numpy, scipy) and libgomp (torch): GPL-3.0-or-later with the GCC Runtime Library
+    Exception, which allows shipping them with any program.
+  libquadmath (numpy, scipy): LGPL-2.1-or-later. GCC's quad-precision maths, loaded at run time and
+    replaceable. It is not part of this repository. It is the one recorded exception to this project's
+    no-LGPL rule; see CONTRIBUTING.md, rule 1.

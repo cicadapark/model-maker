@@ -1,0 +1,13 @@
+# A set of prompts kept aside during development and made once for the release's check: nothing was tuned on them.
+# They were made once for the pass rate the README gives, and are now part of the development set.
+# One a line; # starts a note.
+a wooden rocking horse
+a copper cooking pot with a lid
+a tall wooden bookshelf, empty
+a stone well with a wooden roof
+a woven wicker basket
+an iron anvil
+a wooden wheelbarrow
+a pair of leather boots
+a short curved dagger
+a wooden mallet
