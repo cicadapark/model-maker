@@ -23,6 +23,20 @@ so a game can put it in a hand. Each object
 comes with a report of every check and a sidecar naming every model used and its licence. See
 `docs/objects.md`.
 
+## What it makes
+
+![Eight 3-D objects made by model-maker, each from the line of text under it: a chair, a barrel, a lantern, a clay jug, a shield, a sword, an axe and a spear](docs/images/examples.webp)
+
+Eight objects made during this release's development, each from the line of text under it, each passing every
+check. Every one is a `.glb` you can open in any 3-D tool, turned all the way round:
+
+![The clay jug, turned in steps of 45 degrees: its handle is an open loop from every side](docs/images/clay-jug-turning.webp)
+
+And every one comes with a report of its checks: the picture it was made from, its cut-out, the tries, the outline
+against the picture, the paint, and each check's value against its limit.
+
+<img src="docs/images/report-chair.webp" width="600" alt="The top of the chair's report: passes all 16 checks; its picture, cut-out and tries; its outline against the picture; its turntable">
+
 ## What to expect
 
 This is an early release: the object path has been through a handful of trials on two cards (`docs/objects.md`,
