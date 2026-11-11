@@ -18,13 +18,20 @@ the best other. It is averaged over the two views the state judge uses, the whol
 cut-out. The limit comes from every picture the trials painted, each scored against its own prompt and against every
 other prompt of the trials (docs/objects.md, "The picture against the prompt"; tools/trial/prompt-cases.toml).
 
+A quality the prompt names ("a curved dagger", "a round box": words.qualities_of) is judged in the same check, as the
+state judge judges a lid: by pairs of descriptions of the quality and of its opposite ("a curved dagger, its whole
+length bending in one smooth arc" against "a straight dagger, its whole length one straight line"), each pair's share
+the sigmoid of their score difference, averaged over the pairs and the two views. The thing asked for and each quality
+must each reach the limit; the check's value is the least of their shares. Measured in docs/objects.md, "Qualities
+the words name".
+
 The model is the state judge's: SigLIP 2 (google/siglip2-so400m-patch14-384, Apache-2.0), which runs on the CPU.
 """
 
 import numpy as np
 
 from .picture_checks import Check
-from .state_judge import cropped
+from .state_judge import asked_share, cropped
 
 NAME = "shows the thing asked for"
 LEAST_SUBJECT_SHARE = 0.75
@@ -49,36 +56,69 @@ def subject_share(picture_features, asked, others, scale):
     return float(1.0 / (1.0 + np.exp(-difference))), likeliest
 
 
-def contrast_directions(judge, asked, others):
-    """The thing asked for and each other kind as directions (words.subject_contrast's), worked out once a prompt:
-    (its direction, the others' rows, the others' names)."""
-    return class_directions(judge, {"asked": asked})[0], class_directions(judge, others), list(others)
+def contrast_directions(judge, asked, others, qualities=()):
+    """The thing asked for and each other kind as directions (words.subject_contrast's), and each quality's two sets
+    of wordings embedded (words.quality_texts'), worked out once a prompt: (its direction, the others' rows, the
+    others' names, [(quality, its rows, its opposite's rows)])."""
+    return (class_directions(judge, {"asked": asked})[0], class_directions(judge, others), list(others),
+            [(quality, judge.features(texts=wanted), judge.features(texts=unwanted))
+             for quality, wanted, unwanted in qualities])
+
+
+def directions_of(judge, subject):
+    """`contrast_directions` for a subject: its thing, the other kinds, and the qualities its words name."""
+    from . import words
+
+    return contrast_directions(judge, *words.subject_contrast(subject), words.quality_texts(subject))
+
+
+def view_shares(picture_features, directions, scale):
+    """One view's share for the thing asked for, its likeliest other (a row), and each quality's share against its
+    opposite ([(quality, share)])."""
+    asked, others, _, qualities = directions
+    share, likeliest = subject_share(picture_features, asked, others, scale)
+    return share, likeliest, [(quality, asked_share(picture_features, wanted, unwanted, scale))
+                              for quality, wanted, unwanted in qualities]
+
+
+def averaged(found, names):
+    """The views' shares (`view_shares` each) as the check takes them: the thing's share averaged, the likeliest other
+    where it came nearest, each quality's share averaged."""
+    nearest = min(found, key=lambda view: view[0])[1]
+    qualities = [(quality, float(np.mean([view[2][k][1] for view in found])))
+                 for k, (quality, _) in enumerate(found[0][2])]
+    return float(np.mean([view[0] for view in found])), names[nearest], qualities
 
 
 def judged(judge, picture, mask, directions):
     """The share for the thing asked for (0 to 1), averaged over the whole picture and its crop round the cut-out
-    (`mask`, None for the whole picture only), and the likeliest other kind (in the view where it came nearest).
-    `directions` from `contrast_directions`."""
-    asked, others, names = directions
+    (`mask`, None for the whole picture only), the likeliest other kind (in the view where it came nearest), and each
+    quality's share against its opposite, averaged likewise ([(quality, share)]). `directions` from `directions_of`
+    (or `contrast_directions`)."""
     scale = float(judge.model.logit_scale.exp().item())
     views = [picture] + ([cropped(picture, mask)] if mask is not None and mask.any() else [])
-    found = [subject_share(judge.features(image=view)[0], asked, others, scale) for view in views]
-    nearest = min(found)[1]
-    return float(np.mean([share for share, _ in found])), names[nearest]
+    return averaged([view_shares(judge.features(image=view)[0], directions, scale) for view in views], directions[2])
 
 
-def subject_check(subject, share, likeliest_other):
-    """The check as the picture's checks list it (`picture_checks.Check`)."""
+def subject_check(subject, share, likeliest_other, qualities=()):
+    """The check as the picture's checks list it (`picture_checks.Check`): the thing asked for and each quality
+    ([(quality, share)]) must reach the limit; its value is the least share."""
+    from .words import QUALITY_OPPOSITES
+
+    least = min([share] + [found for _, found in qualities])
+    said = "".join(f"; {quality} with a share of {found:.0%} against {QUALITY_OPPOSITES[quality]}"
+                   for quality, found in qualities)
     return Check(
-        NAME, share * 100, LEAST_SUBJECT_SHARE * 100, "%", share >= LEAST_SUBJECT_SHARE,
+        NAME, least * 100, LEAST_SUBJECT_SHARE * 100, "%", least >= LEAST_SUBJECT_SHARE,
         f"the picture shows {subject.prompt} with a share of {share:.0%} against the likeliest other thing, "
-        f"{likeliest_other} (at least {LEAST_SUBJECT_SHARE:.0%}; judged by SigLIP 2)")
+        f"{likeliest_other}{said} ({'each ' if qualities else ''}at least {LEAST_SUBJECT_SHARE:.0%}; judged by "
+        f"SigLIP 2)")
 
 
-def add_subject_check(result, subject, share, likeliest_other):
+def add_subject_check(result, subject, share, likeliest_other, qualities=()):
     """The check added to a try's checks (`picture_checks.PictureResult`): in the pipeline's choice of try, so a try
     it refuses is not chosen, as with the other picture checks (docs/objects.md, "War hammers")."""
-    result.checks.append(subject_check(subject, share, likeliest_other))
+    result.checks.append(subject_check(subject, share, likeliest_other, qualities))
 
 
 def picture_check(picture_path, prompt, out, mask_path=None):
@@ -98,8 +138,8 @@ def picture_check(picture_path, prompt, out, mask_path=None):
     picture = Image.open(picture_path).convert("RGB")
     mask = (np.asarray(Image.open(mask_path).convert("L")) > 127) if mask_path else None
     judge = state_judge.StateJudge(registry.model_folder("siglip2-so400m", state_judge.MODEL_FOLDER), device="cpu")
-    share, likeliest = judged(judge, picture, mask, contrast_directions(judge, *words.subject_contrast(subject)))
-    checks = [subject_check(subject, share, likeliest)]
+    share, likeliest, qualities = judged(judge, picture, mask, directions_of(judge, subject))
+    checks = [subject_check(subject, share, likeliest, qualities)]
     if subject.state:
         from .picture_checks import PictureResult
 

@@ -3,9 +3,11 @@
 judges it ("shows the thing asked for", subject_judge), one copy of each picture (by its sha256). Also the head pair
 considered as a second layer ("a hammer head with a flat blunt striking face" against "an axe head with a sharp curved
 blade"), for every picture, to see whether it is needed and where its limit would lie (docs/objects.md, "War
-hammers").
+hammers"). And every quality's share (words.QUALITY_JUDGE_TEXTS, each judged with the picture's own thing's word),
+whether its prompt names the quality or not, so a quality's pair can be measured on pictures painted with it and
+without it (docs/objects.md, "Qualities the words name").
 
-    judge_tries.py OUT.json FOLDER...
+    judge_tries.py OUT.json FOLDER... [--only-qualities]     --only-qualities: only pictures whose prompt names one
 
 A picture is found as a job's tries (`<job>/pictures/<seed>.png` with its `-mask.png`, the prompt from `job.json`), a
 job's chosen `picture.png` and `mask.png`, or a `tries.json` of tools/trial/paint_tries.py. SigLIP 2 from
@@ -47,7 +49,8 @@ def found_pictures(folders):
 
 
 def main():
-    out, folders = sys.argv[1], sys.argv[2:]
+    only_qualities = "--only-qualities" in sys.argv
+    out, folders = sys.argv[1], [a for a in sys.argv[2:] if a != "--only-qualities"]
     import numpy as np
     from PIL import Image
 
@@ -57,27 +60,35 @@ def main():
     judge = state_judge.StateJudge(settings.verified(pipeline.STATE_MODEL, pipeline.STATE_MODEL)[0], device="cpu")
     scale = float(judge.model.logit_scale.exp().item())
     hammer, axe = judge.features(texts=[HEAD_PAIR[0]]), judge.features(texts=[HEAD_PAIR[1]])
-    directions, judged, seen = {}, [], {}
+    directions, every_quality, judged, seen = {}, {}, [], {}
     for prompt, picture_path, mask_path, source in found_pictures(folders):
+        if only_qualities and not words.subject_of(prompt).qualities:
+            continue
         with open(picture_path, "rb") as file:
             sha = hashlib.sha256(file.read()).hexdigest()
         if (sha, prompt) in seen:
             seen[(sha, prompt)]["sources"].append(source)
             continue
         if prompt not in directions:
-            directions[prompt] = subject_judge.contrast_directions(judge, *words.subject_contrast(
-                words.subject_of(prompt)))
+            subject = words.subject_of(prompt)
+            directions[prompt] = subject_judge.directions_of(judge, subject)
+            every = words.Subject(**{**subject.__dict__, "qualities": list(words.QUALITY_JUDGE_TEXTS)})
+            every_quality[prompt] = [(quality, judge.features(texts=wanted), judge.features(texts=unwanted))
+                                     for quality, wanted, unwanted in words.quality_texts(every)]
         picture = Image.open(picture_path).convert("RGB")
         mask = np.asarray(Image.open(mask_path).convert("L")) > 127
         # As subject_judge.judged judges it, each view's features worked out once for both measures.
         views = [picture] + ([state_judge.cropped(picture, mask)] if mask.any() else [])
         features = [judge.features(image=view)[0] for view in views]
-        asked, others, names = directions[prompt]
-        found = [subject_judge.subject_share(f, asked, others, scale) for f in features]
-        share, likeliest = float(np.mean([s for s, _ in found])), names[min(found)[1]]
+        share, likeliest, qualities = subject_judge.averaged(
+            [subject_judge.view_shares(f, directions[prompt], scale) for f in features], directions[prompt][2])
         head = float(np.mean([state_judge.asked_share(f, hammer, axe, scale) for f in features]))
+        every = {quality: round(float(np.mean([state_judge.asked_share(f, wanted, unwanted, scale) for f in features])),
+                                4) for quality, wanted, unwanted in every_quality[prompt]}
         entry = {"sha256": sha, "prompt": prompt, "picture": picture_path, "mask": mask_path, "sources": [source],
-                 "subject_share": round(share, 4), "likeliest_other": likeliest, "hammer_head_share": round(head, 4)}
+                 "subject_share": round(share, 4), "likeliest_other": likeliest, "hammer_head_share": round(head, 4),
+                 "qualities_asked": {quality: round(found, 4) for quality, found in qualities},
+                 "check_value": round(min([share] + [found for _, found in qualities]), 4), "every_quality": every}
         seen[(sha, prompt)] = entry
         judged.append(entry)
         print(f"{share:.3f} {head:.3f} {prompt!r} {source}", flush=True)

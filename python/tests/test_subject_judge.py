@@ -45,6 +45,47 @@ class TheShare(unittest.TestCase):
         self.assertTrue(subject_judge.subject_check(chair, 0.99, "a stool").passed)
 
 
+class AQualityTheWordsName(unittest.TestCase):
+    """"a short curved dagger" was painted straight in four tries of four and one was made: a quality the words name
+    must show in the picture, judged in the same check against its opposite."""
+
+    def test_the_check_needs_the_thing_and_every_quality(self):
+        dagger = words.subject_of("a short curved dagger")
+        straight = subject_judge.subject_check(dagger, 0.99, "a sabre", [("curved", 0.12)])
+        self.assertFalse(straight.passed)
+        self.assertAlmostEqual(straight.value, 12.0)
+        self.assertIn("curved with a share of 12% against straight", straight.words)
+        curved = subject_judge.subject_check(dagger, 0.99, "a sabre", [("curved", 0.91)])
+        self.assertTrue(curved.passed)
+        self.assertAlmostEqual(curved.value, 91.0)
+        # The thing itself still decides as before.
+        self.assertFalse(subject_judge.subject_check(dagger, 0.40, "a sabre", [("curved", 0.99)]).passed)
+        self.assertEqual(subject_judge.subject_check(dagger, 0.9, "a sabre").value, 90.0)
+
+    def test_each_view_judges_each_quality_and_the_views_are_averaged(self):
+        picture = unit([1.0, 0.2, 0.0])
+        directions = (unit([1.0, 0.0, 0.0]), np.array([unit([0.0, 1.0, 0.0])]), ["a sabre"],
+                      [("curved", np.array([unit([0.0, 0.0, 1.0])]), np.array([unit([1.0, 0.0, 0.0])]))])
+        share, likeliest, qualities = subject_judge.view_shares(picture, directions, scale=100.0)
+        self.assertGreater(share, 0.99)
+        self.assertEqual(likeliest, 0)
+        self.assertEqual(qualities[0][0], "curved")
+        self.assertLess(qualities[0][1], 0.01)
+        found = subject_judge.averaged([(0.9, 0, [("curved", 0.2)]), (0.7, 0, [("curved", 0.6)])], ["a sabre"])
+        self.assertAlmostEqual(found[0], 0.8)
+        self.assertEqual(found[1], "a sabre")
+        self.assertAlmostEqual(found[2][0][1], 0.4)
+
+    def test_the_directions_hold_each_quality_its_words_name(self):
+        class Judge:
+            def features(self, texts=None, image=None):
+                return np.tile(unit([1.0, 0.0, 0.0]), (len(texts), 1))
+
+        directions = subject_judge.directions_of(Judge(), words.subject_of("a short curved dagger"))
+        self.assertEqual([quality for quality, _, _ in directions[3]], ["curved"])
+        self.assertEqual(subject_judge.directions_of(Judge(), words.subject_of("an old iron sword"))[3], [])
+
+
 class TheContrast(unittest.TestCase):
     def test_a_chair_is_judged_against_a_table_a_vase_a_person_text_and_an_empty_backdrop(self):
         asked, others = words.subject_contrast(words.subject_of("an old looking chair"))
@@ -259,6 +300,31 @@ class InTheChoiceOfTry(unittest.TestCase):
                     mock.patch.object(subject_judge, "judged", side_effect=judged):
                 pipeline.picture_job(job, settings, self.Painter(), self.Cutter(), judge, {}, report=lambda _: None)
             return job.record["picture"], first
+        finally:
+            shutil.rmtree(folder)
+
+    def test_a_try_without_the_quality_asked_is_not_chosen(self):
+        from model_maker import pipeline
+
+        folder = tempfile.mkdtemp()
+        try:
+            job = pipeline.Job(os.path.join(folder, "curved-dagger"), "a curved bronze dagger")
+            settings = pipeline.Settings(verify=False, tries=4)
+            first = painter.seed_of(words.picture_prompt(job.subject))
+            given = iter([0.10, 0.20, 0.95, 0.30])
+
+            def judged(judge, picture, mask, directions):
+                return 0.99, "a sabre", [("curved", next(given))]
+
+            with mock.patch.object(subject_judge, "contrast_directions", return_value="directions"), \
+                    mock.patch.object(subject_judge, "judged", side_effect=judged):
+                pipeline.picture_job(job, settings, self.Painter(), self.Cutter(), object(), {}, report=lambda _: None)
+            record = job.record["picture"]
+            self.assertEqual(record["seed"], first + 2)
+            refused = record["tries"][str(first)]
+            check = next(c for c in refused["checks"] if c["name"] == subject_judge.NAME)
+            self.assertFalse(check["passed"])
+            self.assertIn("curved", check["words"])
         finally:
             shutil.rmtree(folder)
 

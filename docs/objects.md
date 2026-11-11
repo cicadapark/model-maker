@@ -68,6 +68,18 @@ word decided each choice:
   open", "cannot be opened": a negation up to three words before the word denies it). The picture model
   is told so after the prompt ("its lid shut"; a book "lying shut, only its cover showing").
 
+* whether it asks for more than one thing: a pair ("a pair of boots"), a count ("two chairs", "3 swords"), a group
+  ("a set of knives"), a known thing in the plural ("leather boots") or two known things joined ("a sword and a
+  shield"). Release 1 makes one object at a time, so such a prompt is answered before anything is painted, with the
+  one thing to ask for instead: `model-maker makes one object at a time, and these words ask for more than one. Try
+  one: "a leather boot".` A thing that is one object though named as a pair or a set is made ("a pair of scissors",
+  "a pair of tongs", "glasses", "trousers", "a set of drawers"), and so is a count that describes ("a two-handed
+  sword", "a three legged stool"), a plural after "of" or "with" ("a bag of coins", "a chest of drawers") and a
+  pile, heap, stack or bundle (one object). See "Several things, and qualities the words name";
+* the qualities its words give it that the picture must show ("a curved dagger", "a round box"): see the same
+  section. A curved blade ("a curved dagger") is checked as a sabre is (its curve without a kink; no straight line,
+  no mirror across it).
+
 `--stands yes/no` and `--symmetric yes/no` override the words.
 
 ## The checks
@@ -90,7 +102,7 @@ the cut-out, and that is what is checked. The measure cannot tell an object as p
 backdrop from a shadow (2 of the 212, both a white table top): those fail safe, and another try is
 painted.
 | not cut off | the object keeps 1 % of the picture from every edge |
-| shows the thing asked for | SigLIP 2 finds the thing asked for (the prompt and its kind's description) at least three times as likely as the likeliest other kind release 1 makes or a distractor (a person, text, an empty backdrop, several things), from the whole picture and its crop round the cut-out (see "The picture against the prompt" and "War hammers"); without SigLIP 2 the tries go unjudged and the run says so |
+| shows the thing asked for | SigLIP 2 finds the thing asked for (the prompt and its kind's description) at least three times as likely as the likeliest other kind release 1 makes or a distractor (a person, text, an empty backdrop, several things), from the whole picture and its crop round the cut-out (see "The picture against the prompt" and "War hammers"); and each quality the words name ("curved", "round") at least three times as likely as its opposite (see "Several things, and qualities the words name"); without SigLIP 2 the tries go unjudged and the run says so |
 | shows what the words ask | a thing with a lid, cover or doors: SigLIP 2 finds it shut (or open, as asked) at least three times as likely as the other way, judged by descriptions of what each state looks like ("the edges of its pages in one even block" against "split in two at the middle"), from the whole picture and from its crop round the cut-out |
 
 Objects:
@@ -195,13 +207,17 @@ must fail it too), and the first trial's chest and book, shut, which must pass i
 trials painted, labelled open or shut by eye (`tools/trial/state-cases.toml`: each must pass or fail the state check as
 its label says, judged as one case, "state-pictures"); every distinct picture the trials painted, labelled by its prompt (`tools/trial/prompt-cases.toml`:
 each clear one must pass "shows the thing asked for" against its own prompt and fail it against every other, judged as
-one case, "prompt-pictures"; see "The picture against the prompt"); the fix-check's and the fifth trial's jugs, a web in the handle's loop (as made they must fail the outline, carved
+one case, "prompt-pictures"; see "The picture against the prompt"); the pictures painted with a quality and without it, labelled
+by eye (`tools/trial/quality-cases.toml`: judged against the prompt that names the quality, each showing it must pass
+"shows the thing asked for" and each showing its opposite must fail it, judged as one case, "quality-pictures"; see
+"Several things, and qualities the words name"); the fix-check's and the fifth trial's jugs, a web in the handle's loop (as made they must fail the outline, carved
 they must match it, closed and in one piece), and the chairs, stool, tables and lantern whose holes must not be carved;
 the fix-check's book made standing on its edge (laid, it must stand), its chest whose picture is a photograph (it
 must match through a lens) and its candle as the six views painted it (it must keep failing the paint's coverage); the touch-up's first candle, whose fill painted holes and grey patches (it must fail "fill matches the paint round it" while its coverage passes), and its chair, filled in its own wood (it must pass both); the fifth trial's candle, whose foot left out shows a smear of wax and brass (it must fail the fill check), and a clay jug's and a shield's handle's places left out, the model showing one colour there (they must pass it). The state cases need SigLIP 2 in `MODEL_MAKER_MODELS`; it runs on the CPU too, a few seconds a picture. `tools/trial/regression.py run DATA` judges them all on the CPU in a
 few minutes; it runs before any change to the pipeline or its checks, and every case must hold.
 
-The cases and their verdicts are here (`regression.toml`, `state-cases.toml`, `prompt-cases.toml`, `head-cases.toml`),
+The cases and their verdicts are here (`regression.toml`, `state-cases.toml`, `prompt-cases.toml`, `head-cases.toml`,
+`quality-cases.toml`),
 and so are the sums of their data files (`regression-sums.json`), but the data itself (the made shapes and pictures,
 built from the trials' folders) is not in this repository: a reader can see what each case holds and why, but cannot
 run `regression.py build` or `run` without it (the faults its made-up cases hold are tested in `python/tests/`).
@@ -1482,3 +1498,166 @@ the butt) and shield (`shield-two-handles`: two handles found, the grip on one),
 its middle (it must fail straight and kink), a bearded axe (its beard a larger piece than the haft beside it: it must
 pass), an axe with a butt cap like the remade one's (its grip 19 to 26 cm from the butt) and a shield with two handles.
 With the code before, the remade axe, the bearded axe, the butt cap and both shields break; the bent haft fails both.
+
+## Several things, and qualities the words name (11 November 2026)
+
+Release 1's unseen run made two objects the prompt did not describe:
+
+* **"a pair of leather boots" made one boot.** Three of its four picture tries drew two boots, touching, so each
+  passed "one piece" as one lump of two; the fourth drew one boot, scored best on the other picture checks and was
+  chosen. Either way the words were not met: release 1 cannot make two boots as two objects.
+* **"a short curved dagger" came out straight.** None of its four tries was curved, and nothing checked a quality the
+  prompt names.
+
+Those ten prompts were looked at to understand the two faults; nothing below was measured or tuned on them.
+
+### Several things: answered before anything is painted
+
+Release 1 makes one object in one piece. A prompt that asks for more than one thing is now answered at once, before
+any card time, with the one thing to ask for instead (`words.several_of`):
+
+    model-maker makes one object at a time, and these words ask for more than one. Try one: "a leather boot".
+
+It asks for several when its head phrase (the words before "of", "with", "in", "for", "by", ...):
+
+| asks for several | example | suggested |
+|---|---|---|
+| groups things | "a pair of boots", "a set of three knives", "a couple of mugs", "a collection of bottles" | "a boot", "a knife", "a mug", "a bottle" |
+| counts them | "two wooden chairs", "2 lanterns", "a few goblets", "three iron swords with gold hilts" | "a wooden chair", "a lantern", "a goblet", "an iron sword with gold hilts" |
+| names a known thing in the plural | "boots", "leather boots, brown", "knives", "bookshelves" | "a boot", "a leather boot, brown", "a knife", "a bookshelf" |
+| joins two known things | "a sword and a shield", "a table and chairs" | "a sword", "a table" |
+
+What is made as before, each a case in the shared prompt cases:
+
+* things that are one object though named as a pair or a set: "a pair of scissors", "a pair of iron tongs", "a pair
+  of glasses", "glasses", "trousers", "a pair of bellows", "a set of drawers", "a set of bagpipes";
+* a count that describes: "a two-handed sword", "a two handed sword", "a three legged stool", "a four-poster bed", "a
+  20 cm dagger", "a 200 year old chest", "a bench for two people";
+* a plural after "of" or "with", which is what a thing holds or is made of: "a bag of coins", "a chest of drawers",
+  "a basket of apples", "a ring of keys";
+* a pile, heap, stack or bundle, which is one object (its words already make it not mirror-symmetric): "a pile of
+  rocks", "a stack of books", "a bundle of arrows";
+* two words joined where one is no known thing: "a black and white chair".
+
+A plural is known by the word lists: a thing's word with s, es (after s, x, z, ch, sh: "boxes"), ves ("knives",
+"shelves") or its own ("staves"). A plural of a word the lists do not know is not caught ("three widgets" is, by its
+count). The suggestion makes each known plural one and drops the count, the group and the article; with no known
+thing it makes the last word one by the plain rules ("a pair of earrings": "an earring"), and when that word is no
+plural it suggests nothing ("a set of armour": "Ask for one of them."). A suggestion that would itself ask for several
+or for a character is not given.
+
+`python/tests/prompt_cases.json`, shared with the private service's Rust copy, has a fifth verdict, `several`, and 55
+new cases (26 `several`, 29 `make`); no case changed. The Rust side must read the same cases the same way.
+
+Not caught: "a table with four chairs" (the head phrase ends at "with": a table is made, and the chairs are left to
+the picture checks).
+
+### Qualities the words name: judged in the picture
+
+A quality the prompt gives the whole thing is now judged in "shows the thing asked for", as the state check judges a
+lid (`words.qualities_of`, `subject_judge`). Each quality has two pairs of descriptions, the same evidence both ways,
+the thing's word kept in each (classification by description, as the state check's words):
+
+| Quality | Asked | Its opposite |
+|---|---|---|
+| curved | a curved {thing}, its whole length bending in one smooth arc | a straight {thing}, its whole length one straight line |
+| | a {thing} with a curved outline, bent like a crescent | a {thing} with a straight outline, its edges parallel lines |
+| round ("round", "circular") | a round {thing}, its outline a circle | a square {thing}, its outline a square with four corners |
+| | a round {thing} with no corners, curved all the way round | a square {thing} with straight sides meeting at corners |
+
+A pair's share is the sigmoid of the two scores' difference, averaged over the pairs and over the two views (the whole
+picture and its crop round the cut-out), as the state check's is. The thing asked for and each quality must each reach
+**0.75**, the limit of both checks, and the check's value is the least of their shares; its words give each share
+("... with a share of 99% against the likeliest other thing, a stool; round with a share of 100% against square").
+So a try without the quality is not chosen, and when no try of two rounds has it, the job ends at its pictures, failed
+on that check, before any shape is made.
+
+A quality counts when its word is in the head phrase, said of the whole thing: not denied ("a sword, not curved"), not
+joined to the next word ("a round-bottomed flask", "a curved-handled cane"), not followed by a past participle ("a
+round bottomed flask"; a word in -ing is the thing's use: "a curved hunting dagger" is curved), not part of the thing's
+own word ("a short sword") or kind (a sabre, a scimitar, a sickle is curved by its kind), and not contradicted ("a
+round square table"). A quality after "with" names a part ("a chest with a round
+lid") and is not judged.
+
+Two changes came with the curved blade:
+
+* **A blade the words call curved is a curved blade.** "a curved dagger" is checked as a sabre is (its curve without
+  a kink; no straight line, no mirror across it): before, it was a straight blade, whose "blade straight" check a
+  curved dagger fails. In the picture judge it is judged with the curved blade's description ("a curved blade with a
+  hilt") and not against the sabre: with the straight blade's description and the sabre as a contrast, the first four
+  tries of "a curved bronze dagger" labelled curved scored 0.03 to 0.69 as the thing asked for, the likeliest other
+  "a sabre".
+* **A curved blade is painted with its curve in view**, as a bow is: "its blade curving in one smooth arc like a
+  sabre's", and the view "standing upright, its point at the top, seen from the side so its whole curve shows". The
+  picture model seldom paints a curve. Tries labelled by eye, the same six prompts ("a curved bronze dagger", "a curved
+  hunting knife", "a curved iron sword", "a curved silver dagger", "a curved short sword", "a curved steel sabre"), 8
+  each: with release 1's words 1 of 48 curved (one bronze dagger), with these words and view 7 of 48 (the hunting
+  knife 4 of 8, the bronze dagger, the iron sword and the short sword 1 each, the silver dagger and the sabre none).
+  Tried and not kept: a description of the curve alone, the view unchanged ("its whole length bending in one smooth
+  arc": the bronze dagger 3 of 8, the iron sword none). A small sample, and still few curved tries: a job whose tries
+  never show the curve now ends at its pictures, failed on "shows the thing asked for", where release 1 made a
+  straight dagger.
+
+### Measured
+
+New picture tries, painted with the pipeline's own picture words and seeds (`tools/trial/paint_tries.py`): 384 on both
+cards, 8 for each prompt and wording. The prompts name a quality ("a curved hunting knife", "a round mirror", "a tall
+clay vase") or its opposite or nothing ("a straight bronze dagger", "a hunting knife", "a square mirror", "a low
+wooden stool", "a wooden table"). None is one of release 1's unseen ten. Every try was labelled by eye before its
+score or prompt was seen: cropped round its cut-out and shuffled under a random code (`tools/trial/quality_sheets.py`).
+"tall" and "squat" were labelled by the cut-out's proportions (tall at least twice as high as wide, squat at most 1.2
+times, unclear between), "square" as four corners, square or oblong. Each picture was judged against the prompt that
+names the quality: its own, or its twin's ("a hunting knife" as "a curved hunting knife").
+
+| Quality | Showing it, passing the pair | Showing its opposite, refused by the pair | The whole check passes |
+|---|---|---|---|
+| curved: daggers, swords, a short sword, benches | **9 of 9** (lowest 0.77) | **98 of 98** (highest 0.60) | 4 of the 9 curved |
+| round: boxes, mirrors, trays, tables, plates, shields | **48 of 48** (lowest 0.997) | **31 of 31** (highest 0.31) | 46 of the 48 round |
+
+The whole check also judges the thing. It refuses 5 of the 9 curved tries for that: each is a bare curved blade with
+no guard or grip to speak of, taken for a scythe's or a spear's blade (0.002 to 0.32); and one round shield and one
+round mirror (0.35, 0.61, the likeliest other "a coin"), as release 1's check did. The pair is not to blame there.
+
+The 48 tries painted after the wording was chosen ("a curved hunting knife", "a curved silver dagger", "a curved short
+sword" and "a curved steel sabre" with the words and view kept, the dagger and the short sword also with release 1's
+words) were held out as a check of it: every straight dagger and short sword is refused (28 of 28), the one curved
+short sword passes the pair (0.99), and the curved knives showed the limit below. The sabres are not judged for the
+curve (their kind is curved).
+
+A knife's curve is not judged. Of the 7 hunting knives labelled curved (their blades sweep up, their handles
+straight), the pair refused 5 (0.07 to 0.56); the straight knives were all refused (24 of 24, highest 0.45). A second
+wording was tried for every blade on the first tries, the blade named in place of the whole length ("a curved {thing},
+its blade bending in one smooth arc" against "its blade one straight line"): it refused the same two knives (0.46,
+0.53) and brought two straight swords closer to the limit (0.71, 0.73 against 0.58, 0.60); it was not kept. A
+curved knife is still a curved blade, painted with its curve in view (4 of 8 of the held-out knives came out curved),
+and its picture is judged for the thing only (`words.QUALITY_NOT_JUDGED`).
+
+The trials' own pictures whose prompts name a quality kept (`tools/trial/judge_tries.py --only-qualities`, every
+distinct picture of every trial, labelled by its own prompt): "a small round table" (20 pictures, round 0.96 and over)
+and "a round wooden shield with an iron boss" (20, round 0.99 and over). None is newly refused. The 5 round tables
+labelled unclear in the prompt cases (seen from straight above, a table and a stool alike) are refused for the thing,
+as before; their round shares are 0.96 and over too.
+
+Measured and left out, on the first 336 tries and the trials' own pictures (each quality by two pairs, as written):
+
+| Quality | Showing it, passing | Showing its opposite, refused | Why left out |
+|---|---|---|---|
+| tall ("a tall {thing}, much taller than it is wide" against "a squat {thing}, wider than it is tall"; "a tall narrow {thing}, high and slender" against "a low squat {thing}, short and broad") | 32 of 46 | 17 of 17 | stools, vases, bottles and candles pass, but lanterns (4 of 13) and cabinets (0 of 4) twice as high as wide are refused: "tall" is judged against the thing's usual proportions, and a lantern is tall already |
+| squat (the same pairs turned round) | 10 of 17 | 46 of 46 | low stools refused (0.40 to 0.50) |
+| square (the round pairs turned round) | 29 of 31 | 48 of 48 | two square boxes seen in perspective refused (0.69, 0.70) |
+| straight (the curved pairs turned round) | 82 of 84 | 8 of 8 | a straight sword (0.43) and a straight sabre (0.74) refused; the picture model paints blades straight anyway |
+| broken ("a broken {thing}, a part of it snapped off or smashed" against "a whole {thing}, every part of it intact"; "cracked and damaged" against "an undamaged {thing} in good repair") | 0 of 1 (0.57) | 12 of 12 | the picture model painted 1 broken chair in 8 tries of "a broken wooden chair": too few to measure |
+| rusty ("a rusty {thing}, its metal covered in orange-brown rust" against "a clean {thing}, its metal bare and free of rust"; "a corroded {thing}, rust flaking from it" against "a polished {thing}, shining like new") | keys 8 of 8 (0.80 and over), the trials' "a rusty iron lantern" 17 of 20 | 8 of 8 (0.04 and under) | three of the trials' rusty lanterns, rusty by eye, refused (0.64, 0.64, 0.70) |
+
+Known limits: a size ("small", "big", "short", "long") is not judged, as a picture has no scale (`--size` sets it); a
+quality of a part ("a chest with a round lid") is not judged; a knife's curve is not judged; "open" and "closed" are
+judged for things with a lid, cover or doors only (the state check). The picture model seldom paints a curved blade,
+and a bare curved blade with no guard or grip is refused as the thing: most jobs asking for a curved dagger or sword
+end at their pictures, failed on "shows the thing asked for", rather than making a straight one.
+
+The labelled set is a regression case, "quality-pictures" (`tools/trial/quality-cases.toml`, 240 pictures, the curve
+and round tries): judged against the prompt that names the quality, the quality's pair must pass a picture showing it
+and refuse one showing its opposite; the whole check is shown beside it, and "unclear" is shown, not held. The whole
+regression set holds (49 of 49 with it; "quality-pictures" took about 8 minutes on 12 CPU threads). In
+"prompt-pictures" one written prompt fewer passes, a known miss shown and not held (23 of 30, 24 before); every
+other number is as before (own prompts lowest 0.926, other prompts highest 0.500).

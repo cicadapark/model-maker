@@ -8,8 +8,10 @@ on this PC's card with a time per object; `outline_bench.py`, the outline check'
 for each shape try and finish of made objects (CPU), to compare before and after a change to it; `regression.py`, the
 regression set (shapes, pictures and made-up cases each check must pass or fail by name). `paint_tries.py` paints a
 prompt's tries as the picture stage does (pictures only, any wording), `judge_tries.py` judges every picture under
-some folders against its prompt on the CPU, and `head_sheets.py` makes blind sheets of head crops for labelling by
-eye (`head-cases.toml`; docs/objects.md, "War hammers").
+some folders against its prompt on the CPU (and every quality's pair), `head_sheets.py` makes blind sheets of head
+crops for labelling by eye (`head-cases.toml`; docs/objects.md, "War hammers"), and `quality_sheets.py` blind sheets of
+whole cut-outs for labelling a quality (`quality-cases.toml`; docs/objects.md, "Several things, and qualities the words
+name").
 
 The regression set's cases, labels and data sums are here, but its data (the trials' made shapes and pictures) is not
 published, so `regression.py build` and `run` need a copy of the trials' folders to work on (docs/objects.md, "The

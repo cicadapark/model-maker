@@ -165,6 +165,76 @@ STATE_JUDGE_TEXTS = {
     "doors": [("a closed {noun}, its doors shut flat across its front", "an open {noun}, its doors swung out"),
               ("a closed {noun}, its inside hidden", "an open {noun}, its inside showing")],
 }
+# Several things in one prompt. Release 1 makes one object in one piece, and the picture checks hold a picture to one
+# piece: in release 1's unseen run "a pair of leather boots" was painted as two boots in three tries of four, and the
+# fourth, one boot, was chosen and made. So a prompt that asks for more than one thing is answered before anything is
+# painted, with the one thing to ask for instead. It asks for several when its head phrase (the words before "of",
+# "with", "for", ...) names a known thing in the plural ("leather boots"), counts ("two chairs", "3 swords"), groups
+# ("a pair of boots", "a set of knives") or joins two known things ("a sword and a shield"). A count joined to the
+# next word or followed by a participle is a description ("a two-handed sword", "a three legged stool"), and the
+# plural of a thing after "of" or "with" is what it holds or is made of ("a bag of coins", "a pile of rocks", "a
+# chest of drawers"). A pile, heap, stack or bundle is one object (it is not mirror-symmetric: NOT_SYMMETRIC_WORDS).
+SEVERAL_THINGS = "model-maker makes one object at a time, and these words ask for more than one. Try one: \"{one}\"."
+SEVERAL_THINGS_NO_ONE = ("model-maker makes one object at a time, and these words ask for more than one. Ask for one "
+                         "of them.")
+COUNT_WORDS = ("two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "dozen",
+               "several", "many", "multiple", "numerous", "few", "couple")
+GROUP_WORDS = ("pair", "pairs", "set", "sets", "collection", "group", "assortment", "selection", "row", "couple")
+# Things one object although named as a pair or a set ("a pair of scissors", "a set of drawers").
+ONE_THING_IN_PAIRS = (
+    "scissors", "shears", "tongs", "pliers", "pincers", "tweezers", "snips", "clippers", "secateurs", "nutcrackers",
+    "glasses", "spectacles", "goggles", "binoculars", "trousers", "pants", "breeches", "shorts", "jeans", "tights",
+    "bellows", "compasses", "calipers", "callipers", "dividers", "handcuffs", "manacles", "shackles", "drawers",
+    "shelves", "stairs", "steps", "scales", "bagpipes", "gallows", "antlers",
+)
+# Plurals after a count that measure, not count: "a 100 years old chest".
+MEASURES = ("years", "days", "weeks", "months", "hours", "centuries", "decades", "inches", "feet", "metres", "meters",
+            "centimetres", "centimeters", "millimetres", "millimeters", "yards", "miles", "pounds", "kilos",
+            "kilograms", "grams", "gallons", "litres", "liters", "cms", "mms", "lbs", "kgs")
+# A plural not made by adding s: a known thing's own.
+IRREGULAR_PLURALS = {"staff": ("staves",), "quarterstaff": ("quarterstaves",)}
+# Qualities a prompt names that decide a thing's shape or look ("a curved dagger", "a round box"), each judged in the
+# picture as a state is (state_judge): the picture must show the quality asked for at least three times as likely as
+# its opposite. In release 1's unseen run "a short curved dagger" was painted straight in four tries of four and one was
+# made: nothing checked the word "curved". A quality counts when its word is in the head phrase, not denied ("not
+# curved"), not joined to the next word ("a round-bottomed flask") and not followed by a participle ("a tall backed
+# chair"): there it describes a part. Each quality has contrast pairs: the same evidence both ways, the thing's name
+# kept in each (classification by description, as STATE_JUDGE_TEXTS). Only the qualities whose pairs held on labelled
+# pictures are judged; "straight", "square", "tall", "squat", "broken" and "rusty" were measured and left out
+# (docs/objects.md, "Qualities the words name").
+QUALITY_WORDS = {"curved": "curved", "round": "round", "circular": "round"}
+QUALITY_OPPOSITES = {"curved": "straight", "round": "square"}
+# Words that contradict a quality: with both said ("a round square table"), the quality is not judged.
+QUALITY_CONTRADICTED_BY = {"curved": ("straight",), "round": ("square", "rectangular", "oblong")}
+QUALITY_JUDGE_TEXTS = {
+    "curved": [("a curved {noun}, its whole length bending in one smooth arc",
+                "a straight {noun}, its whole length one straight line"),
+               ("a {noun} with a curved outline, bent like a crescent",
+                "a {noun} with a straight outline, its edges parallel lines")],
+    "round": [("a round {noun}, its outline a circle", "a square {noun}, its outline a square with four corners"),
+              ("a round {noun} with no corners, curved all the way round",
+               "a square {noun} with straight sides meeting at corners")],
+}
+# A quality the thing's own word already has is not judged again: a sabre, a scimitar or a sickle is curved by its
+# kind, and the thing asked for is judged with its kind's description ("a curved blade with a hilt"). Painted as a
+# crook, the two sickles of the trial labelled curved scored 0.60 and 0.73 on the curved pair.
+QUALITY_OF_THE_KIND = {"curved": {"sabre", "saber", "scimitar", "falchion", "cutlass", "sickle", "scythe"}}
+# Things whose quality the picture judge cannot see, measured: of 7 hunting knives labelled curved, the curved pair
+# refused 5 (0.07 to 0.56; a knife's curve is in its short blade, its handle straight), and a second wording, tried on
+# two of them, refused them too. A curved knife is still a curved blade, painted with its curve in view; its picture is
+# not held to the curve.
+QUALITY_NOT_JUDGED = {"curved": {"knife"}}
+# A curved blade (a sabre, or a blade the words call curved) is painted facing the viewer with its curve in view, as a
+# bow is: with the blade view ("standing upright ... seen straight from the side"), 1 of 24 tries of a curved dagger,
+# a curved hunting knife and a curved iron sword was curved, and 0 of 8 of "a curved steel sabre"; with these words
+# and view, 5 of 24 (docs/objects.md, "Qualities the words name").
+CURVED_BLADE_VIEW = ("standing upright, its point at the top, seen from the side so its whole curve shows, the whole "
+                     "length in view")
+CURVED_BLADE_WORDS = "its blade curving in one smooth arc like a sabre's"
+# The judge's kind for a blade the words call curved (SUBJECT_KINDS' row with this word).
+CURVED_BLADE_KIND = "sabre"
+# The thing's word in the judge's descriptions when no known word names it.
+UNKNOWN_THING = "object"
 # People, animals and creatures: characters, which come in the second release. A prompt whose head noun is one of
 # these is answered so and not made; "a statue of a knight",
 # "a wolf skull" and "a king's crown" are objects.
@@ -273,9 +343,16 @@ def subject_contrast(subject):
     text = subject.prompt.lower()
     asked = [f"a photo of {subject.prompt}"]
     others = {}
+    # A blade the words call curved ("a curved dagger") is judged as a curved blade, a sabre's kind, not against it:
+    # with the straight blade's description and the sabre's as a contrast, the trial's curved daggers scored 0.03 to
+    # 0.69 as the thing asked for, the likeliest other "a sabre" (docs/objects.md, "Qualities the words name").
+    curved_blade = subject.weapon_kind == "curved blade" and subject.noun not in WEAPON_KINDS["curved blade"]
     for nouns, description in SUBJECT_KINDS:
-        if subject.noun in nouns or any(_found(text, noun) for noun in nouns):
-            if subject.noun in nouns:
+        own = subject.noun in nouns and not curved_blade
+        if curved_blade and CURVED_BLADE_KIND in nouns:
+            own = True
+        if own or subject.noun in nouns or any(_found(text, noun) for noun in nouns):
+            if own:
                 asked.append(f"{subject.prompt}, {description.split(', ', 1)[1]}")
             continue
         others[description.split(", ", 1)[0]] = [description]
@@ -308,6 +385,8 @@ class Subject:
     not_yet: str = ""  # why this kind of thing is not made yet ("" when it is made)
     state: str = ""  # "closed" or "open" for a thing with a lid, cover or doors ("" for others)
     lies: bool = False  # it rests on its broad face (a book, a coin, a plate): laid on its likeliest resting face
+    several: str = ""  # the words that ask for more than one thing ("" for one): not made (SEVERAL_THINGS)
+    qualities: list = field(default_factory=list)  # the qualities the words name ("curved", "round"), judged
     why: dict = field(default_factory=dict)
 
     @property
@@ -371,6 +450,11 @@ HEAD_PHRASE_END = re.compile(rf"\b(?:{'|'.join(HEAD_PHRASE_WORDS)})\b|,")
 # lamp, "a cat and a chair" asks for a cat.
 CHARACTER_PHRASE_WORDS = HEAD_PHRASE_WORDS + ("by", "for", "from", "like", "held", "and", "or")
 CHARACTER_PHRASE_END = re.compile(rf"\b(?:{'|'.join(CHARACTER_PHRASE_WORDS)})\b|,")
+# The head phrase for counting things also ends at these: "a bench for two people" is one bench.
+COUNT_PHRASE_WORDS = HEAD_PHRASE_WORDS + ("for", "by", "from", "like", "held", "to", "as", "at")
+COUNT_PHRASE_END = re.compile(rf"\b(?:{'|'.join(COUNT_PHRASE_WORDS)})\b|,")
+# Words that join two things: "a sword and a shield".
+JOINED = re.compile(r"\s(?:and|&|plus)\s")
 
 
 def _head_phrase(text):
@@ -388,6 +472,153 @@ def _named(text, table):
         if found:
             return max(found, key=lambda w: (part.rfind(w) + len(w), len(w)))
     return ""
+
+
+def known_things():
+    """Every word of a thing release 1 knows: the objects, the things held in the hand, and the judge's kinds."""
+    return {*STANDING, *NOT_STANDING, *(w for table in WEAPON_KINDS.values() for w in table),
+            *(noun for nouns, _ in SUBJECT_KINDS for noun in nouns)}
+
+
+def plurals_of(noun):
+    """A known thing's plural forms: with s; with es after s, x, z, ch or sh ("boxes", "benches"); with ves for f or
+    fe ("shelves", "knives"); and its own irregular ones ("staves")."""
+    forms = {noun + "s", *IRREGULAR_PLURALS.get(noun, ())}
+    if noun.endswith(("s", "x", "z", "ch", "sh")):
+        forms.add(noun + "es")
+    if noun.endswith("fe"):
+        forms.add(noun[:-2] + "ves")
+    elif noun.endswith("f") and not noun.endswith("ff"):
+        forms.add(noun[:-1] + "ves")
+    return forms
+
+
+def _last_thing(phrase, things):
+    """The known thing named last in `phrase` as (its word as written, the thing, whether it is a plural), or None:
+    the one ending last, the longer of two ending together ("battle axes" over "axes")."""
+    found = []
+    for thing in things:
+        for form, plural in ((thing, False), *((p, True) for p in plurals_of(thing))):
+            for match in re.finditer(rf"(?<![a-z]){re.escape(form)}(?![a-z])", phrase):
+                found.append((match.end(), len(form), form, thing, plural))
+    if not found:
+        return None
+    _, _, form, thing, plural = max(found)
+    return form, thing, plural
+
+
+def _article(words_after):
+    return ("an " if words_after[:1] in tuple("aeiou") else "a ") + words_after
+
+
+def _one_of(text, things):
+    """The prompt asking for one of its things: the count, the group and the article dropped, each known plural made
+    one, the words after the head phrase kept ("three iron swords with gold hilts": "an iron sword with gold hilts");
+    or "" when no known thing is named."""
+    head = COUNT_PHRASE_END.split(text, maxsplit=1)[0]
+    group = re.match(rf"^(.*?)\b(?:{'|'.join(GROUP_WORDS)})\s+of\s+(.*)$", text)
+    if group:
+        before, text = group.group(1), group.group(2)
+        head = before + COUNT_PHRASE_END.split(text, maxsplit=1)[0]
+        rest = text[len(COUNT_PHRASE_END.split(text, maxsplit=1)[0]):]
+    else:
+        rest = text[len(head):]
+    head = JOINED.split(head)[0]
+    plural_to_one = {p: thing for thing in things for p in plurals_of(thing)}
+    kept = []
+    for word in re.findall(r"[a-z0-9'\-]+", head):
+        if word in ("a", "an", "the", "some", "both", "of") or word in COUNT_WORDS or word in GROUP_WORDS or \
+                word.isdigit():
+            continue
+        kept.append(plural_to_one.get(word, word))
+    if kept and _last_thing(" ".join(kept), things) is None:
+        # No known thing: the last word made one by the plain rules, so the user is still shown what to ask; when it
+        # is no plural by them ("a set of armour"), nothing is suggested.
+        one = re.sub(r"(?:(?<=[sxz])|(?<=[cs]h))es$|(?<![su])s$", "", re.sub(r"ies$", "y", kept[-1]))
+        if len(kept[-1]) <= 3 or one == kept[-1]:
+            return ""
+        kept[-1] = one
+    if not kept:
+        return ""
+    one = " ".join(kept)
+    rest = rest.strip()
+    return _article(one) + ("" if not rest else rest if rest.startswith(",") else " " + rest)
+
+
+def several_of(text):
+    """Why the (lowered) text asks for more than one thing ("" when it asks for one), and the prompt for one of them
+    ("" when none can be named). See SEVERAL_THINGS."""
+    things = known_things()
+    head = _head_phrase(text)
+    words_of_head = re.findall(r"[a-z0-9'\-]+", head)
+    after_head = text[len(head):].lstrip()
+    if words_of_head and words_of_head[-1] in GROUP_WORDS and after_head.startswith("of "):
+        grouped = COUNT_PHRASE_END.split(after_head[len("of "):], maxsplit=1)[0]
+        if not any(_found(grouped, word) for word in ONE_THING_IN_PAIRS):
+            return f"'{words_of_head[-1]} of'", _one_of(text, things)
+    phrase = COUNT_PHRASE_END.split(text, maxsplit=1)[0]
+    for match in re.finditer(r"(?<![a-z0-9\-])([a-z]+|\d+)(?![a-z0-9])(-?)", phrase):
+        word, joined = match.group(1), match.group(2)
+        counts = word in COUNT_WORDS or (word.isdigit() and int(word) >= 2)
+        if not counts or joined:
+            continue
+        after = re.findall(r"[a-z']+", phrase[match.end():])
+        # "a three legged stool": a count before a participle describes; a count before a plural asks for several.
+        if after and PARTICIPLE.fullmatch(after[0]):
+            continue
+        if any(w.endswith("s") and not w.endswith(("ss", "us", "is")) and w not in MEASURES for w in after):
+            return f"the count '{word}'", _one_of(text, things)
+    last = _last_thing(phrase, things)
+    if last and last[2]:
+        return f"the plural '{last[0]}'", _one_of(text, things)
+    named = [part for part in JOINED.split(phrase) if _last_thing(part, things)]
+    if len(named) >= 2:
+        first, second = _last_thing(named[0], things)[1], _last_thing(named[1], things)[1]
+        return f"'{first}' and '{second}'", _one_of(text, things)
+    return "", ""
+
+
+def qualities_of(text, noun):
+    """The qualities (QUALITY_WORDS) the head phrase of the (lowered) text gives the thing, each once and in the order
+    said, with the word that said it: [(quality, word)]. Not one denied, joined to the next word, followed by a
+    participle, or part of the thing's own word ("a short sword") or kind ("a curved sabre"); one the words also
+    contradict ("a round square table") is left out."""
+    head = _head_phrase(text)
+    found = {}
+    for word, quality in QUALITY_WORDS.items():
+        for match in re.finditer(rf"(?<![a-z\-]){word}(?![a-z])", head):
+            after = head[match.end():]
+            following = re.findall(r"[a-z]+", after)
+            # A past participle after it describes a part ("a tall backed chair"); a word in -ing does not ("a curved
+            # hunting knife", "a round cooking pot").
+            if after.startswith("-") or (following and following[0].endswith("ed") and
+                                         PARTICIPLE.fullmatch(following[0])):
+                continue
+            if noun and (word in noun.split() or noun in QUALITY_OF_THE_KIND.get(quality, ())):
+                continue
+            if noun in QUALITY_NOT_JUDGED.get(quality, ()):
+                continue
+            if not _said(head, word):
+                continue
+            found.setdefault(quality, (match.start(), word))
+    kept = [(quality, word) for quality, (_, word) in sorted(found.items(), key=lambda item: item[1][0])]
+    return [(quality, word) for quality, word in kept
+            if not any(_said(head, other) for other in QUALITY_CONTRADICTED_BY[quality])]
+
+
+def _curved_said(text):
+    """Whether the head phrase calls the whole thing curved, as `qualities_of` reads a quality, for a thing whose
+    curve is not judged in its picture (QUALITY_NOT_JUDGED)."""
+    return any(quality == "curved" for quality, _ in qualities_of(text, ""))
+
+
+def quality_texts(subject):
+    """The picture judge's contrast for each quality the words name: [(quality, wordings of it, wordings of its
+    opposite)], paired by place."""
+    noun = subject.noun or UNKNOWN_THING
+    return [(quality, [asked.format(noun=noun) for asked, _ in QUALITY_JUDGE_TEXTS[quality]],
+             [other.format(noun=noun) for _, other in QUALITY_JUDGE_TEXTS[quality]])
+            for quality in subject.qualities]
 
 
 def character_of(text):
@@ -435,6 +666,14 @@ def subject_of(prompt):
     if character:
         why["kind"] = f"a character: the word '{character}'; characters come in the second release"
         return Subject(prompt=cleaned(prompt), kind="character", noun=character, why=why, not_yet=CHARACTERS_LATER)
+    several, one = several_of(text)
+    if several:
+        if one and (several_of(one)[0] or character_of(one)):
+            one = ""
+        named = _last_thing(one, known_things()) if one else None
+        why["kind"] = f"more than one thing: {several}; model-maker makes one object at a time"
+        return Subject(prompt=cleaned(prompt), kind="object", noun=named[1] if named else "", why=why, several=several,
+                       not_yet=SEVERAL_THINGS.format(one=one) if one else SEVERAL_THINGS_NO_ONE)
     weapon_words = {w: (kind, size) for kind, table in WEAPON_KINDS.items() for w, size in table.items()}
     weapon = _named(text, weapon_words)
     if weapon == "bow" and any(w in text for w in NOT_WEAPON):
@@ -451,6 +690,13 @@ def subject_of(prompt):
     if weapon:
         kind, size = weapon_words[weapon]
         why["kind"] = f"held in the hand: the word '{weapon}' ({kind})"
+        qualities = qualities_of(text, weapon)
+        if kind == "blade" and (any(quality == "curved" for quality, _ in qualities) or
+                                ("curved" in QUALITY_NOT_JUDGED and weapon in QUALITY_NOT_JUDGED["curved"] and
+                                 _curved_said(text))):
+            # A curved dagger is checked as a sabre is: its curve without a kink, no straight line, no mirror.
+            kind = "curved blade"
+            why["kind"] = f"held in the hand: the word '{weapon}' (a blade), and 'curved': a curved blade"
         handled = kind in ("hafted", "spear")
         symmetric = ""
         if kind in ("blade", "spear"):
@@ -470,8 +716,10 @@ def subject_of(prompt):
         if any(_said(text, w) for w in NOT_SYMMETRIC_WORDS):
             symmetric = ""
             why["symmetric"] = "not asked: the words say it is broken, bent or in disorder"
+        _say_qualities(why, qualities)
         return Subject(prompt=cleaned(prompt), kind="weapon", noun=weapon, weapon_kind=kind, handled=handled,
-                       stands=False, symmetric=symmetric, size_m=size, why=why, not_yet=NOT_YET.get(kind, ""))
+                       stands=False, symmetric=symmetric, size_m=size, why=why, not_yet=NOT_YET.get(kind, ""),
+                       qualities=[quality for quality, _ in qualities])
     stands = thing in STANDING
     size = things.get(thing, UNKNOWN_SIZE_M)
     why["kind"] = f"object: the word '{thing}'" if thing else "object: no word known; nothing is assumed"
@@ -501,8 +749,17 @@ def subject_of(prompt):
         lies = not upright
         why["lies"] = (f"left as made: the words '{upright}'" if upright else
                        f"lies: a {thing} rests on its broad face; laid on the face it most often comes to rest on")
+    qualities = qualities_of(text, thing)
+    _say_qualities(why, qualities)
     return Subject(prompt=cleaned(prompt), kind="object", noun=thing, handled=handled, stands=stands,
-                   symmetric=symmetric, size_m=size, why=why, state=state, lies=lies)
+                   symmetric=symmetric, size_m=size, why=why, state=state, lies=lies,
+                   qualities=[quality for quality, _ in qualities])
+
+
+def _say_qualities(why, qualities):
+    if qualities:
+        why["qualities"] = "; ".join(f"{quality}: the word '{word}'; the picture must show it, not "
+                                     f"{QUALITY_OPPOSITES[quality]}" for quality, word in qualities)
 
 
 def state_texts(subject):
@@ -524,6 +781,8 @@ def picture_prompt(subject, lead=DEFAULT_LEAD):
         view = BOW_VIEW
     elif subject.weapon_kind == "hafted":
         view = HAFTED_VIEW
+    elif subject.weapon_kind == "curved blade":
+        view = CURVED_BLADE_VIEW
     elif subject.is_weapon:
         view = WEAPON_VIEW
     elif subject.handled:
@@ -532,7 +791,8 @@ def picture_prompt(subject, lead=DEFAULT_LEAD):
         view = OBJECT_VIEW
     state = f", {STATE_PICTURE_WORDS[OPENING_PARTS[subject.noun]][subject.state]}" if subject.state else ""
     head = f", {HEAD_PICTURE_WORDS[HEAD_KINDS[subject.noun]]}" if subject.noun in HEAD_KINDS else ""
-    return f"{LEADS[lead]} {subject.prompt}{state}{head}, {view}, {STYLE}"
+    curve = f", {CURVED_BLADE_WORDS}" if subject.weapon_kind == "curved blade" else ""
+    return f"{LEADS[lead]} {subject.prompt}{state}{head}{curve}, {view}, {STYLE}"
 
 
 def paint_prompt(subject):

@@ -201,5 +201,89 @@ class TrickyPromptsAreReadRight(unittest.TestCase):
         self.assertFalse(words.subject_of("a book standing upright").lies)
 
 
+
+class QualitiesTheWordsName(unittest.TestCase):
+    """A quality the prompt gives the whole thing is judged in its picture (subject_judge); one that describes a part,
+    is denied or contradicts another is not."""
+
+    def test_a_quality_in_the_head_phrase_is_read(self):
+        self.assertEqual(words.subject_of("a short curved dagger").qualities, ["curved"])
+        self.assertEqual(words.subject_of("a small round table").qualities, ["round"])
+        self.assertEqual(words.subject_of("a circular wooden tray").qualities, ["round"])
+        # A word in -ing after it names the thing's use, not a part: the thing is still curved.
+        self.assertEqual(words.subject_of("a curved steel dagger").qualities, ["curved"])
+        self.assertEqual(words.subject_of("a curved hunting dagger").qualities, ["curved"])
+
+    def test_a_curved_knife_is_a_curved_blade_whose_curve_is_not_judged(self):
+        knife = words.subject_of("a curved hunting knife")
+        self.assertEqual(knife.weapon_kind, "curved blade")
+        self.assertEqual(knife.qualities, [])
+        self.assertIn(words.CURVED_BLADE_WORDS, words.picture_prompt(knife))
+        self.assertEqual(words.subject_of("a hunting knife").weapon_kind, "blade")
+        self.assertEqual(words.subject_of("a knife, not curved").weapon_kind, "blade")
+        self.assertIn("curved", words.subject_of("a short curved dagger").why["qualities"])
+
+    def test_a_quality_of_a_part_denied_or_contradicted_is_not(self):
+        for prompt in ("a chest with a round lid", "a round-bottomed flask", "a sword, not curved",
+                       "a round square table", "a curved-handled cane", "an old looking chair", "a clay jug"):
+            self.assertEqual(words.subject_of(prompt).qualities, [], prompt)
+
+    def test_a_curved_blade_is_checked_as_a_sabre_is(self):
+        dagger = words.subject_of("a short curved dagger")
+        self.assertEqual(dagger.weapon_kind, "curved blade")
+        self.assertEqual(dagger.symmetric, "")
+        self.assertEqual(dagger.size_m, 0.4)
+        self.assertIn("curved blade", dagger.why["kind"])
+        self.assertEqual(words.subject_of("a short dagger").weapon_kind, "blade")
+
+    def test_the_judge_has_a_described_pair_for_each_quality(self):
+        for quality, pairs in words.QUALITY_JUDGE_TEXTS.items():
+            self.assertIn(quality, words.QUALITY_OPPOSITES)
+            self.assertGreaterEqual(len(pairs), 2, quality)
+            for asked, other in pairs:
+                self.assertIn("{noun}", asked)
+                self.assertIn("{noun}", other)
+        for word, quality in words.QUALITY_WORDS.items():
+            self.assertIn(quality, words.QUALITY_JUDGE_TEXTS, word)
+        [(quality, asked, other)] = words.quality_texts(words.subject_of("a curved bronze dagger"))
+        self.assertEqual(quality, "curved")
+        self.assertTrue(all(text.startswith("a curved dagger") or "dagger with a curved" in text for text in asked))
+        self.assertTrue(all("straight" in text for text in other))
+        self.assertEqual(len(asked), len(other))
+
+    def test_an_unknown_thing_is_named_object_in_the_judges_words(self):
+        [(_, asked, _)] = words.quality_texts(words.subject_of("a round gizmo"))
+        self.assertIn("object", asked[0])
+
+    def test_a_curved_blade_is_painted_with_its_curve_in_view(self):
+        for prompt in ("a curved bronze dagger", "a curved steel sabre"):
+            said = words.picture_prompt(words.subject_of(prompt))
+            self.assertIn(words.CURVED_BLADE_WORDS, said)
+            self.assertIn(words.CURVED_BLADE_VIEW, said)
+            self.assertNotIn(words.WEAPON_VIEW, said)
+        # A straight blade and a thing with no quality are painted with the words they had.
+        sword = words.picture_prompt(words.subject_of("an old iron sword"))
+        self.assertIn(words.WEAPON_VIEW, sword)
+        self.assertNotIn("arc", sword)
+
+    def test_a_quality_the_kind_already_has_is_not_judged_again(self):
+        for prompt in ("a curved steel sabre", "a curved iron sickle", "a curved scimitar"):
+            self.assertEqual(words.subject_of(prompt).qualities, [], prompt)
+
+    def test_a_curved_blade_is_judged_as_a_curved_blade_not_against_one(self):
+        asked, others = words.subject_contrast(words.subject_of("a curved bronze dagger"))
+        self.assertIn("a curved blade with a hilt", asked[1])
+        self.assertNotIn("a sabre", others)
+        self.assertNotIn("a sword", others)
+        # A straight blade is still judged against a sabre.
+        _, others = words.subject_contrast(words.subject_of("an old iron sword"))
+        self.assertIn("a sabre", others)
+
+    def test_only_the_measured_qualities_are_judged(self):
+        self.assertEqual(set(words.QUALITY_JUDGE_TEXTS), {"curved", "round"})
+        for prompt in ("a tall clay vase", "a square wooden box", "a broken wooden chair", "a straight iron sword",
+                       "a squat iron lantern", "a rusty iron lantern", "a giant rusted iron key"):
+            self.assertEqual(words.subject_of(prompt).qualities, [], prompt)
+
 if __name__ == "__main__":
     unittest.main()

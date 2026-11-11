@@ -1,0 +1,2466 @@
+# The quality judge's labelled pictures (11 November 2026; docs/objects.md, "Qualities the words name"): picture tries
+# painted with a quality in the prompt and without it, by tools/trial/paint_tries.py with the pipeline's own seeds, on
+# the 16 GB card ("3080") and the 12 GB card ("3060"). `wording`: "plain" (the picture words of release 1),
+# "described" (a description of the curve added after the prompt, not kept), "described2" (the curved blade's words and
+# view that are kept: words.CURVED_BLADE_WORDS, words.CURVED_BLADE_VIEW), "view" (that view alone: "a curved hunting
+# knife" was then not read as curved, "hunting" taken for a participle, so its words were not added, and its
+# "described" tries are its plain ones painted again). None of release 1's unseen prompts is here.
+# Labelled blind: each picture cropped round its cut-out, shuffled under a random code (`code`), with no word of its
+# prompt, wording or score (tools/trial/quality_sheets.py); every label was written before the key was opened.
+#
+# `shows`: "curved" (the whole thing bends: one arc, or an S), "straight"; "round" (a circle in plan), "square" (four
+# corners, square or oblong); "unclear" (in between, a part bent only, or not the thing asked for), with `why`. The
+# qualities measured and left out (tall, squat, broken, rusty) are not here. `prompt` is the prompt the picture is
+# judged against: its own when that names the quality, else its twin that does ("a hunting knife" as "a curved
+# hunting knife"); `painted_for` the one it was painted for. `regression.py run` judges them as the case
+# "quality-pictures": judged as the pipeline's choice of try judges `prompt`, the quality's pair must pass a picture
+# showing the quality and refuse one showing its opposite; the whole check, "shows the thing asked for", is shown
+# beside it (it can fail a picture for the thing: a curved dagger seen as a scythe); "unclear" is shown, not held.
+# Labels are never changed to make a run hold (docs/metrics.md, the honesty rules). The pictures themselves are not
+# published (docs/objects.md, "The regression set").
+
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106419"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106419.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "XQS"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106420"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106420.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "GEP"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106421"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106421.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "MYY"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106422"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106422.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "curved"
+code = "IVK"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106423"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106423.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "curved"
+code = "URH"
+why = "bends in an S"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106424"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106424.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "curved"
+code = "YMZ"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106425"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106425.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "HSG"
+
+[[picture]]
+name = "curved-bronze-dagger-described-3060-106426"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106426.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described"
+card = "3060"
+shows = "unclear"
+code = "BWV"
+why = "straight blade, a curved bar beside it"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982413"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982413.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "IDK"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982414"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982414.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "SRN"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982415"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982415.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "RSU"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982416"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982416.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "CQM"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982417"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982417.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "VBN"
+why = "tilted"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982418"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982418.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "TCF"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982419"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982419.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "SWO"
+
+[[picture]]
+name = "curved-bronze-dagger-described2-3060-982420"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982420.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "OUM"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332855"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332855.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "HGK"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332856"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332856.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "ZFI"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332857"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332857.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "HZY"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332858"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332858.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "KEP"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332859"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332859.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "HHI"
+why = "wavy blade on a straight line"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332860"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332860.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "curved"
+code = "SSM"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332861"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332861.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "UVO"
+
+[[picture]]
+name = "curved-bronze-dagger-plain-3080-332862"
+source = "2026-11-11-qualities/plain/curved-bronze-dagger/332862.png"
+prompt = "a curved bronze dagger"
+painted_for = "a curved bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "FPO"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429467"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429467.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "unclear"
+code = "IHA"
+why = "handle angled, blade a little curved"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429468"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429468.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "SLF"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429469"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429469.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "JDM"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429470"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429470.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "OXO"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429471"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429471.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "HTH"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429472"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429472.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "MRX"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429473"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429473.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "RTC"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3060-429474"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429474.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3060"
+shows = "unclear"
+code = "LPL"
+why = "not the thing"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531528"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531528.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "straight"
+code = "TES"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531529"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531529.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "unclear"
+code = "NUQ"
+why = "broad blade, its back a little curved"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531530"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531530.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "curved"
+code = "RFS"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531531"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531531.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "curved"
+code = "CFD"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531532"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531532.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "straight"
+code = "TNS"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531533"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531533.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "straight"
+code = "IPW"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531534"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531534.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "curved"
+code = "FSK"
+
+[[picture]]
+name = "curved-hunting-knife-view-3060-531535"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531535.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "view"
+card = "3060"
+shows = "unclear"
+code = "JTZ"
+why = "lying flat, its edge curved and its back straight"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79025"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79025.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "unclear"
+code = "SPF"
+why = "handle angled, blade a little curved"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79026"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79026.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "unclear"
+code = "QZK"
+why = "handle and blade apart"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79027"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79027.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "RKK"
+why = "the blade sweeps up to its tip"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79028"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79028.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "CBS"
+why = "the blade sweeps up to its tip"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79029"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79029.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "OEC"
+why = "leaf-shaped"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79030"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79030.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "unclear"
+code = "WLA"
+why = "the edge's belly curved, the back straight"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79031"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79031.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "EJK"
+
+[[picture]]
+name = "curved-hunting-knife-described2-3060-79032"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79032.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "MCB"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429467"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429467.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "BWG"
+why = "handle angled, blade a little curved"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429468"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429468.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "ICU"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429469"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429469.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "OZG"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429470"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429470.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "BFY"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429471"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429471.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "NQT"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429472"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429472.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "VQB"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429473"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429473.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "UHA"
+
+[[picture]]
+name = "curved-hunting-knife-plain-3080-429474"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429474.png"
+prompt = "a curved hunting knife"
+painted_for = "a curved hunting knife"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "GUR"
+why = "not the thing"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732352"
+source = "2026-11-11-qualities/described/curved-iron-sword/732352.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "KPH"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732353"
+source = "2026-11-11-qualities/described/curved-iron-sword/732353.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "OVF"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732354"
+source = "2026-11-11-qualities/described/curved-iron-sword/732354.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "YUQ"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732355"
+source = "2026-11-11-qualities/described/curved-iron-sword/732355.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "UKG"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732356"
+source = "2026-11-11-qualities/described/curved-iron-sword/732356.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "SZW"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732357"
+source = "2026-11-11-qualities/described/curved-iron-sword/732357.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "TZQ"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732358"
+source = "2026-11-11-qualities/described/curved-iron-sword/732358.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "MJV"
+
+[[picture]]
+name = "curved-iron-sword-described-3060-732359"
+source = "2026-11-11-qualities/described/curved-iron-sword/732359.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "TAI"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253518"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253518.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "XVD"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253519"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253519.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "EYW"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253520"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253520.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "USH"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253521"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253521.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "EGI"
+why = "a small loose piece beside it"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253522"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253522.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "EAL"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253523"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253523.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "OTB"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253524"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253524.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "DXB"
+
+[[picture]]
+name = "curved-iron-sword-described2-3060-253525"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253525.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "OGV"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435965"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435965.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "CSK"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435966"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435966.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "KSO"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435967"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435967.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "JTW"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435968"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435968.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "TES"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435969"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435969.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "WWH"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435970"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435970.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "FQX"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435971"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435971.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "OFQ"
+
+[[picture]]
+name = "curved-iron-sword-plain-3080-435972"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435972.png"
+prompt = "a curved iron sword"
+painted_for = "a curved iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "ICR"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300243"
+source = "2026-11-11-qualities/final/curved-short-sword/300243.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "ODV"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300244"
+source = "2026-11-11-qualities/final/curved-short-sword/300244.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "unclear"
+code = "ZAL"
+why = "a thin sliver, barely bent"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300245"
+source = "2026-11-11-qualities/final/curved-short-sword/300245.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "UFA"
+why = "tilted"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300246"
+source = "2026-11-11-qualities/final/curved-short-sword/300246.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "BNF"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300247"
+source = "2026-11-11-qualities/final/curved-short-sword/300247.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "curved"
+code = "GXR"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300248"
+source = "2026-11-11-qualities/final/curved-short-sword/300248.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "unclear"
+code = "LVL"
+why = "a thin sliver, barely bent"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300249"
+source = "2026-11-11-qualities/final/curved-short-sword/300249.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "VFZ"
+
+[[picture]]
+name = "curved-short-sword-described2-3060-300250"
+source = "2026-11-11-qualities/final/curved-short-sword/300250.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "GRS"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205355"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205355.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "TOU"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205356"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205356.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "EIO"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205357"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205357.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "ICY"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205358"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205358.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "FWQ"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205359"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205359.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "SBZ"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205360"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205360.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "unclear"
+code = "PQJ"
+why = "a thin sliver, barely bent"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205361"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205361.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "IPV"
+
+[[picture]]
+name = "curved-short-sword-plain-3060-205362"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205362.png"
+prompt = "a curved short sword"
+painted_for = "a curved short sword"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "RRW"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772503"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772503.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "KCI"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772504"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772504.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "AOG"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772505"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772505.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "KHZ"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772506"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772506.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "WTY"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772507"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772507.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "XVN"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772508"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772508.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "XLU"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772509"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772509.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "MMU"
+
+[[picture]]
+name = "curved-silver-dagger-described2-3060-772510"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772510.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "described2"
+card = "3060"
+shows = "straight"
+code = "AUM"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122945"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122945.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "EMV"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122946"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122946.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "EVD"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122947"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122947.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "RDL"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122948"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122948.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "GND"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122949"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122949.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "LRW"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122950"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122950.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "GIV"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122951"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122951.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "BXH"
+
+[[picture]]
+name = "curved-silver-dagger-plain-3060-122952"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122952.png"
+prompt = "a curved silver dagger"
+painted_for = "a curved silver dagger"
+wording = "plain"
+card = "3060"
+shows = "straight"
+code = "TZO"
+why = "a twist at its top"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63721"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63721.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "IZT"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63722"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63722.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "ZLL"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63723"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63723.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "curved"
+code = "SOR"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63724"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63724.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "unclear"
+code = "HZG"
+why = "seat and back a little curved"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63725"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63725.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "DZF"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63726"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63726.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "CUD"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63727"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63727.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "unclear"
+code = "PNB"
+why = "seat dips a little"
+
+[[picture]]
+name = "curved-wooden-bench-described-3060-63728"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63728.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "described"
+card = "3060"
+shows = "straight"
+code = "SFW"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952920"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952920.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "BVH"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952921"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952921.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "QAD"
+why = "scrolled ends, seat dips"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952922"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952922.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "DNQ"
+why = "only the back's top rail arched"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952923"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952923.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "QRZ"
+why = "seat dips a little"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952924"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952924.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "EFD"
+why = "seat dips a little"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952925"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952925.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "OLN"
+why = "back a little curved"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952926"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952926.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "ZMF"
+why = "back a little curved"
+
+[[picture]]
+name = "curved-wooden-bench-plain-3080-952927"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952927.png"
+prompt = "a curved wooden bench"
+painted_for = "a curved wooden bench"
+wording = "plain"
+card = "3080"
+shows = "curved"
+code = "IXS"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932364-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932364.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "TVD"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932365-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932365.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "KVN"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932366-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932366.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "LUZ"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932367-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932367.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "JJX"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932368-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932368.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "VTW"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932369-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932369.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "KQA"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932370-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932370.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "RIJ"
+
+[[picture]]
+name = "hunting-knife-plain-3080-932371-as-a-curved-hunting-knife"
+source = "2026-11-11-qualities/plain/hunting-knife/932371.png"
+prompt = "a curved hunting knife"
+painted_for = "a hunting knife"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "HRM"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676257"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676257.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "GJT"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676258"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676258.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "WQQ"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676259"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676259.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "HPK"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676260"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676260.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "EKN"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676261"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676261.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "LJS"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676262"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676262.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "AHT"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676263"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676263.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "ION"
+
+[[picture]]
+name = "round-clay-plate-plain-3060-676264"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676264.png"
+prompt = "a round clay plate"
+painted_for = "a round clay plate"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "KID"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326372"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326372.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "GUO"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326373"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326373.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "NPP"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326374"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326374.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "ETC"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326375"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326375.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "DJE"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326376"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326376.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "EEH"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326377"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326377.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "CDH"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326378"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326378.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "LJD"
+
+[[picture]]
+name = "round-iron-shield-plain-3060-326379"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326379.png"
+prompt = "a round iron shield"
+painted_for = "a round iron shield"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "RXK"
+
+[[picture]]
+name = "round-mirror-plain-3080-745653"
+source = "2026-11-11-qualities/plain/round-mirror/745653.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "LHA"
+
+[[picture]]
+name = "round-mirror-plain-3080-745654"
+source = "2026-11-11-qualities/plain/round-mirror/745654.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "DMS"
+
+[[picture]]
+name = "round-mirror-plain-3080-745655"
+source = "2026-11-11-qualities/plain/round-mirror/745655.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "WEP"
+
+[[picture]]
+name = "round-mirror-plain-3080-745656"
+source = "2026-11-11-qualities/plain/round-mirror/745656.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "YZP"
+
+[[picture]]
+name = "round-mirror-plain-3080-745657"
+source = "2026-11-11-qualities/plain/round-mirror/745657.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "GDO"
+
+[[picture]]
+name = "round-mirror-plain-3080-745658"
+source = "2026-11-11-qualities/plain/round-mirror/745658.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "KGX"
+
+[[picture]]
+name = "round-mirror-plain-3080-745659"
+source = "2026-11-11-qualities/plain/round-mirror/745659.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "HPB"
+
+[[picture]]
+name = "round-mirror-plain-3080-745660"
+source = "2026-11-11-qualities/plain/round-mirror/745660.png"
+prompt = "a round mirror"
+painted_for = "a round mirror"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "GWT"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342729"
+source = "2026-11-11-qualities/plain/round-wooden-box/342729.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "DPE"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342730"
+source = "2026-11-11-qualities/plain/round-wooden-box/342730.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "JFR"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342731"
+source = "2026-11-11-qualities/plain/round-wooden-box/342731.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "DID"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342732"
+source = "2026-11-11-qualities/plain/round-wooden-box/342732.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "AIP"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342733"
+source = "2026-11-11-qualities/plain/round-wooden-box/342733.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "MHQ"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342734"
+source = "2026-11-11-qualities/plain/round-wooden-box/342734.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "ZXT"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342735"
+source = "2026-11-11-qualities/plain/round-wooden-box/342735.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "STB"
+
+[[picture]]
+name = "round-wooden-box-plain-3080-342736"
+source = "2026-11-11-qualities/plain/round-wooden-box/342736.png"
+prompt = "a round wooden box"
+painted_for = "a round wooden box"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "KSM"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235117"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235117.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "IWX"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235118"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235118.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "ABG"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235119"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235119.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "TPR"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235120"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235120.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "ZXQ"
+why = "top tilted up behind its legs"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235121"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235121.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "EBP"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235122"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235122.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "TYT"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235123"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235123.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "ODV"
+
+[[picture]]
+name = "round-wooden-table-plain-3060-235124"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235124.png"
+prompt = "a round wooden table"
+painted_for = "a round wooden table"
+wording = "plain"
+card = "3060"
+shows = "round"
+code = "GFS"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731806"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731806.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "GJW"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731807"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731807.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "BRW"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731808"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731808.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "ZMA"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731809"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731809.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "JJU"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731810"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731810.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "IKJ"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731811"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731811.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "GGZ"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731812"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731812.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "DZY"
+
+[[picture]]
+name = "round-wooden-tray-plain-3080-731813"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731813.png"
+prompt = "a round wooden tray"
+painted_for = "a round wooden tray"
+wording = "plain"
+card = "3080"
+shows = "round"
+code = "OMZ"
+
+[[picture]]
+name = "square-mirror-plain-3080-458026-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458026.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "PUU"
+
+[[picture]]
+name = "square-mirror-plain-3080-458027-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458027.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "WPY"
+
+[[picture]]
+name = "square-mirror-plain-3080-458028-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458028.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "BED"
+
+[[picture]]
+name = "square-mirror-plain-3080-458029-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458029.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "LTP"
+
+[[picture]]
+name = "square-mirror-plain-3080-458030-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458030.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "CXQ"
+
+[[picture]]
+name = "square-mirror-plain-3080-458031-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458031.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "GAZ"
+
+[[picture]]
+name = "square-mirror-plain-3080-458032-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458032.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "QWQ"
+
+[[picture]]
+name = "square-mirror-plain-3080-458033-as-a-round-mirror"
+source = "2026-11-11-qualities/plain/square-mirror/458033.png"
+prompt = "a round mirror"
+painted_for = "a square mirror"
+wording = "plain"
+card = "3080"
+shows = "unclear"
+code = "FRO"
+why = "corners rounded off"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622555-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622555.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "GKF"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622556-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622556.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "GKU"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622557-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622557.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "BPT"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622558-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622558.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "UDG"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622559-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622559.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "GZK"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622560-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622560.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "TGZ"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622561-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622561.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "USB"
+
+[[picture]]
+name = "square-wooden-box-plain-3080-622562-as-a-round-wooden-box"
+source = "2026-11-11-qualities/plain/square-wooden-box/622562.png"
+prompt = "a round wooden box"
+painted_for = "a square wooden box"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "TLW"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126514-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126514.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "ZQI"
+why = "oblong"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126515-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126515.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "TRV"
+why = "oblong"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126516-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126516.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "JOF"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126517-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126517.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "OUZ"
+why = "oblong"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126518-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126518.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "RWQ"
+why = "oblong"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126519-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126519.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "NXL"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126520-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126520.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "JCF"
+
+[[picture]]
+name = "square-wooden-tray-plain-3080-126521-as-a-round-wooden-tray"
+source = "2026-11-11-qualities/plain/square-wooden-tray/126521.png"
+prompt = "a round wooden tray"
+painted_for = "a square wooden tray"
+wording = "plain"
+card = "3080"
+shows = "square"
+code = "DVM"
+why = "oblong"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478513-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478513.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "UYP"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478514-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478514.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "CGI"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478515-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478515.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "AMJ"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478516-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478516.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "YQC"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478517-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478517.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "PWB"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478518-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478518.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "JWO"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478519-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478519.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "CWU"
+
+[[picture]]
+name = "straight-bronze-dagger-plain-3080-478520-as-a-curved-bronze-dagger"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478520.png"
+prompt = "a curved bronze dagger"
+painted_for = "a straight bronze dagger"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "GCQ"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226173-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226173.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "FXG"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226174-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226174.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "RJX"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226175-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226175.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "XHR"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226176-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226176.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "JFS"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226177-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226177.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "BLR"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226178-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226178.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "SQL"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226179-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226179.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "IJI"
+
+[[picture]]
+name = "straight-iron-sword-plain-3080-226180-as-a-curved-iron-sword"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226180.png"
+prompt = "a curved iron sword"
+painted_for = "a straight iron sword"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "ZIF"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43237-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43237.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "YZB"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43238-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43238.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "FOV"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43239-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43239.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "XAW"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43240-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43240.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "KIH"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43241-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43241.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "UWI"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43242-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43242.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "AUZ"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43243-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43243.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "FKV"
+
+[[picture]]
+name = "wooden-bench-plain-3080-43244-as-a-curved-wooden-bench"
+source = "2026-11-11-qualities/plain/wooden-bench/43244.png"
+prompt = "a curved wooden bench"
+painted_for = "a wooden bench"
+wording = "plain"
+card = "3080"
+shows = "straight"
+code = "LMY"
+
+[[picture]]
+name = "wooden-table-plain-3060-131138-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131138.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "GMA"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131139-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131139.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "JHI"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131140-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131140.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "YST"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131141-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131141.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "AIL"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131142-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131142.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "IJM"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131143-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131143.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "OPR"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131144-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131144.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "ROH"
+why = "oblong"
+
+[[picture]]
+name = "wooden-table-plain-3060-131145-as-a-round-wooden-table"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131145.png"
+prompt = "a round wooden table"
+painted_for = "a wooden table"
+wording = "plain"
+card = "3060"
+shows = "square"
+code = "VYX"
+why = "oblong"

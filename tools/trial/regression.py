@@ -24,7 +24,10 @@ thing asked for" against its own prompt and fail it against every other prompt t
 prompt, an empty backdrop, must fail it (its words written out, a known miss, are shown, not held). The war hammer
 family's and the axes' pictures, their heads labelled by eye (`head-cases.toml`), are built into DATA/heads and judged
 as "head-pictures": a clear head of the prompt's own kind must pass the check as the pipeline's choice of try judges
-it, one of the other kind must fail it, and a head between the two is shown.
+it, one of the other kind must fail it, and a head between the two is shown. The pictures painted with a quality and
+without it, labelled by eye (`quality-cases.toml`), are built into DATA/qualities and judged as "quality-pictures":
+judged against a prompt that names the quality, the quality's pair must pass a picture showing it and refuse one
+showing its opposite (the whole check "shows the thing asked for" is shown beside it), and one in doubt is shown.
 """
 
 import argparse
@@ -44,11 +47,13 @@ SUMS = os.path.join(HERE, "regression-sums.json")
 STATE_CASES = os.path.join(HERE, "state-cases.toml")
 PROMPT_CASES = os.path.join(HERE, "prompt-cases.toml")
 HEAD_CASES = os.path.join(HERE, "head-cases.toml")
+QUALITY_CASES = os.path.join(HERE, "quality-cases.toml")
 FILES = ("job.json", "picture.png", "mask.png", "shape.npz")
 PICTURE_FILES = ("picture.png", "mask.png")
 STATE_PICTURES = "state-pictures"
 PROMPT_PICTURES = "prompt-pictures"
 HEAD_PICTURES = "head-pictures"
+QUALITY_PICTURES = "quality-pictures"
 
 
 def cases():
@@ -68,6 +73,11 @@ def prompt_pictures():
 
 def head_pictures():
     with open(HEAD_CASES, "rb") as file:
+        return tomllib.load(file)["picture"]
+
+
+def quality_pictures():
+    with open(QUALITY_CASES, "rb") as file:
         return tomllib.load(file)["picture"]
 
 
@@ -186,6 +196,13 @@ def build(trials, data):
         shutil.copyfile(source, os.path.join(heads, picture["name"] + ".png"))
         shutil.copyfile(source[:-4] + "-mask.png", os.path.join(heads, picture["name"] + "-mask.png"))
     print(f"{HEAD_PICTURES}: {len(head_pictures())} pictures")
+    qualities = os.path.join(data, "qualities")
+    os.makedirs(qualities, exist_ok=True)
+    for picture in quality_pictures():
+        source = os.path.join(trials, picture["source"])
+        shutil.copyfile(source, os.path.join(qualities, picture["name"] + ".png"))
+        shutil.copyfile(source[:-4] + "-mask.png", os.path.join(qualities, picture["name"] + "-mask.png"))
+    print(f"{QUALITY_PICTURES}: {len(quality_pictures())} pictures")
 
 
 _JUDGE = []
@@ -278,7 +295,8 @@ def run(data, only=None):
     held = broken = 0
     began = time.time()
     outcomes = {}
-    if only and only not in {case["name"] for case in cases()} | {STATE_PICTURES, PROMPT_PICTURES, HEAD_PICTURES}:
+    if only and only not in {case["name"] for case in cases()} | {STATE_PICTURES, PROMPT_PICTURES, HEAD_PICTURES,
+                                                                  QUALITY_PICTURES}:
         # A mistyped name would judge nothing and say "0 held, 0 broken" with exit 0.
         print(f"no case is named {only!r}", file=sys.stderr)
         return 2
@@ -364,6 +382,14 @@ def run(data, only=None):
         held, broken = held + (not wrong), broken + bool(wrong)
         print(f"{'BROKEN' if wrong else 'held  '} {HEAD_PICTURES} ({time.time() - started:.0f} s)"
               + (": " + "; ".join(wrong) if wrong else ""), flush=True)
+    if not only or only == QUALITY_PICTURES:
+        started = time.time()
+        wrong = changed_files({"name": QUALITY_PICTURES}, os.path.join(data, "qualities"))
+        wrong += judged_qualities(os.path.join(data, "qualities"))
+        outcomes[QUALITY_PICTURES] = "broken" if wrong else "held"
+        held, broken = held + (not wrong), broken + bool(wrong)
+        print(f"{'BROKEN' if wrong else 'held  '} {QUALITY_PICTURES} ({time.time() - started:.0f} s)"
+              + (": " + "; ".join(wrong) if wrong else ""), flush=True)
     print(json.dumps({"held": held, "broken": broken}))
     # A run of part of the set (--only) is kept too, marked so: the progress counts whole runs only.
     ledger.regression(held, broken, time.time() - began, outcomes, whole=only is None)
@@ -386,7 +412,8 @@ def written_sums(data):
     found = {case["name"]: {name: sha256_of(os.path.join(data, case["name"], name))
                             for name in data_files(os.path.join(data, case["name"]))}
              for case in cases() if not case.get("made_up") and not case.get("example")}
-    for name, sub in ((STATE_PICTURES, "states"), (PROMPT_PICTURES, "prompts"), (HEAD_PICTURES, "heads")):
+    for name, sub in ((STATE_PICTURES, "states"), (PROMPT_PICTURES, "prompts"), (HEAD_PICTURES, "heads"),
+                      (QUALITY_PICTURES, "qualities")):
         found[name] = {file: sha256_of(os.path.join(data, sub, file)) for file in data_files(os.path.join(data, sub))}
     with open(SUMS, "w") as file:
         json.dump(found, file, indent=1, sort_keys=True)
@@ -472,8 +499,7 @@ def judged_heads(folder):
     for picture in head_pictures():
         prompt = picture["prompt"]
         if prompt not in directions:
-            directions[prompt] = subject_judge.contrast_directions(judge, *words.subject_contrast(
-                words.subject_of(prompt)))
+            directions[prompt] = subject_judge.directions_of(judge, words.subject_of(prompt))
         path = os.path.join(folder, picture["name"] + ".png")
         image = Image.open(path).convert("RGB")
         mask = np.asarray(Image.open(path[:-4] + "-mask.png").convert("L")) > 127
@@ -491,6 +517,63 @@ def judged_heads(folder):
             wrong.append(f"{picture['name']} ({picture['head']} head) {'passed' if check.passed else 'failed'} "
                          f"({check.value:.0f} %)")
     print("   " + "; ".join(f"{k}: {p} pass, {f} fail" for k, (p, f) in sorted(tally.items())), flush=True)
+    return wrong
+
+
+def quality_verdict_wanted(prompt, shows):
+    """The quality `prompt` names that a picture showing `shows` is held to, and whether its pair must pass the picture
+    (True) or refuse it (False); (None, None) when it is shown only (in doubt, or a quality the prompt does not name)."""
+    from model_maker import words
+
+    for quality in words.subject_of(prompt).qualities:
+        if shows == quality:
+            return quality, True
+        if shows == words.QUALITY_OPPOSITES[quality]:
+            return quality, False
+    return None, None
+
+
+def judged_qualities(folder):
+    """The pictures painted with a quality and without it, labelled by eye: each judged against its case's prompt as
+    the pipeline's choice of try judges it. The quality's pair must pass a picture showing the quality and refuse one
+    showing its opposite; one in doubt is shown. The whole check is shown beside it: a picture can fail it for the thing
+    (a curved dagger seen as a scythe), which the quality's pair does not answer for. The tally says how many of each
+    the pair passed, and how many the whole check passed."""
+    import numpy as np
+    from PIL import Image
+
+    from model_maker import picture_checks, subject_judge, words
+
+    judge = state_judge_of()
+    least = subject_judge.LEAST_SUBJECT_SHARE
+    wrong, tally, directions = [], {}, {}
+    for picture in quality_pictures():
+        prompt = picture["prompt"]
+        if prompt not in directions:
+            directions[prompt] = subject_judge.directions_of(judge, words.subject_of(prompt))
+        path = os.path.join(folder, picture["name"] + ".png")
+        image = Image.open(path).convert("RGB")
+        mask = np.asarray(Image.open(path[:-4] + "-mask.png").convert("L")) > 127
+        share, likeliest, qualities = subject_judge.judged(judge, image, mask, directions[prompt])
+        result = picture_checks.PictureResult()
+        subject_judge.add_subject_check(result, words.subject_of(prompt), share, likeliest, qualities)
+        check = result.checks[0]
+        quality, wanted = quality_verdict_wanted(prompt, picture["shows"])
+        found = dict(qualities).get(quality) if quality else None
+        key = f"{prompt}, {picture['shows']}"
+        counts = tally.setdefault(key, [0, 0, 0])
+        counts[0] += found is not None and found >= least
+        counts[1] += found is not None and found < least
+        counts[2] += check.passed
+        note = "" if wanted is None or wanted == (found >= least) else " WRONG"
+        said = f"{quality} {found:.3f}" if found is not None else "shown only"
+        print(f"   {said:14s} check {check.value / 100:.3f} {'passes' if check.passed else 'fails '} "
+              f"{picture['shows']:8s} {picture['name']}{note}", flush=True)
+        if note:
+            wrong.append(f"{picture['name']} ({picture['shows']}, judged as {prompt!r}): {quality} "
+                         f"{'passed' if found >= least else 'refused'} it ({found:.0%})")
+    print("   " + "; ".join(f"{k}: the pair passes {p}, refuses {f}; the whole check passes {c}"
+                          for k, (p, f, c) in sorted(tally.items())), flush=True)
     return wrong
 
 
@@ -527,13 +610,13 @@ def judged_prompts(folder):
     scale = float(judge.model.logit_scale.exp().item())
     pictures = prompt_pictures()
     prompts = sorted({picture["prompt"] for picture in pictures})
-    classes = {prompt: subject_judge.contrast_directions(judge, *words.subject_contrast(words.subject_of(prompt)))
-               for prompt in prompts}
+    classes = {prompt: subject_judge.directions_of(judge, words.subject_of(prompt)) for prompt in prompts}
 
     def share(views, prompt):
-        asked, others, names = classes[prompt]
-        found = [subject_judge.subject_share(view, asked, others, scale) for view in views]
-        return float(np.mean([s for s, _ in found])), names[min(found)[1]]
+        """The check's value (the thing's share, or a quality's when lower) and the likeliest other thing."""
+        found, likeliest, qualities = subject_judge.averaged(
+            [subject_judge.view_shares(view, classes[prompt], scale) for view in views], classes[prompt][2])
+        return min([found] + [quality for _, quality in qualities]), likeliest
 
     least = subject_judge.LEAST_SUBJECT_SHARE
     wrong, own, against, unclear = [], [], [], []

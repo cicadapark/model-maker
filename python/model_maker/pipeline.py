@@ -275,9 +275,10 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
     prompt = words.picture_prompt(subject, settings.lead)
     first = painter.seed_of(prompt)
     os.makedirs(job.path("pictures"), exist_ok=True)
-    # Each try is judged to show the thing asked for, and one that does not is not chosen (10 November 2026: every war
-    # hammer chosen had an axe-like head, which this check refuses; docs/objects.md, "War hammers").
-    directions = subject_judge.contrast_directions(judge, *words.subject_contrast(subject)) if judge else None
+    # Each try is judged to show the thing asked for, and any quality its words name, and one that does not is not
+    # chosen (10 November 2026: every war hammer chosen had an axe-like head, which this check refuses; docs/objects.md,
+    # "War hammers"; a curved dagger painted straight: "Qualities the words name").
+    directions = subject_judge.directions_of(judge, subject) if judge else None
     made = []
     for round_number in range(settings.picture_rounds):
         seeds = range(first + round_number * settings.tries, first + (round_number + 1) * settings.tries)
