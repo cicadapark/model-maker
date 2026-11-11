@@ -106,7 +106,7 @@ Objects:
 | centre over the base | its centre of mass lies 15 % of the base's radius inside where it touches the ground |
 | left-right symmetry | mirrored across its best upright plane, it lies at most 2 % of its size from itself on average, and at most 5 % at the 98th percentile (measured to its triangles: a leg missing, out of place or on one side) |
 | paint covers the surface | the painted views coloured 90 % of the surface as it is seen: each texel counted by the share of 32 directions round the object it is in view from (the inside of a jug's neck counts little); the plain share of texels is shown beside it |
-| fill matches the paint round it | (when the paint was touched up) in no touch-up view is more than 10 % of the fill, as it was painted (before the touch-up left out what was foreign), a colour found nowhere in the paint round it: each filled point against the 32 painted points nearest it on the same surface, foreign when more than 20 (delta E) from every one of them; and no joined foreign place larger than 3 % of the object's size |
+| fill matches the paint round it | (when the paint was touched up) judged on what the finished model shows. The fill kept: in no touch-up view is more than 10 % of it a colour found nowhere in the paint round it (each filled point against the 32 painted points nearest it on the same surface, foreign when more than 20, delta E, from every one of them), and no joined foreign place is larger than 3 % of the object's size. The places left unpainted (the fill the touch-up left out, which shows the colour spread from round it): none larger than 3 % is a smear, where neither the paint round it nor the colour it shows is one colour (less than 90 % of each within 20 of its median). The fill as the inpainter painted it, before what was foreign was left out, is shown, not counted |
 
 Also measured, not checked: likeness, the painted object seen from its picture's view against the
 picture (the mean colour difference, delta E). It compares ways of painting the same shape; its
@@ -198,7 +198,7 @@ each clear one must pass "shows the thing asked for" against its own prompt and 
 one case, "prompt-pictures"; see "The picture against the prompt"); the fix-check's and the fifth trial's jugs, a web in the handle's loop (as made they must fail the outline, carved
 they must match it, closed and in one piece), and the chairs, stool, tables and lantern whose holes must not be carved;
 the fix-check's book made standing on its edge (laid, it must stand), its chest whose picture is a photograph (it
-must match through a lens) and its candle as the six views painted it (it must keep failing the paint's coverage); the touch-up's first candle, whose fill painted holes and grey patches (it must fail "fill matches the paint round it" while its coverage passes), and its chair, filled in its own wood (it must pass both). The state cases need SigLIP 2 in `MODEL_MAKER_MODELS`; it runs on the CPU too, a few seconds a picture. `tools/trial/regression.py run DATA` judges them all on the CPU in a
+must match through a lens) and its candle as the six views painted it (it must keep failing the paint's coverage); the touch-up's first candle, whose fill painted holes and grey patches (it must fail "fill matches the paint round it" while its coverage passes), and its chair, filled in its own wood (it must pass both); the fifth trial's candle, whose foot left out shows a smear of wax and brass (it must fail the fill check), and a clay jug's and a shield's handle's places left out, the model showing one colour there (they must pass it). The state cases need SigLIP 2 in `MODEL_MAKER_MODELS`; it runs on the CPU too, a few seconds a picture. `tools/trial/regression.py run DATA` judges them all on the CPU in a
 few minutes; it runs before any change to the pipeline or its checks, and every case must hold.
 
 The cases and their verdicts are here (`regression.toml`, `state-cases.toml`, `prompt-cases.toml`, `head-cases.toml`),
@@ -579,6 +579,104 @@ whose view search now also tries three camera distances (the outline through a l
 faster, with the same views and values (see "The outline's search made fast" below). The fill's judgement adds about
 3 s a view and to the finish on the CPU; a retried view adds one more inpainting, and strength 0.6 runs 18 of the 30
 steps.
+
+## The fill judged on the model (11 November 2026)
+
+Release 1's unseen run failed six of its ten objects on "fill matches the paint round it". Two of them, the rocking
+horse and the boots, failed on nothing else and look right: the horse's fill is plausible wood, a little warmer than
+the six views' paint; the inpainter painted the boot's lining and tongue another colour than its outside, and rightly.
+
+### Why good models failed
+
+* **The try was judged, not the model.** The check judged each touch-up view's fill as the inpainter painted it. But
+  the touch-up leaves out what is foreign: those pixels never reach the model, which shows there the colour spread from
+  round the place. The check failed a model for paint it does not carry.
+* **"Found nowhere round it" is not "wrong".** The measure assumes an unseen place should look like its surroundings.
+  That holds for a candle's dish; it does not for insides and undersides: a boot's lining, a shelf's boards, a tray, a
+  leg's inner face.
+
+### The fix: judge only what the model shows
+
+* **The fill kept** is judged as kept, by the same measure as before (at most 10 % of a view foreign, no foreign place
+  over 3 %). What the touch-up keeps is within delta E 15 of the paint round it, so this passes unless the touch-up
+  kept everything (a record made before it judged its fill: the touch-up's first candle still fails, 18 to 72 %).
+* **The places left unpainted** are judged on the finished model. From each touch-up view, the pixels it sees squarely
+  that the finished colour cloud does not reach are joined into places (`touch_up.left_out_places`). There the model
+  shows the colour spread from round the place. A place over 3 % of the object's size across is a smear when the
+  paint round it is not one colour (its ring: the painted pixels within 4 of it, on the surface within three ring widths
+  of it) and the colour the model shows in it is not one colour either. "One colour": at least 90 % of the colours
+  within delta E 20 (the fill check's own "foreign") of their median. A place ringed by one colour passes, and so does a
+  place that shows one colour though its ring holds two (a chair's post spread brown from brown wood and a grey
+  highlight). Leaving a place out does not mend it: a smear still fails.
+* **The fill as painted** is shown in the check's words and no longer counted. It is now the trigger for another seed:
+  after its 2 tries, a view whose kept try was, as painted, more than 10 % foreign is painted from more seeds, up to 4
+  (`MOST_FILL_TRIES`), the least foreign kept.
+* The report's `fill.png` rings each place over 3 %: magenta a smear, blue not.
+
+### The limit, measured
+
+The trials hold 33 touched-up jobs (166 finished, copies counted); their places over 3 % were measured and each judged
+by eye from crops of the finished model beside the inpainter's try (never on the release's unseen ten). Smeared by
+eye: the fifth trial's candle's foot (8.1 % across; ring 61 % one colour, inside 69 %) and a second place on it (3.3 %;
+63 %, 81 %), the 12 GB card's candle's foot (19.2 %; 79 %, 86 %), the fill trial's candle at strength 0.99 (17.1 %;
+73 %, 76 %), and the fifth trial's chair's front stretcher (4.0 %; 82 %, 72 %, grey highlights and brown wood
+spread into dark spikes). Their rings read 61 to 82 % one colour, their insides 69 to 86 %. Places whose ring holds two
+colours but which show one by eye (the fill trial's chair's back post, 66 % and 100 %; a candle's foot spread a flat
+brass, 70 % and 97 %; the remake's shield's handle, 81 % and 97 %) read 97 to 100 % inside. The limit, 90 % for both,
+lies between. The ring alone did not separate them (the chair's post, no smear by eye, reads 66 %; the smears up to
+82 %); weighting lightness by half (as CIE94 does for textiles) read every smear's ring at 87 % or more; keeping only
+the ring pixels facing the place's way changed almost nothing.
+
+| | ring one colour | inside one colour | verdict |
+|---|---|---|---|
+| fifth trial's candle, its foot | 61 % | 69 % | smear, fails |
+| 12 GB card's candle, its foot | 79 % | 86 % | smear, fails |
+| fifth trial's chair, its stretcher | 82 % | 72 % | smear, fails |
+| clay jug, inside its mouth | 100 % | 97 % | passes |
+| shield's handle, its inner face | 100 % | 76 % | passes |
+| rocking horse, a rocker's inner face (unseen run) | 55 % | 100 % | passes |
+| boots, the lining (unseen run) | 73 % | 100 % | passes |
+
+### The trials finished again
+
+All 166 trial jobs (125 on the 16 GB card, 41 on the 12 GB card) were finished again on the CPU by the code before and
+after. 132 passed every check before, 135 after. Every candle copy still fails "fill matches the paint round it": the
+fifth trial's (and its copies in the fill trial and the open-loops run) on its foot's smear, 8.1 % across; the 12 GB
+card's (two copies) on its foot's, 19.2 %; the fill trial's at strength 0.99 on three smears; the touch-up's first
+candle on its kept fill (it kept everything). The verdicts that changed:
+
+| Job (copies) | Before | After | Is the new verdict right? |
+|---|---|---|---|
+| the clay jug of the open-loops run (2) | fails the fill (one place 4.7 % across as painted) | passes | Yes. The place, inside the jug's mouth, shows the clay spread from round it, ringed by one colour |
+| the 16 GB card's remake of the round shield | fails the fill (3.3 % across as painted) | passes | Yes. The handle's inner face shows its iron |
+| the fifth trial's chair (also in the fill trial at strength 0.6) | passes | fails the fill: a smear 4.0 % across | Yes, a small fault: the front stretcher's top, seen from above, shows grey patches and dark brown spikes where the wood should run on. The as-painted check passed it, as the inpainter's own try was brown wood there; what it left out is what the model shows |
+| the unseen run's rocking horse | fails the fill | passes | Yes. Its places, on the rockers' and legs' inner faces, show flat wood |
+| the unseen run's boots | fails the fill | passes | Yes. The lining shows the leather's brown, in two shades where the kept fill meets the spread |
+| the unseen run's well, bookshelf and wheelbarrow | fail the fill and more | fail the rest | The well's inside shows dark stone (inside 90 % one colour: at the limit); the bookshelf's boards and the wheelbarrow's tray show wood. They still fail the symmetry, the coverage, the outline and the holes |
+
+The release's unseen ten were only measured: no limit was set or moved on them. The basket still fails the fill (six
+smears in its weave) besides its outline, holes and coverage.
+
+### On the card
+
+The candle and the chair were made again on the 16 GB card with this code. The candle's two views from 35° above were
+each painted from 4 seeds (their best tries 14 and 17 % foreign as painted, so still over 10 %), the two from 50° from 2;
+it fails "fill matches the paint round it" on two smears at its foot (10.8 % across: ring 85 %, inside 83 %; 4.9 %:
+84 %, 74 %). Its paint stage took 353 s, about 75 s more than with 2 tries. The chair's views were each painted twice
+(3.4 and 5.0 % foreign as painted); it passes every check, its paint stage 252 s.
+
+### Known limits
+
+A smear joined to a large place of one colour reads as one colour: a made-up candle whose whole dish was left out with
+its foot (one place 45 % across) read 100 % for both. The trials' places were each on one or two surfaces; a fill left
+out whole leaves the coverage to fail it. The kept fill passes by construction for a judged touch-up, as before:
+what the inpainter painted and the touch-up kept is within delta E 15 of the paint round it.
+
+The tests: a cup whose inside the inpainter paints as a lining (left out, the model showing the cup's colour) passes; a
+candle whose foot's corners took wax and brass by turns, a glass cup painted round it and left out, fails as a smear;
+the as-painted share is shown, not counted, and the coverage of a model whose fill was all left out is the coverage
+without the touch-up. The regression set adds `candle-glass-cup-smear` (must fail), `jug-mouth-left-out` and
+`shield-handle-inner-face` (must pass).
 
 ## The outline's search made fast (10 November 2026)
 
@@ -1093,7 +1191,9 @@ the trials rightly passed still passes it, and the made-up faults fail it. The m
    foreign was left out: the touch-up records it (`as_painted`: the share foreign at 20 and the largest foreign place),
    and for a record made before that, the finish judges each view's saved try again, its pixels drawn again from the
    colour cloud as it stood before that view (the same drawing the touch-up made). A record from before the touch-up
-   judged its fill (it kept all it painted) is judged on what it kept, as before.
+   judged its fill (it kept all it painted) is judged on what it kept, as before. (Changed on 11 November: the
+   as-painted fill is shown, not counted, and what was left out is judged on the model; see "The fill judged on the
+   model".)
 6. **A speck failed an exact shape.** The outline and the carving judged the raw cut-out; they now judge the cut-out the
    shape model was given (`cutout.for_shape`: its largest piece, its pinholes filled). The exact chair with a speck of 1 %
    of its cut-out above it passes (95th percentile under 1 %); before, 5.7 %.

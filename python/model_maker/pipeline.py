@@ -476,12 +476,12 @@ def finish_stage(jobs, settings, report=print, keep_going=False):
 
 
 def judged_fill(folder, painted, touch_record, made_corners, made_triangles):
-    """The touch-up's fill judged against the paint round it: (its measures, the picture of the worst view's kept fill
-    or None). What the touch-up keeps is within its own stricter limit of the paint round it, so the kept fill passes
-    the check by construction; the check judges each view's fill as it was painted,
-    before what was foreign was left out (kept in the record, or measured again from the saved tries for a record made
-    before that). A record from before the touch-up judged its fill (it kept every pixel) is measured on what it kept,
-    which is all it painted."""
+    """The touch-up's fill judged as the finished model shows it: (its measures, the picture of the worst view or
+    None). The fill the touch-up kept is judged as kept (`touch_up.fill_fit`). A place it left out (or never painted)
+    shows the colour spread to it from round it, so it is judged by the paint round it on the finished model
+    (`touch_up.left_out_places`): a large place whose ring is not one colour is a smear. The fill as the inpainter
+    painted it, before what was foreign was left out, is shown beside them and not counted: those pixels never reach
+    the model (kept in the record, or measured again from the saved tries for a record made before that)."""
     from . import touch_up
 
     sources = touch_up.fill_sources(painted, touch_record)
@@ -490,32 +490,29 @@ def judged_fill(folder, painted, touch_record, made_corners, made_triangles):
     least = touch_up.filled_misfit(*made_cloud, sources) if filled else None
     fit = touch_up.fill_fit(*made_cloud, sources if sources is not None else np.zeros(len(made_cloud[0])),
                             made_corners, touch_record["views"], least=least)
+    fit["judged"] = "as kept"
+    fit["left_out"] = touch_up.left_out_places(made_corners, made_triangles,
+                                               np.asarray(painted["colours"], dtype=np.float64), made_cloud,
+                                               touch_record["views"])
     if touch_record.get("judged"):
         views = os.path.join(folder, "views")
         found = touch_up.as_painted(touch_record) or (
             touch_up.replayed_as_painted(made_corners, made_triangles, painted, touch_record, views)
             if os.path.isdir(views) else None)
-        if found is None:
-            raise FileNotFoundError(f"{folder}: the touch-up's tries are not kept, so its fill cannot be judged")
-        # Both halves are judged as painted: the share foreign (more than a tenth found nowhere round it, and what was
-        # kept is suspect too: the trial's candle was given a glass cup) and the largest foreign place. Leaving a
-        # place out does not mend it: the place is left unpainted and takes colour spread from round it, which no other
-        # check judges, so the largest place judged on what was kept would pass by construction again (a clay jug's
-        # 4.7 % place behind its handle, left out, showed on the model).
-        fit.update(kept_views=fit["views"], kept_largest_patch=fit["largest_patch"], views=found[0],
-                   patches_as_painted=found[1], worst=max(found[0]),
-                   largest_patch=max([fit["largest_patch"], *found[1]]), judged="as painted")
-    else:
-        fit["judged"] = "as kept"
+        if found is not None:
+            fit["as_painted"] = {"views": found[0], "patches": found[1]}
     fill_shown = None
-    if filled:
-        worst = int(np.argmax(fit.get("kept_views", fit["views"])))
+    if filled or fit["left_out"]["largest_place"] > 0:
+        worst = touch_up.worst_view(fit)
         view = touch_record["views"][worst]
         fill_shown = (touch_up.fill_picture(made_corners, made_triangles, made_cloud, sources, view["turn_deg"],
-                                            view["tilt_deg"], least=least),
-                      f"the touch-up's kept fill from its view {worst} ({view['turn_deg']}° round, "
-                      f"{view['tilt_deg']:.0f}° above): green its colour found in the paint round it, red foreign "
-                      f"({fit.get('kept_views', fit['views'])[worst]:.1%} of this view's kept fill)")
+                                            view["tilt_deg"], least=least, colours=painted["colours"]),
+                      f"the touch-up's view {worst} ({view['turn_deg']}° round, {view['tilt_deg']:.0f}° above) on the "
+                      f"finished model: its kept fill green where its colour is found in the paint round it, red "
+                      f"foreign ({(fit['views'] or [0.0])[min(worst, len(fit['views']) - 1)]:.1%} of this view's kept "
+                      f"fill); places left unpainted larger than {touch_up.LARGEST_FOREIGN_PATCH:.0%} of the object's "
+                      f"size ringed, magenta a smear (neither the paint round it nor the colour spread into it one "
+                      f"colour), blue not")
     return fit, fill_shown
 
 

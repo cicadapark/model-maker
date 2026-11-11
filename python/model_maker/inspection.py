@@ -144,22 +144,34 @@ def views_check(shares):
 
 
 def fill_check(fit):
-    """`fit`: the touch-up's fill against the paint round it (`pipeline.judged_fill`). The coverage counts a texel
-    painted; this judges what it was painted with: a fill whose colours are found nowhere in the paint round it (a hole
-    painted into a dish, the backdrop's grey carried in) fails. A judged touch-up keeps only what matches (at a stricter
-    limit), so its fill is judged as it was painted, before what was foreign was left out."""
+    """`fit`: the touch-up's fill as the finished model shows it (`pipeline.judged_fill`). The coverage counts a texel
+    painted; this judges what it shows. The fill kept on the model fails when its colours are found nowhere in the
+    paint round it (a hole painted into a dish, the backdrop's grey carried in); a place left unpainted shows the
+    colour spread to it from round it, and fails when it is large and neither the paint round it nor what it shows is
+    one colour (a smear).
+    The fill as the inpainter painted it, before what was foreign was left out, never reaches the model: it is shown,
+    not counted."""
     from .touch_up import LARGEST_FOREIGN_PATCH, MOST_FOREIGN
 
     shares = ", ".join(f"{share:.1%}" for share in fit["views"])
     worst, patch = fit["worst"], fit.get("largest_patch", 0.0)
-    passed = worst <= MOST_FOREIGN and patch <= LARGEST_FOREIGN_PATCH
-    how = ("as painted, before the touch-up left out what was foreign; its places as kept"
-           if fit.get("judged") == "as painted" else "as kept")
+    left = fit.get("left_out") or {"largest_place": 0.0, "largest_smear": 0.0}
+    smear = left["largest_smear"]
+    passed = worst <= MOST_FOREIGN and patch <= LARGEST_FOREIGN_PATCH and smear == 0.0
+    painted = fit.get("as_painted")
+    shown = (f"; as the inpainter painted it, before the touch-up left out what was foreign (shown, not counted), "
+             + ", ".join(f"{share:.1%}" for share in painted["views"]) + " of each view's fill was foreign"
+             if painted else "")
+    smears = (f"a smear {smear:.1%} of the object's size across: neither the paint round it nor the colour spread "
+              f"into it is one colour" if smear else
+              "no smear: each larger place is ringed by one colour, or shows one"
+              if left["largest_place"] > LARGEST_FOREIGN_PATCH else "none larger than the limit")
     return Check("fill matches the paint round it", worst * 100, MOST_FOREIGN * 100, "%", passed,
-                 f"of the touch-up views' fill ({how}), {worst:.1%} of the worst view's has a colour found nowhere in "
-                 f"the paint round it (delta E over {fit['delta_e']:.0f}; each view {shares}); its largest foreign "
-                 f"place is {patch:.1%} of the object's size across (at most {LARGEST_FOREIGN_PATCH:.0%}); "
-                 f"{fit['filled_points']} filled points kept")
+                 f"of the touch-up views' fill kept on the model, {worst:.1%} of the worst view's has a colour found "
+                 f"nowhere in the paint round it (delta E over {fit['delta_e']:.0f}; each view {shares}; at most "
+                 f"{MOST_FOREIGN:.0%}); its largest foreign place is {patch:.1%} of the object's size across (at most "
+                 f"{LARGEST_FOREIGN_PATCH:.0%}); {fit['filled_points']} filled points kept. Places left unpainted, "
+                 f"the largest {left['largest_place']:.1%} across: {smears}{shown}")
 
 
 def score(checks, measures):

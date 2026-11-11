@@ -47,6 +47,13 @@
   "picture.png": "c5d93cd054f8fe4638375a78c66cac0d5ac53bf24b41f0d662c83386638a5c51",
   "shape.npz": "5133504632989a6e52cc3f5880070b3a49cdaebf5ba3def247bf7bb3b998c5f3"
  },
+ "candle-glass-cup-smear": {
+  "job.json": "d6d9a524edc5a29734d461cac551d6e1676bdda98ee760ad1b620b9b7f5b170d",
+  "mask.png": "24d50679baab090ef3b6bb506d4833493d82aa63d33828b860ee70a79dc12f3b",
+  "painted.npz": "4c2b6f0a8b619f395c57a95e0c54324227520bd7401de08a1ee81a41104611c7",
+  "picture.png": "c5d93cd054f8fe4638375a78c66cac0d5ac53bf24b41f0d662c83386638a5c51",
+  "shape.npz": "5133504632989a6e52cc3f5880070b3a49cdaebf5ba3def247bf7bb3b998c5f3"
+ },
  "chair-fill-alike": {
   "job.json": "426eb8e2caf344f2c2cce8f389e07d3b4ea3f2f2a8bd8360cdedce8c8333afb4",
   "mask.png": "4d571293252579e7ba1bee0e339ee9a67a90f51a8af898e0a40470670c590bfc",
@@ -401,6 +408,13 @@
   "mask.png": "43bdfdb8fdf5b07013e4c8e929a755ff70252cbbe3e601367888e8aa3e421e9b",
   "picture.png": "1c461310ba399ca70d5ab455f87459c01175118c6a7bcf23b3c0d7c5765fcdfa",
   "shape.npz": "a3b8123c4671b24599bde8db6259962a71124bfc416b7ee2b19b7c5f63572a28"
+ },
+ "jug-mouth-left-out": {
+  "job.json": "5e5dd0db8c06d05c9afa3b94838f73643c1b7050da4a791ca0bbabae4e6acd9b",
+  "mask.png": "43bdfdb8fdf5b07013e4c8e929a755ff70252cbbe3e601367888e8aa3e421e9b",
+  "painted.npz": "3dcfb86012fedecf2c17784a612f00ace26d630756cab18181e168cbd480a02c",
+  "picture.png": "1c461310ba399ca70d5ab455f87459c01175118c6a7bcf23b3c0d7c5765fcdfa",
+  "shape.npz": "a6faa73d56d6c0ca1451de4e95faca7f2858d8dc5d6337b1f91907af5f855861"
  },
  "jug-neck-unseen": {
   "job.json": "2209931156ad88cba437fb40e32909d070888644e2e2eda83b294855bcd31376",
@@ -933,6 +947,13 @@
   "wooden-treasure-chest-11-10-fix-check-581162.png": "29b1e7f1e8b13d800e4c562319e2ecdb1cd0782e0104030bbbf9f48fbd2cdb52",
   "wooden-treasure-chest-11-10-fix-check-581163-mask.png": "ccc108ca8d4aa0999bb833e5c3dd5f5b9f16e5444840ae9e9c8407bb30ee6293",
   "wooden-treasure-chest-11-10-fix-check-581163.png": "bea7e35809c6ac8baaf2062227e9b42785327e50a18394a70a1cc37270a8ab2b"
+ },
+ "shield-handle-inner-face": {
+  "job.json": "da60a7467a70c0d00b1dbe226d98b31297b07afea59a87c884a9fc2d6362aa7e",
+  "mask.png": "48cfdb95b559eaf0dddec2e59bafbb52b6fe459c264c6faef42cb3f66707684b",
+  "painted.npz": "cfd37ca685a639de24519e2349a13bb78beb992d1a2de9004449da14deb71aa0",
+  "picture.png": "b21b4fe016375526c2fdf1a55b08db8c1377410e72b9520cb8949eedea2d4ec8",
+  "shape.npz": "d34b9bd65493dedc142693b87d034aed69e68823e2e3d956dc16dbaa0104841a"
  },
  "shield-two-handles": {
   "job.json": "ce1c47171e84af890eb06b5c0c001765e7d796aa151713a5c94b1306ea5a135f",

@@ -23,7 +23,15 @@ The picture the inpainter sees is drawn from the painted colours and the earlier
 colour is then measured against the painted points nearest it on the same surface (`misfit`); a view whose fill has
 colours found nowhere round it is painted again from another seed, the better try kept, and its pixels still foreign
 (and a little round them) are left out: they keep the spread colour and count as unpainted, so the coverage stays
-true. The same measure is the finish's fill check (`fill_fit`, `inspection.fill_check`).
+true. A view whose kept try was, as painted, more foreign than the fill check allows is painted again from more seeds.
+
+The finish judges only what the model shows (`inspection.fill_check`). The fill kept is judged as kept, by the same
+measure (`fill_fit`). A place left out never shows the inpainter's try: it shows the colour spread to it from round
+it, which looks right when the paint round it is one colour (a lining spread from the boot's leather is the leather's
+brown) and is a smear when it is not (the candle's foot spread from its wax and its brass dish): a large place is
+judged by its ring (`left_out_places`). The fill as painted is shown beside them, not counted: an unseen place need
+not look like its surroundings (a lining, a shelf's boards, a leg's inner face), so a try's colours found nowhere round
+it are no fault of the model, and what was foreign never reached it.
 """
 
 import numpy as np
@@ -74,8 +82,10 @@ FOREIGN_DELTA_E = 20.0
 # The touch-up keeps a filled pixel only when it is within this (stricter than the check, so what it keeps is clear of
 # the check's limit, not at it).
 KEEP_DELTA_E = 15.0
-# A view's fill is tried this many times while more than `GOOD_ENOUGH` of it is foreign (each try its own seed).
+# A view's fill is tried this many times while more than `GOOD_ENOUGH` of it is foreign (each try its own seed), and
+# up to `MOST_FILL_TRIES` while the best try, as painted, is more than `MOST_FOREIGN` foreign (see `touched_up`).
 FILL_TRIES = 2
+MOST_FILL_TRIES = 4
 GOOD_ENOUGH = 0.02
 # Foreign pixels, and these many round them (a blob's soft edge), are left out.
 LEAVE_OUT_GROW = 2
@@ -85,6 +95,18 @@ LEAVE_OUT_GROW = 2
 MOST_FOREIGN = 0.10
 LARGEST_FOREIGN_PATCH = 0.03
 JUDGED_IN_PIECES = 20000
+# A place a view left unpainted (its fill left out, or never painted) shows on the model the colour spread to it from
+# round it. Its ring is the painted pixels within this many of it (half a latent cell), those on the surface within
+# this many ring widths of it (a slanted surface's pixels lie further apart than a pixel).
+RING_PIXELS = 4
+RING_REACH = 3.0
+# Colours are one colour when at least this share of them lies within `FOREIGN_DELTA_E` of their median. A place
+# larger than `LARGEST_FOREIGN_PATCH` is a smear when neither its ring nor what the model shows in it is one colour.
+# Measured on the trials' places (docs/objects.md, "The fill judged on the model"): those smeared by eye (a candle's
+# foot spread from its wax and its dish, a chair's stretcher spread from grey and brown) read 0.61 to 0.82 for their
+# ring and 0.69 to 0.86 inside; those whose ring holds two colours but which show one by eye (a chair's post spread
+# brown from its brown and grey ring, a shield's handle) 0.97 to 1.00 inside.
+ONE_COLOUR = 0.9
 
 
 def _cloud_near(points, normals, cloud):
@@ -169,10 +191,18 @@ def grown(wanted, hit):
     return ndimage.binary_dilation(wanted, structure=np.ones((3, 3), dtype=bool), iterations=MASK_GROW) & hit
 
 
-def drawn(corners, triangles, colours, cloud, turn, tilt):
-    """The object from a view in its colours so far: the colour cloud's (the six views' paint and the fills before
-    this view) where it reaches, the colours spread to the corners elsewhere. Returns (picture, the unpainted pixels
-    this view sees squarely, the mask to paint, each pixel's surface point and normal)."""
+class Seen:
+    """The object from a touch-up view in its colours so far (`seen_from`): which pixels it covers (`hit`), each
+    pixel's surface point and normal, its colour (the colour cloud's, as the bake mixes it, where the cloud reaches:
+    `reached`; the colours spread to the corners elsewhere), the pixels it sees squarely that the cloud does not reach
+    (`wanted`), and its framing."""
+
+    def __init__(self, frame, hit, surface, facing, colour, reached, wanted):
+        self.frame, self.hit, self.surface, self.facing = frame, hit, surface, facing
+        self.colour, self.reached, self.wanted = colour, reached, wanted
+
+
+def seen_from(corners, triangles, colours, cloud, turn, tilt):
     frame = framing(corners, turn, tilt)
     xy, depth = frame.pixels(corners)
     _, owner, bary = render.rasterised(xy, depth, triangles, SIDE, SIDE)
@@ -184,16 +214,25 @@ def drawn(corners, triangles, colours, cloud, turn, tilt):
     shown = np.einsum("pk,pkc->pc", bary[hit], colours[tri])
     painted, reached = cloud_coloured(points, normals, cloud)
     shown[reached] = painted[reached]
-    image = np.full((SIDE, SIDE, 3), BACKDROP)
-    image[hit] = shown
     toward = render.view_matrix(turn, tilt)[2]
-    wanted = np.zeros((SIDE, SIDE), dtype=bool)
-    wanted[hit] = ~reached & (normals @ toward >= LEAST_FACING)
-    mask = grown(wanted, hit)
-    surface = np.zeros((SIDE, SIDE, 3))
-    facing = np.zeros((SIDE, SIDE, 3))
+    surface, facing = np.zeros((SIDE, SIDE, 3)), np.zeros((SIDE, SIDE, 3))
     surface[hit], facing[hit] = points, normals
-    return Image.fromarray((np.clip(image, 0, 1) * 255).round().astype(np.uint8)), wanted, mask, surface, facing
+    colour = np.full((SIDE, SIDE, 3), BACKDROP)
+    colour[hit] = shown
+    reached_pixels, wanted = np.zeros((SIDE, SIDE), dtype=bool), np.zeros((SIDE, SIDE), dtype=bool)
+    reached_pixels[hit] = reached
+    wanted[hit] = ~reached & (normals @ toward >= LEAST_FACING)
+    return Seen(frame, hit, surface, facing, colour, reached_pixels, wanted)
+
+
+def drawn(corners, triangles, colours, cloud, turn, tilt):
+    """The object from a view in its colours so far: the colour cloud's (the six views' paint and the fills before
+    this view) where it reaches, the colours spread to the corners elsewhere. Returns (picture, the unpainted pixels
+    this view sees squarely, the mask to paint, each pixel's surface point and normal)."""
+    seen = seen_from(corners, triangles, colours, cloud, turn, tilt)
+    mask = grown(seen.wanted, seen.hit)
+    picture = Image.fromarray((np.clip(seen.colour, 0, 1) * 255).round().astype(np.uint8))
+    return picture, seen.wanted, mask, seen.surface, seen.facing
 
 
 def _lab(rgb):
@@ -375,6 +414,86 @@ def largest_place(foreign):
     return float(np.sqrt(np.bincount(labels.ravel())[1:].max()) / object_pixels())
 
 
+def ring_of(place, seen):
+    """The painted pixels round a place in a view: within `RING_PIXELS` of it in the picture and, on the surface,
+    within `RING_REACH` ring widths of it (a nearer or farther surface beside it in the picture is not its ring)."""
+    near = ndimage.binary_dilation(place, structure=np.ones((3, 3), dtype=bool), iterations=RING_PIXELS)
+    ring = near & ~place & seen.hit & seen.reached
+    if not ring.any():
+        return ring
+    reach = RING_REACH * RING_PIXELS / seen.frame.scale
+    distance, _ = cKDTree(seen.surface[place]).query(seen.surface[ring], distance_upper_bound=reach)
+    rows, cols = np.nonzero(ring)
+    ring[rows[~np.isfinite(distance)], cols[~np.isfinite(distance)]] = False
+    return ring
+
+
+def one_colour_share(colours):
+    """How much of a ring is one colour: the share of its colours within `FOREIGN_DELTA_E` of their median (in CIE
+    Lab); 0 for no ring."""
+    if len(colours) == 0:
+        return 0.0
+    lab = _lab(colours)
+    return float((np.linalg.norm(lab - np.median(lab, 0), axis=1) <= FOREIGN_DELTA_E).mean())
+
+
+def judged_places(seen):
+    """The places a view sees squarely that the colour cloud does not reach, larger than `LARGEST_FOREIGN_PATCH` of
+    the object's size, largest first: [(their pixels, size, the share of their ring that is one colour, the share of
+    what the model shows in them that is, the ring's pixel count)], and the largest place's size (any size)."""
+    labels, count = ndimage.label(seen.wanted, structure=np.ones((3, 3), dtype=bool))
+    if not count:
+        return [], 0.0
+    sizes = np.sqrt(np.bincount(labels.ravel())[1:]) / object_pixels()
+    places = []
+    for label in np.argsort(-sizes):
+        if sizes[label] <= LARGEST_FOREIGN_PATCH:
+            break
+        place = labels == label + 1
+        ring = ring_of(place, seen)
+        places.append((place, float(sizes[label]), one_colour_share(seen.colour[ring]),
+                       one_colour_share(seen.colour[place]), int(ring.sum())))
+    return places, float(sizes.max())
+
+
+def is_smear(ring_share, inside_share):
+    """A place left unpainted is a smear when the paint round it is not one colour and what the model shows in it,
+    spread from that paint, is not one colour either."""
+    return ring_share < ONE_COLOUR and inside_share < ONE_COLOUR
+
+
+def left_out_places(corners, triangles, colours, cloud, views):
+    """The places the touch-up's views left unpainted, judged on the finished model: from each view (turn_deg,
+    tilt_deg), the pixels it sees squarely that the finished colour cloud does not reach, joined (`judged_places`).
+    There the model shows the colour spread from round the place: a place larger than `LARGEST_FOREIGN_PATCH` of the
+    object's size is a smear (`is_smear`) when its ring (`ring_of`) is not one colour (`one_colour_share`) and neither
+    is what the model shows in it. Returns each view's places (their size, ring, inside and whether a smear), the
+    largest place and the largest smear (0 for none)."""
+    found = {"views": [], "largest_place": 0.0, "largest_smear": 0.0, "one_colour": ONE_COLOUR}
+    for view in views:
+        places, largest = judged_places(seen_from(corners, triangles, colours, cloud, view["turn_deg"],
+                                                  view["tilt_deg"]))
+        judged = [{"size": round(size, 4), "ring_one_colour": round(ring, 4), "inside_one_colour": round(inside, 4),
+                   "ring_pixels": ring_pixels, "smear": is_smear(ring, inside)}
+                  for _, size, ring, inside, ring_pixels in places]
+        found["views"].append({"largest": round(largest, 4), "places": judged})
+        found["largest_place"] = max(found["largest_place"], round(largest, 4))
+        found["largest_smear"] = max([found["largest_smear"], *(p["size"] for p in judged if p["smear"])])
+    return found
+
+
+def worst_view(fit):
+    """The touch-up view to show: the one with the largest smear, else the most foreign kept fill, else the largest
+    place left unpainted."""
+    left = fit["left_out"]["views"]
+    smears = [max([p["size"] for p in view["places"] if p["smear"]], default=0.0) for view in left]
+    if max(smears, default=0.0) > 0:
+        return int(np.argmax(smears))
+    if max(fit["views"], default=0.0) > 0 and len(fit["views"]) == len(left):
+        return int(np.argmax(fit["views"]))
+    return int(np.argmax([view["largest"] for view in left]))
+
+
 def touched_up(inpaint, corners, triangles, colours, cloud, text, seed=0, most=MOST_VIEWS, report=print,
                views_out=None, judge=True):
     """The colour cloud with the places the views missed painted from views chosen to see them: (cloud, record,
@@ -395,13 +514,17 @@ def touched_up(inpaint, corners, triangles, colours, cloud, text, seed=0, most=M
         number = len(record["views"]) + 1
         mask_image = Image.fromarray(mask.astype(np.uint8) * 255)
         tries = []
-        for attempt in range(FILL_TRIES if judge else 1):
+        for attempt in range(MOST_FILL_TRIES if judge else 1):
             painted = np.asarray(inpaint(picture, mask_image, text, seed + k + 100 * attempt)
                                  .convert("RGB").resize((SIDE, SIDE))).astype(np.float64) / 255
             share, left_out, checked = judged_fill(painted, wanted, surface, facing, ring) if judge \
                 else (0.0, np.zeros_like(wanted), None)
             tries.append((share, attempt, painted, left_out, checked))
             if share <= GOOD_ENOUGH:
+                break
+            # After `FILL_TRIES`, another seed only while the try to be kept was, as painted, more foreign than the
+            # fill check allows a kept fill: what it left out is left to the spread.
+            if len(tries) >= FILL_TRIES and min(tries, key=lambda t: t[0])[4]["foreign"] <= MOST_FOREIGN:
                 break
         share, kept_try, painted, left_out, checked = min(tries, key=lambda t: t[0])
         if views_out:
@@ -425,14 +548,16 @@ def touched_up(inpaint, corners, triangles, colours, cloud, text, seed=0, most=M
     return cloud, record, np.concatenate(sources)
 
 
-def fill_picture(corners, triangles, cloud, sources, turn, tilt, side=360, least=None):
+def fill_picture(corners, triangles, cloud, sources, turn, tilt, side=360, least=None, colours=None):
     """The object from a touch-up view: its painted colours dimmed, each filled place green where its colour is found
-    round it and red where it is foreign. `least`: `filled_misfit`, when it is measured already."""
-    points, normals, colours = (np.asarray(c, dtype=np.float64) for c in cloud)
-    sources = np.asarray(sources)
+    round it and red where it is foreign. `least`: `filled_misfit`, when it is measured already. With the corners'
+    `colours`, the places the view left unpainted larger than `LARGEST_FOREIGN_PATCH` (`judged_places`) are ringed:
+    blue when the paint round them is one colour, magenta when it is not (a smear)."""
+    points, normals, cloud_colours = (np.asarray(c, dtype=np.float64) for c in cloud)
+    sources = np.asarray(sources) if sources is not None else np.zeros(len(points), dtype=np.int16)
     filled = sources > 0
     if least is None:
-        least = filled_misfit(points, normals, colours, sources)
+        least = filled_misfit(points, normals, cloud_colours, sources) if filled.any() else np.zeros(0)
     each = np.zeros(len(points))
     each[filled] = least
     least = each
@@ -440,15 +565,21 @@ def fill_picture(corners, triangles, cloud, sources, turn, tilt, side=360, least
     xy, depth = frame.pixels(corners)
     _, owner, bary = render.rasterised(xy, depth, triangles, side, side)
     hit = owner >= 0
-    face_normals, _ = M.face_normals_and_areas(corners, triangles)
     at = np.einsum("pk,pkd->pd", bary[hit], corners[triangles[owner[hit]]])
     nearest = cKDTree(points).query(at)[1]
     image = np.full((side, side, 3), 245.0)
-    shown = colours[nearest] * 255 * 0.45 + 245 * 0.2
+    shown = cloud_colours[nearest] * 255 * 0.45 + 245 * 0.2
     is_fill = filled[nearest]
     strength = np.clip(least[nearest] / (1.5 * FOREIGN_DELTA_E), 0, 1)[:, None]
     shown[is_fill] = (np.array([215.0, 60, 50]) * strength + np.array([70.0, 175, 90]) * (1 - strength))[is_fill]
     image[hit] = shown
+    if colours is not None:
+        places, _ = judged_places(seen_from(corners, triangles, np.asarray(colours, dtype=np.float64),
+                                            (points, normals, cloud_colours), turn, tilt))
+        for place, _, ring, inside, _ in places:
+            small = np.asarray(Image.fromarray(place).resize((side, side), Image.NEAREST))
+            edge = small & ~ndimage.binary_erosion(small, iterations=2)
+            image[edge] = (210, 40, 200) if is_smear(ring, inside) else (40, 110, 240)
     return Image.fromarray(image.astype(np.uint8))
 
 

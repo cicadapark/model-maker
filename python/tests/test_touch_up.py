@@ -36,6 +36,58 @@ def painted_from_six(corners, triangles, colour=GREY, grain=0.0):
     return points[seen], normals[seen], np.clip(colours, 0, 1)
 
 
+WAX = (0.93, 0.9, 0.84)
+# A pale grey-green, as the fifth trial's inpainter painted a glass cup round the candle's foot.
+GLASS = (0.55, 0.62, 0.6)
+LINING = (0.86, 0.79, 0.62)
+
+
+def on_candle(points):
+    """Which points lie on the candle (its surface half a voxel out from its box), not on the dish's floor."""
+    return (np.abs(points[:, 0]) <= 0.036) & (np.abs(points[:, 2]) <= 0.036) & (points[:, 1] > 0.026)
+
+
+def wax_and_brass(corners, triangles):
+    """The candle in a bowl as the six views would leave it in two colours, wax on the candle and brass on the dish:
+    the colour cloud, and the corners' colours as the paint stage leaves them. Those the cloud reaches take its colour;
+    the candle's foot, hidden by the rim, takes wax or brass corner by corner (as the fifth trial's candle's corners,
+    given colours by views that saw them at a slant: its foot spiked with both); the rest are spread from their
+    neighbours (`paint.spread`)."""
+    from model_maker import paint
+    from model_maker.mesh_tools import corner_normals
+
+    points, normals, _ = painted_from_six(corners, triangles)
+    colours = np.where(on_candle(points)[:, None], WAX, BRASS)
+    cloud = (points, normals, colours)
+    known = ~touch_up.unpainted(corners, corner_normals(corners, triangles), cloud)
+    corner_colours = np.where(on_candle(corners)[:, None], WAX, BRASS) * known[:, None]
+    foot = on_candle(corners) & ~known
+    mottled = np.random.default_rng(3).random(len(corners)) < 0.5
+    corner_colours[foot] = np.where(mottled[foot, None], WAX, BRASS)
+    known |= foot
+    return cloud, paint.spread(corner_colours, known, triangles)
+
+
+def glass_round_the_foot(grain=0.02):
+    """Paints the masked pixels brass, but those not drawn brass (the candle's foot, its corners wax and brass) a
+    glass cup's grey-green."""
+    def inpaint(picture, mask, text, seed):
+        image = np.asarray(picture).astype(np.float64) / 255
+        masked = np.asarray(mask) > 127
+        waxen = np.linalg.norm(image - BRASS, axis=2) > 0.08
+        noise = np.random.default_rng(seed).uniform(-grain, grain, image.shape)
+        image[masked] = np.clip(np.where(waxen[..., None], GLASS, BRASS) + noise, 0, 1)[masked]
+        return Image.fromarray((image * 255).round().astype(np.uint8))
+    return inpaint
+
+
+def a_cup():
+    """A cup 10 cm high and 24 cm across, its walls 2 cm thick: the candle's dish without the candle."""
+    return shapes.surface_of([((-0.12, 0.0, -0.12), (0.12, 0.02, 0.12)),
+                              ((-0.12, 0.0, -0.12), (-0.1, 0.1, 0.12)), ((0.1, 0.0, -0.12), (0.12, 0.1, 0.12)),
+                              ((-0.12, 0.0, -0.12), (0.12, 0.1, -0.1)), ((-0.12, 0.0, 0.1), (0.12, 0.1, 0.12))], 0.005)
+
+
 def painting(colour, grain=0.0):
     """A stand-in inpainter painting every masked pixel `colour` (with grain)."""
     def inpaint(picture, mask, text, seed):
@@ -158,7 +210,10 @@ class TouchUp(unittest.TestCase):
         self.assertLess(added.sum(1).min(), 3.0)
         self.assertGreater(added.sum(1).min(), 0.6, "no dark blob's colour reached the surface")
         view = record["views"][0]
-        self.assertEqual(view["tries"], touch_up.FILL_TRIES, "a blobbed fill is tried again")
+        # A blobbed fill is tried again: past `FILL_TRIES` while its kept try was, as painted, more than
+        # `MOST_FOREIGN` foreign.
+        more = view["as_painted"]["foreign"] > touch_up.MOST_FOREIGN
+        self.assertEqual(view["tries"], touch_up.MOST_FILL_TRIES if more else touch_up.FILL_TRIES, view)
         self.assertGreater(view["foreign"], 0.0)
         self.assertGreater(view["left_out"], 0)
         self.assertEqual(len({seed for _, _, seed in recording.given}), len(recording.given), "each try its seed")
@@ -241,29 +296,85 @@ class TouchUp(unittest.TestCase):
         self.assertEqual(touch_up.fill_sources({"cloud_from": np.array([0, 1, 1, 2])}, numbered).tolist(),
                          [0, 1, 1, 2])
 
-    def test_the_finish_judges_the_fill_as_painted_not_as_kept(self):
-        """The touch-up keeps only fill within delta E 15 of the paint round it, and the
-        finish judged what was kept at 20, so the check passed by construction. A fill painted in a colour found
-        nowhere round it on every try is judged as it was painted, and fails; what was kept (nothing) still matches."""
+    def test_the_fill_as_painted_is_shown_not_counted(self):
+        """The fill as the inpainter painted it never reaches the model: what was foreign was left out. A pale grey
+        painted into a brass dish on every try is left out whole; the model shows the brass spread into those places
+        from round them, one colour, and passes. The as-painted share is shown, and the places count as unpainted, so
+        the coverage stays true (as without the touch-up)."""
         views = tempfile.mkdtemp(prefix="touch-up-views-")
         touched, record, sources = touch_up.touched_up(painting((0.85, 0.85, 0.85)), self.corners, self.triangles,
                                                        self.brass, self.brass_cloud, "a candle", report=quiet,
                                                        views_out=views)
-        kept = touch_up.fill_fit(*touched, sources, self.corners, record["views"])
-        self.assertTrue(inspection.fill_check(kept).passed, "what is kept matches by construction")
         painted = {"colours": self.brass, "cloud_points": touched[0], "cloud_normals": touched[1],
                    "cloud_colours": touched[2], "cloud_from": sources}
         fit, _ = pipeline.judged_fill(views, painted, record, self.corners, self.triangles)
-        self.assertEqual(fit["judged"], "as painted")
-        self.assertGreater(fit["worst"], touch_up.MOST_FOREIGN, fit)
-        failed = inspection.fill_check(fit)
-        self.assertFalse(failed.passed, fit)
-        self.assertIn("as painted", failed.words)
+        self.assertEqual(fit["judged"], "as kept")
+        self.assertGreater(min(fit["as_painted"]["views"]), touch_up.MOST_FOREIGN, fit)
+        self.assertGreater(fit["left_out"]["largest_place"], touch_up.LARGEST_FOREIGN_PATCH, fit)
+        self.assertEqual(fit["left_out"]["largest_smear"], 0.0, fit)
+        check = inspection.fill_check(fit)
+        self.assertTrue(check.passed, fit)
+        self.assertIn("shown, not counted", check.words)
+        without = bake.baked(self.corners, self.triangles, self.brass, self.brass_cloud, side=512)["coverage"]
+        with_it = bake.baked(self.corners, self.triangles, self.brass, touched, side=512)["coverage"]
+        self.assertEqual(with_it, without, "a place left out is not counted painted")
         # A record made before the touch-up kept its judgement: the saved tries are judged again, alike.
         older = {**record, "views": [{k: v for k, v in view.items() if k not in ("as_painted", "source")}
                                      for view in record["views"]]}
         replayed = touch_up.replayed_as_painted(self.corners, self.triangles, painted, older, views)
         self.assertEqual(replayed, touch_up.as_painted(record))
+
+    def test_a_lining_painted_another_colour_passes(self):
+        """A boot's lining, a shelf's boards, a leg's inner face need not look like the paint round them. A cup whose
+        inside the inpainter paints a pale lining: the lining's colour is found nowhere round it, so the touch-up
+        leaves it out, and the model shows the cup's own colour spread from its rim and floor. It passes."""
+        corners, triangles = a_cup()
+        cloud = painted_from_six(corners, triangles, BRASS, grain=0.04)
+        colours = np.tile(BRASS, (len(corners), 1))
+        views = tempfile.mkdtemp(prefix="touch-up-views-")
+        touched, record, sources = touch_up.touched_up(painting(LINING, 0.02), corners, triangles, colours,
+                                                       cloud, "a cup", report=quiet, views_out=views)
+        self.assertTrue(record["views"])
+        painted = {"colours": colours, "cloud_points": touched[0], "cloud_normals": touched[1],
+                   "cloud_colours": touched[2], "cloud_from": sources}
+        fit, shown = pipeline.judged_fill(views, painted, record, corners, triangles)
+        self.assertGreater(max(fit["as_painted"]["views"]), touch_up.MOST_FOREIGN, "the lining is foreign as painted")
+        self.assertGreater(fit["left_out"]["largest_place"], touch_up.LARGEST_FOREIGN_PATCH, fit["left_out"])
+        self.assertTrue(inspection.fill_check(fit).passed, fit)
+        self.assertIsNotNone(shown)
+
+    def test_a_smear_left_out_still_fails(self):
+        """Leaving a place out does not mend it. The fifth trial's candle: the inpainter painted a glass cup round the
+        candle's foot, which the touch-up left out; the model shows there the colours spread from the wax above and
+        the brass dish below, neither one colour: a smear, and the check fails."""
+        cloud, colours = wax_and_brass(self.corners, self.triangles)
+        views = tempfile.mkdtemp(prefix="touch-up-views-")
+        touched, record, sources = touch_up.touched_up(glass_round_the_foot(), self.corners, self.triangles,
+                                                       colours, cloud, "a candle in a brass holder", report=quiet,
+                                                       views_out=views)
+        painted = {"colours": colours, "cloud_points": touched[0], "cloud_normals": touched[1],
+                   "cloud_colours": touched[2], "cloud_from": sources}
+        fit, shown = pipeline.judged_fill(views, painted, record, self.corners, self.triangles)
+        self.assertGreater(fit["left_out"]["largest_smear"], touch_up.LARGEST_FOREIGN_PATCH, fit["left_out"])
+        failed = inspection.fill_check(fit)
+        self.assertFalse(failed.passed, fit)
+        self.assertIn("a smear", failed.words)
+        smears = [p for view in fit["left_out"]["views"] for p in view["places"] if p["smear"]]
+        self.assertTrue(all(p["ring_one_colour"] < touch_up.ONE_COLOUR and p["inside_one_colour"] < touch_up.ONE_COLOUR
+                            for p in smears))
+        # Shown in the report's picture: the smear ringed magenta.
+        picture = np.asarray(shown[0])
+        self.assertTrue((np.abs(picture.astype(int) - (210, 40, 200)).max(-1) == 0).any())
+
+    def test_a_smear_needs_its_ring_and_its_inside_both_mixed(self):
+        self.assertTrue(touch_up.is_smear(0.61, 0.69))
+        self.assertFalse(touch_up.is_smear(0.6, 1.0), "a place showing one colour spread from a mixed ring")
+        self.assertFalse(touch_up.is_smear(1.0, 0.6), "a place ringed by one colour passes")
+        many = np.tile(BRASS, (100, 1))
+        self.assertEqual(touch_up.one_colour_share(many), 1.0)
+        half = np.concatenate([np.tile(BRASS, (50, 1)), np.tile(WAX, (50, 1))])
+        self.assertLess(touch_up.one_colour_share(half), touch_up.ONE_COLOUR)
+        self.assertEqual(touch_up.one_colour_share(np.zeros((0, 3))), 0.0)
 
     def test_a_good_fill_passes_as_painted(self):
         views = tempfile.mkdtemp(prefix="touch-up-views-")
@@ -276,9 +387,10 @@ class TouchUp(unittest.TestCase):
         self.assertTrue(inspection.fill_check(fit).passed, fit)
 
 
-    def test_a_foreign_place_left_out_still_fails_as_painted(self):
-        """A clay jug's fill: a view whose fill was mostly right but held one foreign place larger
-        than the limit, which the touch-up left out, fails: leaving it out does not mend the place on the model."""
+    def test_a_place_left_out_ringed_by_one_colour_passes(self):
+        """A clay jug's fill: a view whose fill held one foreign place larger than the limit (a shadow
+        behind its handle, 7.2 % of the fill and 4.7 % across, as painted), which the touch-up left out. The model shows
+        there the clay spread from round it: the place passes, and its as-painted measure is shown."""
         views = tempfile.mkdtemp(prefix="touch-up-views-")
         touched, record, sources = touch_up.touched_up(painting(BRASS, 0.03), self.corners, self.triangles,
                                                        self.brass, self.brass_cloud, "a candle", report=quiet,
@@ -288,9 +400,34 @@ class TouchUp(unittest.TestCase):
         one_place = {**record, "views": [dict(view) for view in record["views"]]}
         one_place["views"][0]["as_painted"] = {"foreign": 0.072, "patch": 0.047}
         fit, _ = pipeline.judged_fill(views, painted, one_place, self.corners, self.triangles)
-        self.assertLess(fit["worst"], touch_up.MOST_FOREIGN, "the share alone would pass")
-        self.assertEqual(fit["largest_patch"], 0.047)
-        self.assertFalse(inspection.fill_check(fit).passed, fit)
+        self.assertEqual(fit["as_painted"]["patches"][0], 0.047)
+        self.assertEqual(fit["largest_patch"], 0.0, "judged as kept")
+        check = inspection.fill_check(fit)
+        self.assertTrue(check.passed, fit)
+        self.assertIn("7.2%", check.words)
+
+    def test_another_seed_while_the_kept_try_was_foreign_as_painted(self):
+        """The as-painted share is the trigger for more seeds: a fill foreign on every try is painted
+        `MOST_FILL_TRIES` times; a fill a little foreign (more than `GOOD_ENOUGH`, under `MOST_FOREIGN`) `FILL_TRIES`."""
+        recording = Recording(painting((0.85, 0.85, 0.85)))
+        _, record, _ = touch_up.touched_up(recording, self.corners, self.triangles, self.brass, self.brass_cloud,
+                                           "a candle", report=quiet, most=1)
+        self.assertEqual(record["views"][0]["tries"], touch_up.MOST_FILL_TRIES)
+        self.assertEqual(len({seed for _, _, seed in recording.given}), touch_up.MOST_FILL_TRIES, "each try its seed")
+
+        def a_few_specks(picture, mask, text, seed):
+            image = np.asarray(painting(BRASS, 0.03)(picture, mask, text, seed)).copy()
+            rows, cols = np.nonzero(np.asarray(mask) > 127)
+            specks = np.random.default_rng(seed).choice(len(rows), len(rows) // 20, replace=False)
+            image[rows[specks], cols[specks]] = (20, 20, 20)
+            return Image.fromarray(image)
+
+        _, record, _ = touch_up.touched_up(a_few_specks, self.corners, self.triangles, self.brass, self.brass_cloud,
+                                           "a candle", report=quiet, most=1)
+        view = record["views"][0]
+        self.assertGreater(view["foreign"], touch_up.GOOD_ENOUGH)
+        self.assertLessEqual(view["as_painted"]["foreign"], touch_up.MOST_FOREIGN)
+        self.assertEqual(view["tries"], touch_up.FILL_TRIES)
 
 
 if __name__ == "__main__":
