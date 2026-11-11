@@ -28,6 +28,11 @@ it, one of the other kind must fail it, and a head between the two is shown. The
 without it, labelled by eye (`quality-cases.toml`), are built into DATA/qualities and judged as "quality-pictures":
 judged against a prompt that names the quality, the quality's pair must pass a picture showing it and refuse one
 showing its opposite (the whole check "shows the thing asked for" is shown beside it), and one in doubt is shown.
+The picture tries labelled by eye for painted lettering (`lettering-cases.toml`) are built into DATA/lettering and
+judged as "lettering-pictures": "no painted lettering" must refuse a try showing letters its prompt does not ask for
+(but a known miss, `known_miss`, is shown), pass one showing none, and pass every try whose prompt asks for lettering;
+one in doubt is shown. It needs tesseract 5 or newer with its English data: without a usable one the case is not
+judged, and counts as broken (it never passes unread); the version that read it is printed and kept in the ledger.
 """
 
 import argparse
@@ -48,12 +53,14 @@ STATE_CASES = os.path.join(HERE, "state-cases.toml")
 PROMPT_CASES = os.path.join(HERE, "prompt-cases.toml")
 HEAD_CASES = os.path.join(HERE, "head-cases.toml")
 QUALITY_CASES = os.path.join(HERE, "quality-cases.toml")
+LETTERING_CASES = os.path.join(HERE, "lettering-cases.toml")
 FILES = ("job.json", "picture.png", "mask.png", "shape.npz")
 PICTURE_FILES = ("picture.png", "mask.png")
 STATE_PICTURES = "state-pictures"
 PROMPT_PICTURES = "prompt-pictures"
 HEAD_PICTURES = "head-pictures"
 QUALITY_PICTURES = "quality-pictures"
+LETTERING_PICTURES = "lettering-pictures"
 
 
 def cases():
@@ -78,6 +85,11 @@ def head_pictures():
 
 def quality_pictures():
     with open(QUALITY_CASES, "rb") as file:
+        return tomllib.load(file)["picture"]
+
+
+def lettering_pictures():
+    with open(LETTERING_CASES, "rb") as file:
         return tomllib.load(file)["picture"]
 
 
@@ -203,6 +215,13 @@ def build(trials, data):
         shutil.copyfile(source, os.path.join(qualities, picture["name"] + ".png"))
         shutil.copyfile(source[:-4] + "-mask.png", os.path.join(qualities, picture["name"] + "-mask.png"))
     print(f"{QUALITY_PICTURES}: {len(quality_pictures())} pictures")
+    lettered = os.path.join(data, "lettering")
+    os.makedirs(lettered, exist_ok=True)
+    for picture in lettering_pictures():
+        source = os.path.join(trials, picture["source"])
+        shutil.copyfile(source, os.path.join(lettered, picture["name"] + ".png"))
+        shutil.copyfile(source[:-4] + "-mask.png", os.path.join(lettered, picture["name"] + "-mask.png"))
+    print(f"{LETTERING_PICTURES}: {len(lettering_pictures())} pictures")
 
 
 _JUDGE = []
@@ -296,7 +315,7 @@ def run(data, only=None):
     began = time.time()
     outcomes = {}
     if only and only not in {case["name"] for case in cases()} | {STATE_PICTURES, PROMPT_PICTURES, HEAD_PICTURES,
-                                                                  QUALITY_PICTURES}:
+                                                                  QUALITY_PICTURES, LETTERING_PICTURES}:
         # A mistyped name would judge nothing and say "0 held, 0 broken" with exit 0.
         print(f"no case is named {only!r}", file=sys.stderr)
         return 2
@@ -390,9 +409,20 @@ def run(data, only=None):
         held, broken = held + (not wrong), broken + bool(wrong)
         print(f"{'BROKEN' if wrong else 'held  '} {QUALITY_PICTURES} ({time.time() - started:.0f} s)"
               + (": " + "; ".join(wrong) if wrong else ""), flush=True)
+    if not only or only == LETTERING_PICTURES:
+        started = time.time()
+        wrong = changed_files({"name": LETTERING_PICTURES}, os.path.join(data, "lettering"))
+        wrong += judged_lettering(os.path.join(data, "lettering"))
+        outcomes[LETTERING_PICTURES] = "broken" if wrong else "held"
+        held, broken = held + (not wrong), broken + bool(wrong)
+        print(f"{'BROKEN' if wrong else 'held  '} {LETTERING_PICTURES} ({time.time() - started:.0f} s)"
+              + (": " + "; ".join(wrong) if wrong else ""), flush=True)
     print(json.dumps({"held": held, "broken": broken}))
     # A run of part of the set (--only) is kept too, marked so: the progress counts whole runs only.
-    ledger.regression(held, broken, time.time() - began, outcomes, whole=only is None)
+    from model_maker import lettering
+
+    read_by = lettering.reader().version if LETTERING_PICTURES in outcomes and lettering.reader().usable else None
+    ledger.regression(held, broken, time.time() - began, outcomes, whole=only is None, tesseract=read_by)
     return 1 if broken else 0
 
 
@@ -413,7 +443,7 @@ def written_sums(data):
                             for name in data_files(os.path.join(data, case["name"]))}
              for case in cases() if not case.get("made_up") and not case.get("example")}
     for name, sub in ((STATE_PICTURES, "states"), (PROMPT_PICTURES, "prompts"), (HEAD_PICTURES, "heads"),
-                      (QUALITY_PICTURES, "qualities")):
+                      (QUALITY_PICTURES, "qualities"), (LETTERING_PICTURES, "lettering")):
         found[name] = {file: sha256_of(os.path.join(data, sub, file)) for file in data_files(os.path.join(data, sub))}
     with open(SUMS, "w") as file:
         json.dump(found, file, indent=1, sort_keys=True)
@@ -574,6 +604,47 @@ def judged_qualities(folder):
                          f"{'passed' if found >= least else 'refused'} it ({found:.0%})")
     print("   " + "; ".join(f"{k}: the pair passes {p}, refuses {f}; the whole check passes {c}"
                           for k, (p, f, c) in sorted(tally.items())), flush=True)
+    return wrong
+
+
+def judged_lettering(folder):
+    """The picture tries labelled by eye for painted lettering, each judged as the pipeline's choice of try judges
+    its prompt: a try showing letters its prompt does not ask for must be refused (a known miss is shown), one showing
+    none passed, and every try whose prompt asks for lettering passed; one in doubt is shown. The tally says how many
+    of each were refused."""
+    import numpy as np
+    from PIL import Image
+
+    from model_maker import lettering, words
+
+    found = lettering.reader()
+    if not found.usable:
+        return [found.why]
+    print(f"   read by tesseract {found.version}", flush=True)
+    wrong, tally, doubt, misses = [], {}, [], []
+    for picture in lettering_pictures():
+        path = os.path.join(folder, picture["name"] + ".png")
+        rgb = np.asarray(Image.open(path).convert("RGB"))
+        mask = np.asarray(Image.open(path[:-4] + "-mask.png").convert("L")) > 127
+        asked = words.lettering_asked(picture["prompt"])
+        check = lettering.lettering_check(rgb, mask, asked)
+        key = f"{picture['shows']}{', asked' if asked else ''}"
+        counts = tally.setdefault(key, [0, 0])
+        counts[check.passed] += 1
+        must_pass = bool(asked) or picture["shows"] == "none"
+        if picture["shows"] == "unclear" and not asked:
+            doubt.append(f"{picture['name']} {'passed' if check.passed else 'refused'} ({check.value:.0f})")
+        elif picture.get("known_miss") and not asked:
+            misses.append(f"{picture['name']} {'passed' if check.passed else 'now refused'}")
+        elif check.passed != must_pass:
+            wrong.append(f"{picture['name']} ({key}) {'passed' if check.passed else 'refused'}: {check.words}")
+    print("   " + "; ".join(f"{key}: refused {refused}, passed {passed}"
+                          for key, (refused, passed) in sorted(tally.items())), flush=True)
+    if doubt:
+        print("   in doubt by eye (shown, not held): " + ", ".join(doubt), flush=True)
+    if misses:
+        print(f"   known misses (shown, not held): {sum('now refused' in m for m in misses)} of {len(misses)} refused: "
+              + ", ".join(misses), flush=True)
     return wrong
 
 

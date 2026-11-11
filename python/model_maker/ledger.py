@@ -100,7 +100,8 @@ def settings_of(settings):
     return {"tries": settings.tries, "shape_tries": settings.shape_tries, "triangles": settings.triangles,
             "texture": settings.texture, "lead": settings.lead, "paint_steps": settings.paint_steps,
             "picture_rounds": settings.picture_rounds, "touch_up_views": settings.touch_up_views,
-            "touch_up_strength": settings.touch_up_strength}
+            "touch_up_strength": settings.touch_up_strength,
+            "require_lettering": getattr(settings, "require_lettering", False)}
 
 
 def _card_peak_reset():
@@ -189,6 +190,10 @@ def finished(job, settings, grouped, measures):
     append({**about(job, settings), "event": "job", "status": job.record["status"], "passed": not failed,
             "failed": failed, "seconds": job["seconds"],
             "first_tries": first_tries(job.record),
+            # Whether the chosen picture was read for painted lettering (None: made before the check): a job not read
+            # is not counted as a pass by tools/trial/summary.py.
+            "lettering_judged": (job.record.get("lettering") or {}).get("judged"),
+            "tesseract_version": (job.record.get("lettering") or {}).get("tesseract"),
             "checks": [{"name": c["name"], "value": c.get("value"), "limit": c.get("limit"), "passed": c["passed"]}
                        for c in every],
             "levelled_mm": round(1000 * measures["levelling"]["trimmed_m"], 1) if measures.get("levelling") else 0.0,
@@ -230,9 +235,11 @@ def rounds_of(picture):
     return picture.get("rounds") or -(-len(tries) // DEFAULT_TRIES)
 
 
-def regression(held, broken, seconds, cases, whole=True):
+def regression(held, broken, seconds, cases, whole=True, tesseract=None):
+    """A run of the regression set; `tesseract`: the version that read its lettering case (None: not read)."""
     append({"event": "regression", "held": held, "broken": broken, "seconds": round(seconds, 1),
-            "cases": cases, "whole": whole, "machine": machine(), "version": _version()}, REGRESSION_FILE)
+            "cases": cases, "whole": whole, "machine": machine(), "version": _version(), "tesseract": tesseract},
+           REGRESSION_FILE)
 
 
 def _version():

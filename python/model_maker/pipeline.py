@@ -47,7 +47,8 @@ DEFAULT_TEXTURE = 2048
 class Settings:
     def __init__(self, models=None, sources=None, tries=DEFAULT_TRIES, shape_tries=DEFAULT_SHAPE_TRIES,
                  triangles=DEFAULT_TRIANGLES, texture=DEFAULT_TEXTURE, verify=True, lead=words.DEFAULT_LEAD,
-                 paint_steps=None, picture_rounds=MOST_PICTURE_ROUNDS, touch_up_views=None, touch_up_strength=None):
+                 paint_steps=None, picture_rounds=MOST_PICTURE_ROUNDS, touch_up_views=None, touch_up_strength=None,
+                 require_lettering=False):
         from .paint import STEPS
         from .touch_up import MOST_VIEWS, STRENGTH
 
@@ -58,6 +59,9 @@ class Settings:
         self.lead, self.paint_steps, self.picture_rounds = lead, paint_steps or STEPS, picture_rounds
         self.touch_up_views = MOST_VIEWS if touch_up_views is None else touch_up_views
         self.touch_up_strength = STRENGTH if touch_up_strength is None else touch_up_strength
+        # The measured run reads every picture for painted lettering: without a usable tesseract its jobs are not
+        # made, and a try it could not read is not chosen (lettering.py).
+        self.require_lettering = require_lettering
         self.checked = set()
 
     def folder(self, name):
@@ -262,17 +266,24 @@ def pictures_stage(jobs, settings, report=print, kept=None, keep_going=False):
     loaded(models, "pictures", "picture models", report)
     if judge is None:
         report(NO_SUBJECT_JUDGE)
+    from . import lettering
+
+    if not lettering.reader().usable:
+        report(f"{NO_LETTERING_READER}: {lettering.reader().why}")
     each_job(todo, "pictures", settings, lambda job, found: picture_job(job, settings, paint, cutter, judge, found,
                                                                         report), report, keep_going)
     models.done_with("pictures")
 
 
 def picture_job(job, settings, paint, cutter, judge, found, report):
-    from . import painter, picture_checks, state_judge, subject_judge
+    from . import lettering, painter, picture_checks, state_judge, subject_judge
 
     started = time.time()
     subject = job.subject
     prompt = words.picture_prompt(subject, settings.lead)
+    # Each try's cut-out is read for letters the words do not ask for (11 November 2026: release 1's unseen "an iron
+    # anvil" was chosen with made-up words painted on its side; docs/objects.md, "Painted lettering").
+    lettering_asked = words.lettering_asked(subject.prompt)
     first = painter.seed_of(prompt)
     os.makedirs(job.path("pictures"), exist_ok=True)
     # Each try is judged to show the thing asked for, and any quality its words name, and one that does not is not
@@ -293,6 +304,10 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
             for seed, picture, mask, result in tried:
                 state_judge.add_state_check(result, subject, judge.share(picture, mask, wanted, unwanted))
                 report(f"picture {seed}: {result.checks[-1].words}")
+        for seed, picture, mask, result in tried:
+            check = lettering.add_lettering_check(result, np.asarray(picture.convert("RGB")), mask, lettering_asked,
+                                                  settings.require_lettering)
+            report(f"picture {seed}: {check.words}")
         made += tried
         if any(result.passed for _, _, _, result in made):
             break
@@ -302,18 +317,35 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
         Image.fromarray(mask.astype(np.uint8) * 255).save(job.path("pictures", f"{seed}-mask.png"))
     best = picture_checks.best_try([result for _, _, _, result in made])
     seed, picture, mask, result = made[best]
+    chosen_lettering = next(c for c in result.checks if c.name == lettering.NAME)
     job.record["picture"] = {"prompt": prompt, "lead": settings.lead, "seed": seed, "passed": result.passed,
                              "state_judged": bool(subject.state), "subject_judged": directions is not None,
-                             "rounds": rounds,
+                             "lettering_judged": lettering.was_read(chosen_lettering),
+                             "lettering_asked": lettering_asked, "rounds": rounds,
                              "tries": {str(s): r.as_dict() for s, _, _, r in made}}
+    job.record["lettering"] = lettering_record(chosen_lettering, "pictures")
     job.timed("pictures", time.time() - started)
     # The record and the cut-out first, the picture (which marks the stage done) last, each whole or not at all.
     written(job.path("mask.png"), lambda path: shutil.copyfile(job.path("pictures", f"{seed}-mask.png"), path))
     written(job.path("picture.png"), lambda path: shutil.copyfile(job.path("pictures", f"{seed}.png"), path))
     found.update({"tries": len(made), "tries_passing": sum(r.passed for _, _, _, r in made), "rounds": rounds,
                   "chosen_passed": result.passed,
-                  "faults": sorted({c.name for _, _, _, r in made for c in r.checks if not c.passed})})
+                  "faults": sorted({c.name for _, _, _, r in made for c in r.checks if not c.passed and c.counted})})
     report(f"{job['slug']}: picture {seed} chosen ({'passes' if result.passed else 'fails'} its checks)")
+
+
+def lettering_record(check, read_at, version=None):
+    """Whether the chosen picture was read for painted lettering, by which tesseract, at which stage, and why not:
+    carried into the provenance, the report and the ledger, so a job not read is never taken for one read and
+    passed (`tools/trial/summary.py` does not count it as a pass)."""
+    from . import lettering
+
+    judged = lettering.was_read(check) if check is not None else False
+    if version is None and judged:
+        version = lettering.reader().version
+    return {"judged": judged, "tesseract": version if judged else None, "read_at": read_at,
+            "why": "" if judged else (check.words if check is not None else
+                                      f"{lettering.NOT_JUDGED} (the job was made before the check)")}
 
 
 def shape_stage(jobs, settings, report=print, kept=None, keep_going=False):
@@ -519,7 +551,7 @@ def judged_fill(folder, painted, touch_record, made_corners, made_triangles):
 
 def finished(job, settings, report=print):
     from . import bake, glb, inspection, likeness, lying, picture_checks as P, render
-    from . import state_judge, subject_judge
+    from . import lettering, state_judge, subject_judge
     from . import report as pages
     from .mesh_tools import corner_normals
 
@@ -584,7 +616,9 @@ def finished(job, settings, report=print):
         else:
             measures["string"] = {"drawn": False, "brace_m": string["brace_m"], "why": string["why"]}
     # The chosen picture checked again, so a measure corrected since it was painted counts; SigLIP 2's verdicts (the
-    # thing asked for, and the state) need its model and are kept from when the picture was chosen.
+    # thing asked for, and the state) need its model and are kept from when the picture was chosen. The lettering
+    # needs no card and is read again, with the words as read now; without a usable tesseract here, the reading made
+    # when the picture was chosen is kept (and a job never read says so).
     picture_result = P.checked(np.asarray(picture), mask)
     chosen = job.record.get("picture", {})
     chosen_try = chosen.get("tries", {}).get(str(chosen.get("seed")), {})
@@ -592,6 +626,24 @@ def finished(job, settings, report=print):
         kept_check = state_judge.check_from_record(chosen_try, name)
         if kept_check is not None:
             picture_result.checks.append(kept_check)
+    required = bool((job.record.get("settings") or {}).get("require_lettering"))
+    if lettering.reader().usable:
+        lettering_check = lettering.add_lettering_check(picture_result, np.asarray(picture), mask,
+                                                        words.lettering_asked(subject.prompt), required)
+        job.record["lettering"] = lettering_record(lettering_check, "finish")
+    else:
+        kept_check = state_judge.check_from_record(chosen_try, lettering.NAME)
+        if kept_check is not None:
+            picture_result.checks.append(kept_check)
+        if kept_check is None:
+            # Made before the check, and no reader here to read it now.
+            job.record["lettering"] = {"judged": False, "tesseract": None, "read_at": "finish",
+                                       "why": lettering.reader().why}
+        elif not lettering.was_read(kept_check):
+            job.record["lettering"] = lettering_record(kept_check, "pictures")
+        elif "lettering" not in job.record:
+            # Read when the picture was chosen, before the reading was recorded apart: its version not known.
+            job.record["lettering"] = {"judged": True, "tesseract": None, "read_at": "pictures", "why": ""}
     grouped = {"picture": [c.as_dict() for c in picture_result.checks], "shape": [c.as_dict() for c in checks],
                "paint": [c.as_dict() for c in paint_checks]}
     every = [c for group in grouped.values() for c in group]
@@ -623,6 +675,11 @@ def finished(job, settings, report=print):
         "marks": {name: {"at": [round(float(x), 4) for x in where], "up": [round(float(x), 4) for x in up]}
                   for name, (where, up, _) in marks.items()},
         "status": job.record["status"], "checks": grouped, "seconds": job["seconds"],
+        # Whether the chosen picture was read for painted lettering, and by which tesseract (lettering.py): a job not
+        # read passes nothing about lettering.
+        "lettering_judged": job.record["lettering"]["judged"],
+        "tesseract_version": job.record["lettering"]["tesseract"],
+        "lettering": job.record["lettering"],
         "measures": json.loads(json.dumps(measures, default=float)),
     }
     with open(job.path(f"{slug}.provenance.json"), "w") as file:
@@ -675,6 +732,12 @@ NEEDS_STATE_MODEL = ("needs SigLIP 2, which judges whether a lid, a cover or doo
 # Without SigLIP 2 the other things are made, each try unjudged against its prompt; the run says so.
 NO_SUBJECT_JUDGE = ("SigLIP 2 is not downloaded: the pictures are not checked to show the thing asked for (run "
                     "./setup.sh again and accept it)")
+# Without a usable tesseract (optional) the pictures are not read for painted lettering; the run and each try say so.
+NO_LETTERING_READER = ("tesseract cannot read the pictures for painted lettering (optional, recommended: version 5 or "
+                       "newer with its English data; docs/setup.md says how to install it)")
+# A run that requires the reader (`--require-lettering`, the measured run) makes no job without it.
+NEEDS_LETTERING_READER = ("the run requires tesseract to read the pictures for painted lettering "
+                          "(--require-lettering), and it cannot")
 
 
 def model_present(settings, name, model_id):
@@ -718,6 +781,15 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
             if job.subject.state and not job.has("picture.png"):
                 not_made(job, NEEDS_STATE_MODEL, report)
                 job.set_aside = True
+    # The measured run reads every picture for lettering: without a usable reader its jobs are not made.
+    if "pictures" in stages and settings.require_lettering:
+        from . import lettering
+
+        if not lettering.reader().usable:
+            for job in jobs:
+                if not job.set_aside and not job.has("picture.png"):
+                    not_made(job, f"{NEEDS_LETTERING_READER}: {lettering.reader().why}", report)
+                    job.set_aside = True
     for stage in stages:
         jobs = [job for job in jobs if not job.set_aside]
         if stage in ("shape", "paint"):

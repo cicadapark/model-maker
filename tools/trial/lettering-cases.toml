@@ -1,0 +1,2468 @@
+# The lettering check's labelled pictures (11 November 2026; docs/objects.md, "Painted lettering"): picture tries the
+# trials painted (every try that looser limits would have refused, and 100 drawn at random from the rest), and 160
+# painted for this by tools/trial/paint_tries.py, with the pipeline's own picture words and seeds, on the 16 GB card
+# ("invite-3080") and the 12 GB card ("asked-3060"), for prompts that invite lettering ("an old iron anvil", "a wooden
+# crate", "a brass plaque", "a gold coin") or ask for it ("a wooden sign that says OPEN", "a stone gravestone with an
+# inscription"). None of release 1's unseen prompts is here. Labelled blind: each picture cropped round its cut-out,
+# shuffled under a random code (`code`), with no word of its prompt or of what the reader read
+# (tools/trial/lettering_sheets.py); every label was written before the key was opened.
+#
+# `shows`: "letters" (letters, words, numbers or a signature painted on the object, large enough to read as such),
+# "none", or "unclear" (a mark too small to read: a maker's stamp a few pixels tall, a logo without letters), with
+# `why` where it helps. `prompt` is the prompt it was painted for. `regression.py run` judges them as the case
+# "lettering-pictures", as the pipeline's choice of try judges its prompt: "no painted lettering" must pass every
+# picture showing none and every picture whose prompt asks for lettering, and refuse every picture showing letters
+# its prompt does not ask for, but those marked `known_miss` (the reader's known limits, shown, not held: if one is
+# caught one day, the run says so). "unclear" is shown, not held. Labels are never changed to make a run hold
+# (docs/metrics.md, the honesty rules). The pictures themselves are not published (docs/objects.md, "The regression
+# set").
+
+
+[[picture]]
+name = "09-first-trial-round-wooden-shield-iron-524506"
+source = "2026-11-09-first-trial/round-wooden-shield-iron/pictures/524506.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "DFP"
+
+[[picture]]
+name = "09-first-trial-round-wooden-shield-iron-524507"
+source = "2026-11-09-first-trial/round-wooden-shield-iron/pictures/524507.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "USR"
+
+[[picture]]
+name = "09-first-trial-round-wooden-shield-iron-524508"
+source = "2026-11-09-first-trial/round-wooden-shield-iron/pictures/524508.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "QNF"
+
+[[picture]]
+name = "09-first-trial-round-wooden-shield-iron-524509"
+source = "2026-11-09-first-trial/round-wooden-shield-iron/pictures/524509.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "WKY"
+
+[[picture]]
+name = "09-first-trial-rusty-iron-lantern-385547"
+source = "2026-11-09-first-trial/rusty-iron-lantern/pictures/385547.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "LFJ"
+
+[[picture]]
+name = "09-first-trial-rusty-iron-lantern-385549"
+source = "2026-11-09-first-trial/rusty-iron-lantern/pictures/385549.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "JWW"
+
+[[picture]]
+name = "09-first-trial-three-legged-stool-775049"
+source = "2026-11-09-first-trial/three-legged-stool/pictures/775049.png"
+prompt = "a three-legged stool"
+shows = "none"
+code = "IWQ"
+
+[[picture]]
+name = "09-first-trial-wooden-treasure-chest-878511"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878511.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "RXL"
+
+[[picture]]
+name = "09-first-trial-wooden-treasure-chest-878512"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878512.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "SQE"
+
+[[picture]]
+name = "09-first-trial-wooden-treasure-chest-878513"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878513.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "XHL"
+
+[[picture]]
+name = "09-first-trial-wooden-treasure-chest-878514"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878514.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "VGP"
+
+[[picture]]
+name = "09-first-trial-wooden-treasure-chest-878516"
+source = "2026-11-09-first-trial/wooden-treasure-chest/pictures/878516.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "QQN"
+
+[[picture]]
+name = "09-second-run-fixes-refinished-chair-108645"
+source = "2026-11-09-second-run/fixes-refinished/chair/pictures/108645.png"
+prompt = "an old looking chair"
+shows = "none"
+code = "ARN"
+
+[[picture]]
+name = "09-second-run-lead-cutout-candle-brass-holder-501741"
+source = "2026-11-09-second-run/lead-cutout/candle-brass-holder/pictures/501741.png"
+prompt = "a candle in a brass holder"
+shows = "none"
+code = "KCD"
+
+[[picture]]
+name = "09-second-run-lead-cutout-chair-153238"
+source = "2026-11-09-second-run/lead-cutout/chair/pictures/153238.png"
+prompt = "an old looking chair"
+shows = "none"
+code = "ZKO"
+
+[[picture]]
+name = "09-second-run-lead-cutout-clay-jug-371213"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371213.png"
+prompt = "a clay jug"
+shows = "none"
+code = "BWJ"
+
+[[picture]]
+name = "09-second-run-lead-cutout-clay-jug-371214"
+source = "2026-11-09-second-run/lead-cutout/clay-jug/pictures/371214.png"
+prompt = "a clay jug"
+shows = "none"
+code = "FTI"
+
+[[picture]]
+name = "09-second-run-lead-cutout-round-wooden-shield-iron-595236"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595236.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "ZLD"
+
+[[picture]]
+name = "09-second-run-lead-cutout-round-wooden-shield-iron-595239"
+source = "2026-11-09-second-run/lead-cutout/round-wooden-shield-iron/pictures/595239.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "JQW"
+
+[[picture]]
+name = "09-second-run-lead-cutout-rusty-iron-lantern-908369"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908369.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "WAC"
+
+[[picture]]
+name = "09-second-run-lead-cutout-rusty-iron-lantern-908372"
+source = "2026-11-09-second-run/lead-cutout/rusty-iron-lantern/pictures/908372.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "FVF"
+
+[[picture]]
+name = "09-second-run-lead-cutout-wooden-barrel-iron-hoops-638977"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638977.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "UFE"
+
+[[picture]]
+name = "09-second-run-lead-cutout-wooden-barrel-iron-hoops-638978"
+source = "2026-11-09-second-run/lead-cutout/wooden-barrel-iron-hoops/pictures/638978.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "KCV"
+
+[[picture]]
+name = "09-second-run-lead-cutout-wooden-longbow-610375"
+source = "2026-11-09-second-run/lead-cutout/wooden-longbow/pictures/610375.png"
+prompt = "a wooden longbow"
+shows = "none"
+code = "JTO"
+
+[[picture]]
+name = "09-second-run-lead-cutout-wooden-treasure-chest-604626"
+source = "2026-11-09-second-run/lead-cutout/wooden-treasure-chest/pictures/604626.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "EKU"
+
+[[picture]]
+name = "09-second-run-lead-floating-wooden-longbow-249132"
+source = "2026-11-09-second-run/lead-floating/wooden-longbow/pictures/249132.png"
+prompt = "a wooden longbow"
+shows = "none"
+code = "DAP"
+
+[[picture]]
+name = "09-second-run-lead-isolated-leather-bound-book-closed-233815"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233815.png"
+prompt = "a leather-bound book, closed"
+shows = "none"
+code = "ZNU"
+
+[[picture]]
+name = "09-second-run-lead-isolated-leather-bound-book-closed-233818"
+source = "2026-11-09-second-run/lead-isolated/leather-bound-book-closed/pictures/233818.png"
+prompt = "a leather-bound book, closed"
+shows = "none"
+code = "VMS"
+
+[[picture]]
+name = "09-second-run-lead-isolated-round-wooden-shield-iron-752047"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752047.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "FVG"
+
+[[picture]]
+name = "09-second-run-lead-isolated-round-wooden-shield-iron-752048"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752048.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "SIL"
+
+[[picture]]
+name = "09-second-run-lead-isolated-round-wooden-shield-iron-752049"
+source = "2026-11-09-second-run/lead-isolated/round-wooden-shield-iron/pictures/752049.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "VTD"
+
+[[picture]]
+name = "09-second-run-lead-isolated-rusty-iron-lantern-218244"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218244.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "BUF"
+
+[[picture]]
+name = "09-second-run-lead-isolated-rusty-iron-lantern-218245"
+source = "2026-11-09-second-run/lead-isolated/rusty-iron-lantern/pictures/218245.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "TEY"
+
+[[picture]]
+name = "09-second-run-lead-isolated-wooden-barrel-iron-hoops-680965"
+source = "2026-11-09-second-run/lead-isolated/wooden-barrel-iron-hoops/pictures/680965.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "GDR"
+
+[[picture]]
+name = "10-3060-trial-4-broom-40961"
+source = "2026-11-10-3060-trial-4/broom/pictures/40961.png"
+prompt = "a broom"
+shows = "none"
+code = "OOD"
+
+[[picture]]
+name = "10-3060-trial-4-broom-40962"
+source = "2026-11-10-3060-trial-4/broom/pictures/40962.png"
+prompt = "a broom"
+shows = "none"
+code = "MGF"
+
+[[picture]]
+name = "10-3060-trial-4-candle-brass-holder-115215"
+source = "2026-11-10-3060-trial-4/candle-brass-holder/pictures/115215.png"
+prompt = "a candle in a brass holder"
+shows = "none"
+code = "QKF"
+
+[[picture]]
+name = "10-3060-trial-4-chair-108642"
+source = "2026-11-10-3060-trial-4/chair/pictures/108642.png"
+prompt = "an old looking chair"
+shows = "none"
+code = "HTQ"
+
+[[picture]]
+name = "10-3060-trial-4-clay-jug-50187"
+source = "2026-11-10-3060-trial-4/clay-jug/pictures/50187.png"
+prompt = "a clay jug"
+shows = "none"
+code = "JLC"
+
+[[picture]]
+name = "10-3060-trial-4-double-bitted-battle-axe-230146"
+source = "2026-11-10-3060-trial-4/double-bitted-battle-axe/pictures/230146.png"
+prompt = "a double-bitted battle axe"
+shows = "none"
+code = "SON"
+
+[[picture]]
+name = "10-3060-trial-4-iron-sword-127913"
+source = "2026-11-10-3060-trial-4/iron-sword/pictures/127913.png"
+prompt = "an old iron sword"
+shows = "none"
+code = "QRE"
+
+[[picture]]
+name = "10-3060-trial-4-leather-bound-book-closed-935321"
+source = "2026-11-10-3060-trial-4/leather-bound-book-closed/pictures/935321.png"
+prompt = "a leather-bound book, closed"
+shows = "letters"
+code = "SGH"
+
+[[picture]]
+name = "10-3060-trial-4-round-wooden-shield-iron-524502"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524502.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "MUM"
+
+[[picture]]
+name = "10-3060-trial-4-round-wooden-shield-iron-524503"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524503.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "WOJ"
+
+[[picture]]
+name = "10-3060-trial-4-round-wooden-shield-iron-524504"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524504.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "CMM"
+
+[[picture]]
+name = "10-3060-trial-4-round-wooden-shield-iron-524505"
+source = "2026-11-10-3060-trial-4/round-wooden-shield-iron/pictures/524505.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "DBO"
+
+[[picture]]
+name = "10-3060-trial-4-rusty-iron-lantern-141221"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141221.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "JLJ"
+
+[[picture]]
+name = "10-3060-trial-4-rusty-iron-lantern-141222"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141222.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "ECM"
+
+[[picture]]
+name = "10-3060-trial-4-rusty-iron-lantern-141223"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141223.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "WME"
+
+[[picture]]
+name = "10-3060-trial-4-rusty-iron-lantern-141224"
+source = "2026-11-10-3060-trial-4/rusty-iron-lantern/pictures/141224.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "YQI"
+
+[[picture]]
+name = "10-3060-trial-4-wooden-barrel-iron-hoops-465417"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465417.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "PPN"
+
+[[picture]]
+name = "10-3060-trial-4-wooden-barrel-iron-hoops-465418"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465418.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "ZBC"
+
+[[picture]]
+name = "10-3060-trial-4-wooden-barrel-iron-hoops-465419"
+source = "2026-11-10-3060-trial-4/wooden-barrel-iron-hoops/pictures/465419.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "IZJ"
+
+[[picture]]
+name = "10-3060-trial-4-wooden-treasure-chest-581161"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581161.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "DIF"
+
+[[picture]]
+name = "10-3060-trial-4-wooden-treasure-chest-581163"
+source = "2026-11-10-3060-trial-4/wooden-treasure-chest/pictures/581163.png"
+prompt = "a wooden treasure chest"
+shows = "none"
+code = "LCC"
+
+[[picture]]
+name = "10-third-trial-leather-bound-book-closed-628200"
+source = "2026-11-10-third-trial/leather-bound-book-closed/pictures/628200.png"
+prompt = "a leather-bound book, closed"
+shows = "none"
+code = "GCG"
+
+[[picture]]
+name = "10-third-trial-wooden-treasure-chest-962713"
+source = "2026-11-10-third-trial/wooden-treasure-chest/pictures/962713.png"
+prompt = "a wooden treasure chest"
+shows = "unclear"
+code = "WYW"
+why = "a scratch-like mark a few pixels wide on the latch"
+
+[[picture]]
+name = "10-trial-5-broom-40961"
+source = "2026-11-10-trial-5/broom/pictures/40961.png"
+prompt = "a broom"
+shows = "none"
+code = "MPU"
+
+[[picture]]
+name = "10-trial-5-chair-108639"
+source = "2026-11-10-trial-5/chair/pictures/108639.png"
+prompt = "an old looking chair"
+shows = "none"
+code = "YMO"
+
+[[picture]]
+name = "10-trial-5-chair-108642"
+source = "2026-11-10-trial-5/chair/pictures/108642.png"
+prompt = "an old looking chair"
+shows = "none"
+code = "UJY"
+
+[[picture]]
+name = "10-trial-5-clay-jug-50188"
+source = "2026-11-10-trial-5/clay-jug/pictures/50188.png"
+prompt = "a clay jug"
+shows = "none"
+code = "LFD"
+
+[[picture]]
+name = "10-trial-5-double-bitted-battle-axe-230146"
+source = "2026-11-10-trial-5/double-bitted-battle-axe/pictures/230146.png"
+prompt = "a double-bitted battle axe"
+shows = "none"
+code = "WGX"
+
+[[picture]]
+name = "10-trial-5-iron-sword-127912"
+source = "2026-11-10-trial-5/iron-sword/pictures/127912.png"
+prompt = "an old iron sword"
+shows = "none"
+code = "JGQ"
+
+[[picture]]
+name = "10-trial-5-leather-bound-book-closed-935320"
+source = "2026-11-10-trial-5/leather-bound-book-closed/pictures/935320.png"
+prompt = "a leather-bound book, closed"
+shows = "none"
+code = "NVK"
+
+[[picture]]
+name = "10-trial-5-leather-bound-book-closed-935321"
+source = "2026-11-10-trial-5/leather-bound-book-closed/pictures/935321.png"
+prompt = "a leather-bound book, closed"
+shows = "letters"
+code = "PQZ"
+
+[[picture]]
+name = "10-trial-5-round-table-719531"
+source = "2026-11-10-trial-5/round-table/pictures/719531.png"
+prompt = "a small round table"
+shows = "none"
+code = "RSC"
+
+[[picture]]
+name = "10-trial-5-round-table-719532"
+source = "2026-11-10-trial-5/round-table/pictures/719532.png"
+prompt = "a small round table"
+shows = "none"
+code = "KUE"
+
+[[picture]]
+name = "10-trial-5-round-table-719533"
+source = "2026-11-10-trial-5/round-table/pictures/719533.png"
+prompt = "a small round table"
+shows = "none"
+code = "MNC"
+
+[[picture]]
+name = "10-trial-5-round-wooden-shield-iron-524502"
+source = "2026-11-10-trial-5/round-wooden-shield-iron/pictures/524502.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "OIE"
+
+[[picture]]
+name = "10-trial-5-round-wooden-shield-iron-524504"
+source = "2026-11-10-trial-5/round-wooden-shield-iron/pictures/524504.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "OYY"
+
+[[picture]]
+name = "10-trial-5-round-wooden-shield-iron-524505"
+source = "2026-11-10-trial-5/round-wooden-shield-iron/pictures/524505.png"
+prompt = "a round wooden shield with an iron boss"
+shows = "none"
+code = "YWU"
+
+[[picture]]
+name = "10-trial-5-rusty-iron-lantern-141223"
+source = "2026-11-10-trial-5/rusty-iron-lantern/pictures/141223.png"
+prompt = "a rusty iron lantern"
+shows = "none"
+code = "PUY"
+
+[[picture]]
+name = "10-trial-5-spear-leaf-shaped-head-529268"
+source = "2026-11-10-trial-5/spear-leaf-shaped-head/pictures/529268.png"
+prompt = "a spear with a leaf-shaped head"
+shows = "none"
+code = "QBP"
+
+[[picture]]
+name = "10-trial-5-wooden-barrel-iron-hoops-465419"
+source = "2026-11-10-trial-5/wooden-barrel-iron-hoops/pictures/465419.png"
+prompt = "a wooden barrel with iron hoops"
+shows = "none"
+code = "SII"
+
+[[picture]]
+name = "10-war-hammer-words-new-battle-axe-454595"
+source = "2026-11-10-war-hammer-words/new/battle-axe/454595.png"
+prompt = "a battle axe"
+shows = "none"
+code = "ANY"
+
+[[picture]]
+name = "10-war-hammer-words-new-double-bitted-battle-axe-2112"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2112.png"
+prompt = "a double-bitted battle axe"
+shows = "none"
+code = "RLI"
+
+[[picture]]
+name = "10-war-hammer-words-new-double-bitted-battle-axe-2119"
+source = "2026-11-10-war-hammer-words/new/double-bitted-battle-axe/2119.png"
+prompt = "a double-bitted battle axe"
+shows = "none"
+code = "HWD"
+
+[[picture]]
+name = "10-war-hammer-words-new-mallet-267621"
+source = "2026-11-10-war-hammer-words/new/mallet/267621.png"
+prompt = "a mallet"
+shows = "none"
+code = "RCU"
+
+[[picture]]
+name = "10-war-hammer-words-new-maul-63643"
+source = "2026-11-10-war-hammer-words/new/maul/63643.png"
+prompt = "a maul"
+shows = "none"
+code = "FYY"
+
+[[picture]]
+name = "10-war-hammer-words-new-maul-63647"
+source = "2026-11-10-war-hammer-words/new/maul/63647.png"
+prompt = "a maul"
+shows = "none"
+code = "CBQ"
+
+[[picture]]
+name = "10-war-hammer-words-new-sledgehammer-388453"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388453.png"
+prompt = "a sledgehammer"
+shows = "none"
+code = "ZKE"
+
+[[picture]]
+name = "10-war-hammer-words-new-sledgehammer-388456"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388456.png"
+prompt = "a sledgehammer"
+shows = "none"
+code = "GEY"
+
+[[picture]]
+name = "10-war-hammer-words-new-sledgehammer-388460"
+source = "2026-11-10-war-hammer-words/new/sledgehammer/388460.png"
+prompt = "a sledgehammer"
+shows = "none"
+code = "ZIU"
+
+[[picture]]
+name = "10-war-hammer-words-old-battle-axe-222594"
+source = "2026-11-10-war-hammer-words/old/battle-axe/222594.png"
+prompt = "a battle axe"
+shows = "none"
+code = "LQX"
+
+[[picture]]
+name = "10-war-hammer-words-old-double-bitted-battle-axe-230147"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230147.png"
+prompt = "a double-bitted battle axe"
+shows = "letters"
+code = "HYA"
+why = "letter-like stamps on both blades"
+known_miss = "letter-like stamps a few pixels tall on the blades"
+
+[[picture]]
+name = "10-war-hammer-words-old-double-bitted-battle-axe-230148"
+source = "2026-11-10-war-hammer-words/old/double-bitted-battle-axe/230148.png"
+prompt = "a double-bitted battle axe"
+shows = "none"
+code = "AHV"
+
+[[picture]]
+name = "10-war-hammer-words-old-mallet-502360"
+source = "2026-11-10-war-hammer-words/old/mallet/502360.png"
+prompt = "a mallet"
+shows = "none"
+code = "OGE"
+
+[[picture]]
+name = "10-war-hammer-words-old-maul-987724"
+source = "2026-11-10-war-hammer-words/old/maul/987724.png"
+prompt = "a maul"
+shows = "unclear"
+code = "RPE"
+why = "a faint maker stamp along the handle"
+
+[[picture]]
+name = "10-war-hammer-words-old-maul-987725"
+source = "2026-11-10-war-hammer-words/old/maul/987725.png"
+prompt = "a maul"
+shows = "none"
+code = "KSC"
+
+[[picture]]
+name = "10-war-hammer-words-old-sledgehammer-814606"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814606.png"
+prompt = "a sledgehammer"
+shows = "letters"
+code = "XMS"
+known_miss = "small letters running up the handle"
+
+[[picture]]
+name = "10-war-hammer-words-old-sledgehammer-814611"
+source = "2026-11-10-war-hammer-words/old/sledgehammer/814611.png"
+prompt = "a sledgehammer"
+shows = "unclear"
+code = "NHK"
+why = "a logo a few pixels wide on the hammer's head"
+
+[[picture]]
+name = "10-war-hammer-words-old-war-hammer-141084"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141084.png"
+prompt = "a war hammer"
+shows = "none"
+code = "ESO"
+
+[[picture]]
+name = "10-war-hammer-words-old-war-hammer-141086"
+source = "2026-11-10-war-hammer-words/old/war-hammer/141086.png"
+prompt = "a war hammer"
+shows = "none"
+code = "XDK"
+
+[[picture]]
+name = "10-war-hammer-words-turn-mallet-617906"
+source = "2026-11-10-war-hammer-words/turn/mallet/617906.png"
+prompt = "a mallet"
+shows = "none"
+code = "JQE"
+
+[[picture]]
+name = "10-war-hammer-words-turn-maul-127887"
+source = "2026-11-10-war-hammer-words/turn/maul/127887.png"
+prompt = "a maul"
+shows = "none"
+code = "XKJ"
+
+[[picture]]
+name = "10-war-hammer-words-turn-maul-127888"
+source = "2026-11-10-war-hammer-words/turn/maul/127888.png"
+prompt = "a maul"
+shows = "none"
+code = "ZZT"
+
+[[picture]]
+name = "10-war-hammer-words-turn-sledgehammer-596881"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596881.png"
+prompt = "a sledgehammer"
+shows = "unclear"
+code = "TYR"
+why = "a maker stamp a few pixels tall along the handle"
+
+[[picture]]
+name = "10-war-hammer-words-turn-sledgehammer-596887"
+source = "2026-11-10-war-hammer-words/turn/sledgehammer/596887.png"
+prompt = "a sledgehammer"
+shows = "none"
+code = "JWR"
+
+[[picture]]
+name = "10-war-hammer-words-turn-war-hammer-288374"
+source = "2026-11-10-war-hammer-words/turn/war-hammer/288374.png"
+prompt = "a war hammer"
+shows = "none"
+code = "RWW"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171258"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171258.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "MPU"
+why = "a title written at a slant"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171259"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171259.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "GGU"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171260"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171260.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "MHW"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171261"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171261.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "JTE"
+why = "an open book, its pages printed"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171262"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171262.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "OUS"
+why = "an open book, small headings on its pages"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171263"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171263.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "DGN"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171264"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171264.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "TJP"
+why = "an open book, its pages printed"
+
+[[picture]]
+name = "11-lettering-asked-3060-book-title-on-its-171265"
+source = "2026-11-11-lettering/asked-3060/book-title-on-its/171265.png"
+prompt = "a book with a title on its cover"
+shows = "letters"
+code = "IPB"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154156"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154156.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "KAV"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154157"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154157.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "WXQ"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154158"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154158.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "COO"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154159"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154159.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "IBB"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154160"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154160.png"
+prompt = "a brass plaque engraved with a name"
+shows = "none"
+code = "TFJ"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154161"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154161.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "PDU"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154162"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154162.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "COM"
+
+[[picture]]
+name = "11-lettering-asked-3060-brass-plaque-engraved-name-154163"
+source = "2026-11-11-lettering/asked-3060/brass-plaque-engraved-name/154163.png"
+prompt = "a brass plaque engraved with a name"
+shows = "letters"
+code = "IBO"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717877"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717877.png"
+prompt = "a bronze bell"
+shows = "letters"
+code = "CPJ"
+why = "raised letters round the bell's rim"
+known_miss = "raised letters running round the bell's curve"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717878"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717878.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "ZGC"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717879"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717879.png"
+prompt = "a bronze bell"
+shows = "letters"
+code = "VJU"
+why = "a small signature in script on the bell"
+known_miss = "a small signature in script"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717880"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717880.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "YVS"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717881"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717881.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "ODL"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717882"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717882.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "AEP"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717883"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717883.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "OOI"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-bell-717884"
+source = "2026-11-11-lettering/asked-3060/bronze-bell/717884.png"
+prompt = "a bronze bell"
+shows = "none"
+code = "GGH"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729475"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729475.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "LWW"
+why = "small lettering round the coin's rim"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729476"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729476.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "ERZ"
+why = "small lettering round the coin's rim"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729477"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729477.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "FZW"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729478"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729478.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "VWR"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729479"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729479.png"
+prompt = "a bronze medal"
+shows = "none"
+code = "XLF"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729480"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729480.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "EUV"
+why = "curved lettering round a medal"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729481"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729481.png"
+prompt = "a bronze medal"
+shows = "none"
+code = "DFW"
+
+[[picture]]
+name = "11-lettering-asked-3060-bronze-medal-729482"
+source = "2026-11-11-lettering/asked-3060/bronze-medal/729482.png"
+prompt = "a bronze medal"
+shows = "letters"
+code = "ZPA"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200944"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200944.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "YAJ"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200945"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200945.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "PAG"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200946"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200946.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "WSN"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200947"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200947.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "XZE"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200948"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200948.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "JNC"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200949"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200949.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "TPR"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200950"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200950.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "CDC"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-gravestone-inscription-200951"
+source = "2026-11-11-lettering/asked-3060/stone-gravestone-inscription/200951.png"
+prompt = "a stone gravestone with an inscription"
+shows = "letters"
+code = "URR"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466176"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466176.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "QAO"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466177"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466177.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "FOI"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466178"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466178.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "MTJ"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466179"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466179.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "JZD"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466180"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466180.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "BRI"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466181"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466181.png"
+prompt = "a stone milestone"
+shows = "letters"
+code = "MQV"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466182"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466182.png"
+prompt = "a stone milestone"
+shows = "letters"
+code = "ZDL"
+
+[[picture]]
+name = "11-lettering-asked-3060-stone-milestone-466183"
+source = "2026-11-11-lettering/asked-3060/stone-milestone/466183.png"
+prompt = "a stone milestone"
+shows = "none"
+code = "HFU"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903712"
+source = "2026-11-11-lettering/asked-3060/tin-box/903712.png"
+prompt = "a tin box"
+shows = "none"
+code = "DNX"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903713"
+source = "2026-11-11-lettering/asked-3060/tin-box/903713.png"
+prompt = "a tin box"
+shows = "none"
+code = "PDA"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903714"
+source = "2026-11-11-lettering/asked-3060/tin-box/903714.png"
+prompt = "a tin box"
+shows = "none"
+code = "MMN"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903715"
+source = "2026-11-11-lettering/asked-3060/tin-box/903715.png"
+prompt = "a tin box"
+shows = "none"
+code = "YZD"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903716"
+source = "2026-11-11-lettering/asked-3060/tin-box/903716.png"
+prompt = "a tin box"
+shows = "none"
+code = "BLX"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903717"
+source = "2026-11-11-lettering/asked-3060/tin-box/903717.png"
+prompt = "a tin box"
+shows = "none"
+code = "SOA"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903718"
+source = "2026-11-11-lettering/asked-3060/tin-box/903718.png"
+prompt = "a tin box"
+shows = "none"
+code = "KLU"
+
+[[picture]]
+name = "11-lettering-asked-3060-tin-box-903719"
+source = "2026-11-11-lettering/asked-3060/tin-box/903719.png"
+prompt = "a tin box"
+shows = "none"
+code = "XCG"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600509"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600509.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "VFE"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600510"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600510.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "SQI"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600511"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600511.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "TVY"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600512"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600512.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "ESD"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600513"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600513.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "BIO"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600514"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600514.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "VPZ"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600515"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600515.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "QYI"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-chest-drawers-600516"
+source = "2026-11-11-lettering/asked-3060/wooden-chest-drawers/600516.png"
+prompt = "a wooden chest of drawers"
+shows = "none"
+code = "LUD"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141186"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141186.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "KTQ"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141187"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141187.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "AKG"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141188"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141188.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "AHL"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141189"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141189.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "MUA"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141190"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141190.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "SQT"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141191"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141191.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "VKA"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141192"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141192.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "GKE"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-sign-that-says-141193"
+source = "2026-11-11-lettering/asked-3060/wooden-sign-that-says/141193.png"
+prompt = "a wooden sign that says OPEN"
+shows = "letters"
+code = "AZR"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133667"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133667.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "VNH"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133668"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133668.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "KSG"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133669"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133669.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "AJU"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133670"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133670.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "QJZ"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133671"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133671.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "AYD"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133672"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133672.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "RYM"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133673"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133673.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "ENX"
+
+[[picture]]
+name = "11-lettering-asked-3060-wooden-tea-chest-133674"
+source = "2026-11-11-lettering/asked-3060/wooden-tea-chest/133674.png"
+prompt = "a wooden tea chest"
+shows = "none"
+code = "OIU"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560348"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560348.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "PPR"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560349"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560349.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "VHI"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560350"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560350.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "NNC"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560351"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560351.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "WTJ"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560352"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560352.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "UZF"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560353"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560353.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "SFY"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560354"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560354.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "OBR"
+
+[[picture]]
+name = "11-lettering-invite-3080-brass-plaque-560355"
+source = "2026-11-11-lettering/invite-3080/brass-plaque/560355.png"
+prompt = "a brass plaque"
+shows = "none"
+code = "AEG"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80473"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80473.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "YOQ"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80474"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80474.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "PTY"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80475"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80475.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "YWR"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80476"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80476.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "USO"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80477"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80477.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "ESR"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80478"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80478.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "PAA"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80479"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80479.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "GDS"
+
+[[picture]]
+name = "11-lettering-invite-3080-glass-potion-bottle-80480"
+source = "2026-11-11-lettering/invite-3080/glass-potion-bottle/80480.png"
+prompt = "a glass potion bottle"
+shows = "none"
+code = "LBX"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828229"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828229.png"
+prompt = "a gold coin"
+shows = "unclear"
+code = "RKJ"
+why = "a small coin, a logo, its rim too small to read"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828230"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828230.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "LAR"
+why = "lettering round the coin's rim and a logo"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828231"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828231.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "KHB"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828232"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828232.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "GML"
+why = "lettering round the coin's rim and a logo"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828233"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828233.png"
+prompt = "a gold coin"
+shows = "unclear"
+code = "XKF"
+why = "a small coin, a logo and tiny lettering round its rim"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828234"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828234.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "DQN"
+why = "curved lettering round a coin and a logo"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828235"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828235.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "BQV"
+why = "small lettering round the coin's rim and a logo"
+
+[[picture]]
+name = "11-lettering-invite-3080-gold-coin-828236"
+source = "2026-11-11-lettering/invite-3080/gold-coin/828236.png"
+prompt = "a gold coin"
+shows = "letters"
+code = "RAA"
+known_miss = "curved lettering round a rim: tesseract reads straight lines"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328158"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328158.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "EKW"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328159"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328159.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "LZK"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328160"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328160.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "OZI"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328161"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328161.png"
+prompt = "an old iron anvil"
+shows = "unclear"
+code = "PYU"
+why = "faint raised marks on the anvil's waist"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328162"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328162.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "WOR"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328163"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328163.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "SZM"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328164"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328164.png"
+prompt = "an old iron anvil"
+shows = "unclear"
+code = "SZP"
+why = "a small emblem on the side, no letters"
+
+[[picture]]
+name = "11-lettering-invite-3080-iron-anvil-328165"
+source = "2026-11-11-lettering/invite-3080/iron-anvil/328165.png"
+prompt = "an old iron anvil"
+shows = "none"
+code = "WJI"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965290"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965290.png"
+prompt = "an old leather-bound book"
+shows = "letters"
+code = "ZDY"
+why = "an open book, its pages printed"
+known_miss = "small print on the open pages"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965291"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965291.png"
+prompt = "an old leather-bound book"
+shows = "unclear"
+code = "MTQ"
+why = "an open book, faint lines of print on its pages"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965292"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965292.png"
+prompt = "an old leather-bound book"
+shows = "none"
+code = "ARO"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965293"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965293.png"
+prompt = "an old leather-bound book"
+shows = "none"
+code = "TBC"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965294"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965294.png"
+prompt = "an old leather-bound book"
+shows = "none"
+code = "OXT"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965295"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965295.png"
+prompt = "an old leather-bound book"
+shows = "none"
+code = "NFT"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965296"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965296.png"
+prompt = "an old leather-bound book"
+shows = "letters"
+code = "EJX"
+
+[[picture]]
+name = "11-lettering-invite-3080-leather-bound-book-965297"
+source = "2026-11-11-lettering/invite-3080/leather-bound-book/965297.png"
+prompt = "an old leather-bound book"
+shows = "none"
+code = "MEM"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191672"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191672.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "HOE"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191673"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191673.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "TSE"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191674"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191674.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "KLV"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191675"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191675.png"
+prompt = "a stone gravestone"
+shows = "none"
+code = "SSS"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191676"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191676.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "PFR"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191677"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191677.png"
+prompt = "a stone gravestone"
+shows = "none"
+code = "JAV"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191678"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191678.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "QHS"
+
+[[picture]]
+name = "11-lettering-invite-3080-stone-gravestone-191679"
+source = "2026-11-11-lettering/invite-3080/stone-gravestone/191679.png"
+prompt = "a stone gravestone"
+shows = "letters"
+code = "XDH"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68241"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68241.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "ZSG"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68242"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68242.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "LUP"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68243"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68243.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "CHT"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68244"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68244.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "VGT"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68245"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68245.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "QFQ"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68246"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68246.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "PAK"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68247"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68247.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "XLX"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-barrel-68248"
+source = "2026-11-11-lettering/invite-3080/wooden-barrel/68248.png"
+prompt = "a wooden barrel"
+shows = "none"
+code = "LHF"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28109"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28109.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "CWS"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28110"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28110.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "HUZ"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28111"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28111.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "BPN"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28112"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28112.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "YXI"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28113"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28113.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "ITD"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28114"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28114.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "VWD"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28115"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28115.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "WGM"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-crate-28116"
+source = "2026-11-11-lettering/invite-3080/wooden-crate/28116.png"
+prompt = "a wooden crate"
+shows = "none"
+code = "JCW"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111054"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111054.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "GCM"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111055"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111055.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "STC"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111056"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111056.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "ENJ"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111057"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111057.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "ULK"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111058"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111058.png"
+prompt = "a wooden shipping crate"
+shows = "letters"
+code = "RCO"
+why = "a logo and a word on the crate"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111059"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111059.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "KSF"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111060"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111060.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "ESK"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-shipping-crate-111061"
+source = "2026-11-11-lettering/invite-3080/wooden-shipping-crate/111061.png"
+prompt = "a wooden shipping crate"
+shows = "none"
+code = "WAP"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336363"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336363.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "MXG"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336364"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336364.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "IKB"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336365"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336365.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "TYM"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336366"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336366.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "SRD"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336367"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336367.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "OPC"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336368"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336368.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "IJA"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336369"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336369.png"
+prompt = "a wooden signboard"
+shows = "letters"
+code = "BHX"
+
+[[picture]]
+name = "11-lettering-invite-3080-wooden-signboard-336370"
+source = "2026-11-11-lettering/invite-3080/wooden-signboard/336370.png"
+prompt = "a wooden signboard"
+shows = "none"
+code = "BQO"
+
+[[picture]]
+name = "11-qualities-described-curved-bronze-dagger-106426"
+source = "2026-11-11-qualities/described/curved-bronze-dagger/106426.png"
+prompt = "a curved bronze dagger"
+shows = "none"
+code = "JRF"
+
+[[picture]]
+name = "11-qualities-described-curved-hunting-knife-429467"
+source = "2026-11-11-qualities/described/curved-hunting-knife/429467.png"
+prompt = "a curved hunting knife"
+shows = "none"
+code = "KBX"
+
+[[picture]]
+name = "11-qualities-described-curved-iron-sword-732355"
+source = "2026-11-11-qualities/described/curved-iron-sword/732355.png"
+prompt = "a curved iron sword"
+shows = "none"
+code = "GZA"
+
+[[picture]]
+name = "11-qualities-described-curved-wooden-bench-63725"
+source = "2026-11-11-qualities/described/curved-wooden-bench/63725.png"
+prompt = "a curved wooden bench"
+shows = "none"
+code = "WYU"
+
+[[picture]]
+name = "11-qualities-described2-curved-bronze-dagger-982420"
+source = "2026-11-11-qualities/described2/curved-bronze-dagger/982420.png"
+prompt = "a curved bronze dagger"
+shows = "none"
+code = "BQO"
+
+[[picture]]
+name = "11-qualities-described2-curved-hunting-knife-531534"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531534.png"
+prompt = "a curved hunting knife"
+shows = "none"
+code = "AMS"
+
+[[picture]]
+name = "11-qualities-described2-curved-hunting-knife-531535"
+source = "2026-11-11-qualities/described2/curved-hunting-knife/531535.png"
+prompt = "a curved hunting knife"
+shows = "letters"
+code = "ZYG"
+why = "a logo and a word on the blade"
+
+[[picture]]
+name = "11-qualities-described2-curved-iron-sword-253523"
+source = "2026-11-11-qualities/described2/curved-iron-sword/253523.png"
+prompt = "a curved iron sword"
+shows = "none"
+code = "VNL"
+
+[[picture]]
+name = "11-qualities-final-curved-hunting-knife-79025"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79025.png"
+prompt = "a curved hunting knife"
+shows = "none"
+code = "JCZ"
+
+[[picture]]
+name = "11-qualities-final-curved-hunting-knife-79026"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79026.png"
+prompt = "a curved hunting knife"
+shows = "unclear"
+code = "VVG"
+why = "a stamp a few pixels tall at the top of the blade"
+
+[[picture]]
+name = "11-qualities-final-curved-hunting-knife-79028"
+source = "2026-11-11-qualities/final/curved-hunting-knife/79028.png"
+prompt = "a curved hunting knife"
+shows = "none"
+code = "NLK"
+
+[[picture]]
+name = "11-qualities-final-curved-short-sword-300243"
+source = "2026-11-11-qualities/final/curved-short-sword/300243.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "QEZ"
+
+[[picture]]
+name = "11-qualities-final-curved-short-sword-300246"
+source = "2026-11-11-qualities/final/curved-short-sword/300246.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "ADE"
+
+[[picture]]
+name = "11-qualities-final-curved-short-sword-300247"
+source = "2026-11-11-qualities/final/curved-short-sword/300247.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "ZQA"
+
+[[picture]]
+name = "11-qualities-final-curved-short-sword-300249"
+source = "2026-11-11-qualities/final/curved-short-sword/300249.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "QNO"
+
+[[picture]]
+name = "11-qualities-final-curved-silver-dagger-772509"
+source = "2026-11-11-qualities/final/curved-silver-dagger/772509.png"
+prompt = "a curved silver dagger"
+shows = "none"
+code = "SGM"
+
+[[picture]]
+name = "11-qualities-final-curved-steel-sabre-696362"
+source = "2026-11-11-qualities/final/curved-steel-sabre/696362.png"
+prompt = "a curved steel sabre"
+shows = "none"
+code = "RUT"
+
+[[picture]]
+name = "11-qualities-final-curved-steel-sabre-696367"
+source = "2026-11-11-qualities/final/curved-steel-sabre/696367.png"
+prompt = "a curved steel sabre"
+shows = "none"
+code = "ROG"
+
+[[picture]]
+name = "11-qualities-plain-3060-clay-vase-666231"
+source = "2026-11-11-qualities/plain-3060/clay-vase/666231.png"
+prompt = "a clay vase"
+shows = "none"
+code = "WUK"
+
+[[picture]]
+name = "11-qualities-plain-3060-clay-vase-666233"
+source = "2026-11-11-qualities/plain-3060/clay-vase/666233.png"
+prompt = "a clay vase"
+shows = "none"
+code = "LWK"
+
+[[picture]]
+name = "11-qualities-plain-3060-clay-vase-666236"
+source = "2026-11-11-qualities/plain-3060/clay-vase/666236.png"
+prompt = "a clay vase"
+shows = "none"
+code = "OBS"
+
+[[picture]]
+name = "11-qualities-plain-3060-curved-steel-sabre-601477"
+source = "2026-11-11-qualities/plain-3060/curved-steel-sabre/601477.png"
+prompt = "a curved steel sabre"
+shows = "none"
+code = "RXG"
+
+[[picture]]
+name = "11-qualities-plain-3060-curved-steel-sabre-601478"
+source = "2026-11-11-qualities/plain-3060/curved-steel-sabre/601478.png"
+prompt = "a curved steel sabre"
+shows = "none"
+code = "WBY"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-clay-plate-676258"
+source = "2026-11-11-qualities/plain-3060/round-clay-plate/676258.png"
+prompt = "a round clay plate"
+shows = "none"
+code = "TOZ"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-iron-shield-326374"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326374.png"
+prompt = "a round iron shield"
+shows = "none"
+code = "FYF"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-iron-shield-326375"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326375.png"
+prompt = "a round iron shield"
+shows = "none"
+code = "DDT"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-iron-shield-326376"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326376.png"
+prompt = "a round iron shield"
+shows = "none"
+code = "XGN"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-iron-shield-326378"
+source = "2026-11-11-qualities/plain-3060/round-iron-shield/326378.png"
+prompt = "a round iron shield"
+shows = "none"
+code = "ZSD"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-wooden-table-235121"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235121.png"
+prompt = "a round wooden table"
+shows = "none"
+code = "DJX"
+
+[[picture]]
+name = "11-qualities-plain-3060-round-wooden-table-235124"
+source = "2026-11-11-qualities/plain-3060/round-wooden-table/235124.png"
+prompt = "a round wooden table"
+shows = "none"
+code = "BKS"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-glass-bottle-959201"
+source = "2026-11-11-qualities/plain-3060/tall-glass-bottle/959201.png"
+prompt = "a tall glass bottle"
+shows = "none"
+code = "VLC"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wax-candle-529075"
+source = "2026-11-11-qualities/plain-3060/tall-wax-candle/529075.png"
+prompt = "a tall wax candle"
+shows = "none"
+code = "CNJ"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wax-candle-529076"
+source = "2026-11-11-qualities/plain-3060/tall-wax-candle/529076.png"
+prompt = "a tall wax candle"
+shows = "none"
+code = "DOS"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wax-candle-529079"
+source = "2026-11-11-qualities/plain-3060/tall-wax-candle/529079.png"
+prompt = "a tall wax candle"
+shows = "none"
+code = "FJY"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wooden-cabinet-991760"
+source = "2026-11-11-qualities/plain-3060/tall-wooden-cabinet/991760.png"
+prompt = "a tall wooden cabinet"
+shows = "none"
+code = "QXX"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wooden-cabinet-991761"
+source = "2026-11-11-qualities/plain-3060/tall-wooden-cabinet/991761.png"
+prompt = "a tall wooden cabinet"
+shows = "none"
+code = "QSW"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wooden-cabinet-991763"
+source = "2026-11-11-qualities/plain-3060/tall-wooden-cabinet/991763.png"
+prompt = "a tall wooden cabinet"
+shows = "none"
+code = "EVK"
+
+[[picture]]
+name = "11-qualities-plain-3060-tall-wooden-cabinet-991764"
+source = "2026-11-11-qualities/plain-3060/tall-wooden-cabinet/991764.png"
+prompt = "a tall wooden cabinet"
+shows = "none"
+code = "ORZ"
+
+[[picture]]
+name = "11-qualities-plain-3060-wooden-cabinet-385666"
+source = "2026-11-11-qualities/plain-3060/wooden-cabinet/385666.png"
+prompt = "a wooden cabinet"
+shows = "none"
+code = "OOJ"
+
+[[picture]]
+name = "11-qualities-plain-3060-wooden-cabinet-385668"
+source = "2026-11-11-qualities/plain-3060/wooden-cabinet/385668.png"
+prompt = "a wooden cabinet"
+shows = "none"
+code = "DSI"
+
+[[picture]]
+name = "11-qualities-plain-3060-wooden-cabinet-385669"
+source = "2026-11-11-qualities/plain-3060/wooden-cabinet/385669.png"
+prompt = "a wooden cabinet"
+shows = "none"
+code = "GGJ"
+
+[[picture]]
+name = "11-qualities-plain-3060-wooden-table-131145"
+source = "2026-11-11-qualities/plain-3060/wooden-table/131145.png"
+prompt = "a wooden table"
+shows = "none"
+code = "FQA"
+
+[[picture]]
+name = "11-qualities-plain-3060b-curved-short-sword-205355"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205355.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "SUH"
+
+[[picture]]
+name = "11-qualities-plain-3060b-curved-short-sword-205356"
+source = "2026-11-11-qualities/plain-3060b/curved-short-sword/205356.png"
+prompt = "a curved short sword"
+shows = "none"
+code = "GUU"
+
+[[picture]]
+name = "11-qualities-plain-3060b-curved-silver-dagger-122945"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122945.png"
+prompt = "a curved silver dagger"
+shows = "none"
+code = "MTV"
+
+[[picture]]
+name = "11-qualities-plain-3060b-curved-silver-dagger-122949"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122949.png"
+prompt = "a curved silver dagger"
+shows = "none"
+code = "XMD"
+
+[[picture]]
+name = "11-qualities-plain-3060b-curved-silver-dagger-122952"
+source = "2026-11-11-qualities/plain-3060b/curved-silver-dagger/122952.png"
+prompt = "a curved silver dagger"
+shows = "none"
+code = "UDT"
+
+[[picture]]
+name = "11-qualities-plain-broken-wooden-chair-351081"
+source = "2026-11-11-qualities/plain/broken-wooden-chair/351081.png"
+prompt = "a broken wooden chair"
+shows = "unclear"
+code = "ESS"
+why = "a carved squiggle on the seat front, like a tiny signature"
+
+[[picture]]
+name = "11-qualities-plain-curved-hunting-knife-429467"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429467.png"
+prompt = "a curved hunting knife"
+shows = "unclear"
+code = "VEL"
+why = "a maker mark of tiny letters along the blade"
+
+[[picture]]
+name = "11-qualities-plain-curved-hunting-knife-429468"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429468.png"
+prompt = "a curved hunting knife"
+shows = "letters"
+code = "DLU"
+why = "two small words on the blade"
+known_miss = "two words a few pixels tall on the blade"
+
+[[picture]]
+name = "11-qualities-plain-curved-hunting-knife-429472"
+source = "2026-11-11-qualities/plain/curved-hunting-knife/429472.png"
+prompt = "a curved hunting knife"
+shows = "none"
+code = "FMN"
+
+[[picture]]
+name = "11-qualities-plain-curved-iron-sword-435965"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435965.png"
+prompt = "a curved iron sword"
+shows = "none"
+code = "UMV"
+
+[[picture]]
+name = "11-qualities-plain-curved-iron-sword-435972"
+source = "2026-11-11-qualities/plain/curved-iron-sword/435972.png"
+prompt = "a curved iron sword"
+shows = "none"
+code = "EVR"
+
+[[picture]]
+name = "11-qualities-plain-curved-wooden-bench-952920"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952920.png"
+prompt = "a curved wooden bench"
+shows = "none"
+code = "MBF"
+
+[[picture]]
+name = "11-qualities-plain-curved-wooden-bench-952922"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952922.png"
+prompt = "a curved wooden bench"
+shows = "none"
+code = "MQU"
+
+[[picture]]
+name = "11-qualities-plain-curved-wooden-bench-952924"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952924.png"
+prompt = "a curved wooden bench"
+shows = "none"
+code = "KOQ"
+
+[[picture]]
+name = "11-qualities-plain-curved-wooden-bench-952927"
+source = "2026-11-11-qualities/plain/curved-wooden-bench/952927.png"
+prompt = "a curved wooden bench"
+shows = "none"
+code = "UVX"
+
+[[picture]]
+name = "11-qualities-plain-hunting-knife-932365"
+source = "2026-11-11-qualities/plain/hunting-knife/932365.png"
+prompt = "a hunting knife"
+shows = "unclear"
+code = "NFR"
+why = "a maker mark of a few tiny letters on the blade"
+
+[[picture]]
+name = "11-qualities-plain-hunting-knife-932371"
+source = "2026-11-11-qualities/plain/hunting-knife/932371.png"
+prompt = "a hunting knife"
+shows = "none"
+code = "VEG"
+
+[[picture]]
+name = "11-qualities-plain-round-wooden-box-342734"
+source = "2026-11-11-qualities/plain/round-wooden-box/342734.png"
+prompt = "a round wooden box"
+shows = "none"
+code = "VNG"
+
+[[picture]]
+name = "11-qualities-plain-round-wooden-tray-731810"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731810.png"
+prompt = "a round wooden tray"
+shows = "none"
+code = "LJK"
+
+[[picture]]
+name = "11-qualities-plain-round-wooden-tray-731812"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731812.png"
+prompt = "a round wooden tray"
+shows = "none"
+code = "EDP"
+
+[[picture]]
+name = "11-qualities-plain-round-wooden-tray-731813"
+source = "2026-11-11-qualities/plain/round-wooden-tray/731813.png"
+prompt = "a round wooden tray"
+shows = "none"
+code = "YHI"
+
+[[picture]]
+name = "11-qualities-plain-rusty-iron-key-317410"
+source = "2026-11-11-qualities/plain/rusty-iron-key/317410.png"
+prompt = "a rusty iron key"
+shows = "none"
+code = "ZLH"
+
+[[picture]]
+name = "11-qualities-plain-rusty-iron-key-317414"
+source = "2026-11-11-qualities/plain/rusty-iron-key/317414.png"
+prompt = "a rusty iron key"
+shows = "none"
+code = "XMP"
+
+[[picture]]
+name = "11-qualities-plain-rusty-iron-key-317415"
+source = "2026-11-11-qualities/plain/rusty-iron-key/317415.png"
+prompt = "a rusty iron key"
+shows = "none"
+code = "UVF"
+
+[[picture]]
+name = "11-qualities-plain-shiny-new-iron-key-256222"
+source = "2026-11-11-qualities/plain/shiny-new-iron-key/256222.png"
+prompt = "a shiny new iron key"
+shows = "none"
+code = "EVM"
+
+[[picture]]
+name = "11-qualities-plain-short-squat-clay-vase-601723"
+source = "2026-11-11-qualities/plain/short-squat-clay-vase/601723.png"
+prompt = "a short squat clay vase"
+shows = "none"
+code = "BYD"
+
+[[picture]]
+name = "11-qualities-plain-square-mirror-458031"
+source = "2026-11-11-qualities/plain/square-mirror/458031.png"
+prompt = "a square mirror"
+shows = "none"
+code = "WZF"
+
+[[picture]]
+name = "11-qualities-plain-square-mirror-458033"
+source = "2026-11-11-qualities/plain/square-mirror/458033.png"
+prompt = "a square mirror"
+shows = "none"
+code = "YLP"
+
+[[picture]]
+name = "11-qualities-plain-square-wooden-box-622559"
+source = "2026-11-11-qualities/plain/square-wooden-box/622559.png"
+prompt = "a square wooden box"
+shows = "none"
+code = "RVI"
+
+[[picture]]
+name = "11-qualities-plain-square-wooden-box-622562"
+source = "2026-11-11-qualities/plain/square-wooden-box/622562.png"
+prompt = "a square wooden box"
+shows = "none"
+code = "ADF"
+
+[[picture]]
+name = "11-qualities-plain-straight-bronze-dagger-478513"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478513.png"
+prompt = "a straight bronze dagger"
+shows = "none"
+code = "MSO"
+
+[[picture]]
+name = "11-qualities-plain-straight-bronze-dagger-478515"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478515.png"
+prompt = "a straight bronze dagger"
+shows = "none"
+code = "SNI"
+
+[[picture]]
+name = "11-qualities-plain-straight-bronze-dagger-478520"
+source = "2026-11-11-qualities/plain/straight-bronze-dagger/478520.png"
+prompt = "a straight bronze dagger"
+shows = "none"
+code = "XSH"
+
+[[picture]]
+name = "11-qualities-plain-straight-iron-sword-226176"
+source = "2026-11-11-qualities/plain/straight-iron-sword/226176.png"
+prompt = "a straight iron sword"
+shows = "none"
+code = "KTM"
+
+[[picture]]
+name = "11-qualities-plain-tall-iron-lantern-641020"
+source = "2026-11-11-qualities/plain/tall-iron-lantern/641020.png"
+prompt = "a tall iron lantern"
+shows = "none"
+code = "XDF"
+
+[[picture]]
+name = "11-qualities-plain-tall-iron-lantern-641022"
+source = "2026-11-11-qualities/plain/tall-iron-lantern/641022.png"
+prompt = "a tall iron lantern"
+shows = "none"
+code = "LGY"
+
+[[picture]]
+name = "11-qualities-plain-tall-iron-lantern-641023"
+source = "2026-11-11-qualities/plain/tall-iron-lantern/641023.png"
+prompt = "a tall iron lantern"
+shows = "none"
+code = "OZA"
+
+[[picture]]
+name = "11-qualities-plain-tall-wooden-stool-20510"
+source = "2026-11-11-qualities/plain/tall-wooden-stool/20510.png"
+prompt = "a tall wooden stool"
+shows = "none"
+code = "SMG"
+
+[[picture]]
+name = "11-qualities-plain-tall-wooden-stool-20513"
+source = "2026-11-11-qualities/plain/tall-wooden-stool/20513.png"
+prompt = "a tall wooden stool"
+shows = "none"
+code = "KZH"
+
+[[picture]]
+name = "11-qualities-plain-tall-wooden-stool-20516"
+source = "2026-11-11-qualities/plain/tall-wooden-stool/20516.png"
+prompt = "a tall wooden stool"
+shows = "none"
+code = "SBE"
+
+[[picture]]
+name = "11-qualities-plain-wooden-chair-737395"
+source = "2026-11-11-qualities/plain/wooden-chair/737395.png"
+prompt = "a wooden chair"
+shows = "none"
+code = "SJO"
+
+[[picture]]
+name = "11-qualities-plain-wooden-chair-737400"
+source = "2026-11-11-qualities/plain/wooden-chair/737400.png"
+prompt = "a wooden chair"
+shows = "none"
+code = "GLY"

@@ -212,6 +212,96 @@ class Finish(unittest.TestCase):
         finally:
             shutil.rmtree(folder)
 
+    def anvil_with_its_try(self, folder, lettering_check=None, lettering_record=None):
+        """An unpainted anvil's job ready for its finish, its chosen try's record holding `lettering_check`."""
+        from model_maker import picture_checks
+
+        job = pipeline.Job(os.path.join(folder, "anvil"), "an iron anvil")
+        corners, triangles = shapes.surface_of([((-0.2, 0.0, -0.1), (0.2, 0.3, 0.1))], 0.01)
+        corners = O.set_down(corners, job["size_m"])
+        mask = render.silhouette(corners, triangles, 20, 512)
+        Image.fromarray(np.where(mask[..., None], 120, 210).astype(np.uint8).repeat(3, -1)).save(
+            job.path("picture.png"))
+        Image.fromarray(mask.astype(np.uint8) * 255).save(job.path("mask.png"))
+        np.savez_compressed(job.path("shape.npz"), corners=corners, triangles=triangles)
+        chosen = picture_checks.PictureResult(checks=[lettering_check] if lettering_check is not None else [])
+        job.record["picture"] = {"seed": 7, "tries": {"7": chosen.as_dict()}}
+        if lettering_record is not None:
+            job.record["lettering"] = lettering_record
+        job.save()
+        return job
+
+    def finished_with(self, job, reader, readings=()):
+        from unittest import mock
+
+        from model_maker import lettering
+
+        # The ledger beside the job, not the repository's metrics/.
+        ledger_folder = os.path.join(os.path.dirname(job.folder), "ledger")
+        with mock.patch.object(lettering, "reader", return_value=reader), \
+                mock.patch.object(lettering, "every_reading", return_value=list(readings)), \
+                mock.patch.dict(os.environ, {"MODEL_MAKER_LEDGER": ledger_folder}):
+            pipeline.finish_stage([job], pipeline.Settings(texture=256, verify=False), report=lambda _: None)
+        with open(job.path(f"{job['slug']}.provenance.json")) as file:
+            return json.load(file)
+
+    def test_a_refinish_reads_the_lettering_again(self):
+        # The 0.2.0 review: the other picture checks are measured again at a finish; the lettering needs no card.
+        from model_maker import lettering, picture_checks
+
+        folder = tempfile.mkdtemp()
+        try:
+            passed_then = picture_checks.Check(lettering.NAME, 0.0, lettering.MOST_CHARACTERS, "characters", True,
+                                               "no lettering read")
+            job = self.anvil_with_its_try(folder, passed_then, {"judged": True, "tesseract": "5.3.0",
+                                                                 "read_at": "pictures", "why": ""})
+            read_now = [lettering.Word("EANITIES", 90.0, 200.0, 200.0, 60.0, 12.0, "as painted")]
+            provenance = self.finished_with(job, lettering.Reader(True, "5.5.0", ""), read_now)
+            said = {c["name"]: c for c in provenance["checks"]["picture"]}
+            self.assertFalse(said[lettering.NAME]["passed"])
+            self.assertIn(lettering.NAME, job.record["status"])
+            self.assertIs(provenance["lettering_judged"], True)
+            self.assertEqual(provenance["tesseract_version"], "5.5.0")
+            self.assertEqual(job.record["lettering"]["read_at"], "finish")
+        finally:
+            shutil.rmtree(folder)
+
+    def test_without_a_reader_a_refinish_keeps_the_reading_made_when_the_try_was_chosen(self):
+        from model_maker import lettering, picture_checks
+
+        folder = tempfile.mkdtemp()
+        try:
+            refused_then = picture_checks.Check(lettering.NAME, 12.0, lettering.MOST_CHARACTERS, "characters", False,
+                                                "lettering painted on the object: read \"EANITIES\"")
+            job = self.anvil_with_its_try(folder, refused_then, {"judged": True, "tesseract": "5.3.0",
+                                                                  "read_at": "pictures", "why": ""})
+            provenance = self.finished_with(job, lettering.Reader(False, None, lettering.NOT_INSTALLED))
+            said = {c["name"]: c for c in provenance["checks"]["picture"]}
+            self.assertFalse(said[lettering.NAME]["passed"])
+            self.assertIs(provenance["lettering_judged"], True)
+            self.assertEqual(provenance["tesseract_version"], "5.3.0")
+        finally:
+            shutil.rmtree(folder)
+
+    def test_a_job_never_read_says_so_in_its_sidecar_report_and_ledger_line(self):
+        from model_maker import lettering
+
+        folder = tempfile.mkdtemp()
+        try:
+            job = self.anvil_with_its_try(folder, lettering.not_judged(lettering.NOT_INSTALLED))
+            provenance = self.finished_with(job, lettering.Reader(False, None, lettering.NOT_INSTALLED))
+            self.assertIs(provenance["lettering_judged"], False)
+            self.assertIsNone(provenance["tesseract_version"])
+            # Not counted: the status is what the counted checks say; the sidecar, report and ledger say it was unread.
+            self.assertNotIn(lettering.NAME, job.record["status"])
+            with open(job.path("report", "report.html")) as file:
+                self.assertIn("not read for painted lettering", file.read().lower())
+            with open(os.path.join(folder, "ledger", "jobs.jsonl")) as file:
+                line = [json.loads(text) for text in file][-1]
+            self.assertIs(line["lettering_judged"], False)
+        finally:
+            shutil.rmtree(folder)
+
     def test_a_web_in_a_mug_s_handle_is_carved_and_the_sidecar_says_so(self):
         folder = tempfile.mkdtemp()
         try:

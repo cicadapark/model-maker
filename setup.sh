@@ -184,11 +184,39 @@ check_rust() {
 check_tool() {
     local label=$1 command=$2 needed=$3 version
     if command -v "$command" >/dev/null 2>&1; then
-        # Its version number alone: the first line of --version can be longer than the table's column.
-        version=$("$command" --version 2>/dev/null | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+' | head -n 1)
+        # Its version number alone: the first line of --version can be longer than the table's column. A --version
+        # that fails or prints no number must not end the check (set -e, pipefail): "(version unknown)".
+        version=$("$command" --version 2>&1 | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+' | head -n 1 || true)
         row "$label" "$command ${version:-(version unknown)}" "ok"
     else
         missing "$label" "none" "$needed"
+    fi
+}
+
+# tesseract, optional: found, its version and its English data; not found or not usable, how to install it (not counted
+# as missing: the pipeline runs without it and says what it did not judge). Version 5 or newer is needed (version 4
+# has no Sauvola threshold). setup.sh installs no system package.
+readonly TESSERACT_INSTALL="reads pictures for painted lettering: tesseract 5 or newer with English data (Debian 12, \
+Ubuntu 24.04: sudo apt install tesseract-ocr tesseract-ocr-eng; Ubuntu 22.04 ships 4: docs/setup.md)"
+check_tesseract() {
+    local version major languages
+    if ! command -v tesseract >/dev/null 2>&1; then
+        row "tesseract" "none" "optional, recommended: $TESSERACT_INSTALL"
+        return
+    fi
+    # Tesseract 3 and some builds of 4 print their version on their errors; a --version that fails or prints no
+    # number must not end the check (set -e, pipefail).
+    version=$(tesseract --version 2>&1 | head -n 1 | grep -oE '[0-9]+(\.[0-9]+)+' | head -n 1 || true)
+    major=${version%%.*}
+    languages=$(tesseract --list-langs 2>&1 || true)
+    if [ -z "$version" ]; then
+        row "tesseract" "tesseract (version unknown)" "optional, not used (no version found): $TESSERACT_INSTALL"
+    elif [ "$major" -lt 5 ]; then
+        row "tesseract" "tesseract $version" "optional, not used (too old): $TESSERACT_INSTALL"
+    elif ! grep -qx 'eng' <<< "$(tr -d '\r' <<< "$languages")"; then
+        row "tesseract" "tesseract $version, no English data" "optional, not used: $TESSERACT_INSTALL"
+    else
+        row "tesseract" "tesseract $version" "ok"
     fi
 }
 
@@ -231,6 +259,7 @@ checked() {
     check_tool "git" git "git"
     check_tool "curl" curl "curl"
     check_tool "tar" tar "tar"
+    check_tesseract
     print_table
 }
 

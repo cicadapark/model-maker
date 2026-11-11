@@ -5,6 +5,7 @@ Nothing here guesses beyond the words. A word list decides each choice, so a use
 not (the report says which word decided it), and `model-maker make --stands no` or `--symmetric no` overrides it.
 """
 
+import functools
 import re
 from dataclasses import dataclass, field
 
@@ -45,6 +46,47 @@ BOW_VIEW = "standing upright, facing the viewer so its whole curve shows from ti
 TOOL_VIEW = "standing upright on its working end, its handle up, seen straight from the side, the whole length in view"
 SHIELD_VIEW ="seen straight from the front, its face to the viewer, upright"
 STYLE = "clean silhouette, true materials, crisp detail, no text, no signature, no hands, no people"
+# Words that ask for lettering on the thing ("a sign that says OPEN", "a book with a title on its cover"): then the
+# picture is painted without "no text, no signature", and the picture check "no painted lettering" does not refuse
+# letters (lettering.py). A word that only names a thing that often bears letters ("a sign", "a plaque", "a coin") does
+# not ask for them; "writing" and "brand" are left out, for "a writing desk" and "a brand new sword". A word is read
+# with a plural s ("say" reads "says"). The picture judge's "text" distractor has its own, wider words
+# (SUBJECT_DISTRACTORS): a sign may show letters, so a picture of one is not refused as text; but made-up letters on it
+# are refused here unless the words ask for some. A word in capitals ("a tombstone with RIP") or in quotes ("a sign
+# 'inn'") asks too (`lettering_asked`).
+LETTERING_WORDS = ("say", "saying", "read", "reading", "written", "writing on", "inscribed", "inscription",
+                   "engraved", "lettering", "letter", "lettered", "text", "title", "titled", "label",
+                   "labelled", "labeled", "word", "name", "called", "signed", "signature", "logo", "motto", "initials",
+                   "monogram", "number", "numbered", "numeral", "rune", "runes", "runic", "glyph", "hieroglyph",
+                   "script", "calligraphy", "slogan", "branded", "printed", "stamped", "marked")
+# A lettering word does not ask in these places (each found from the word on, in the prompt as read, lowered):
+# "an engraved silver cup" is ornament, "engraved with" asks; "a well-read book"; "a reading lamp", "a lamp for
+# reading"; "a pile of letters" is post, "a letter opener" a knife; "a number of coins"; "a title deed".
+LETTERING_NOT_ASKING = {
+    "engraved": (r"engraved(?!\s+(?:with|on|in|into|along|across|round|around)\b)",),
+    "read": (r"(?<=-)reads?\b",),
+    "reading": (r"(?<![a-z])(?:a|an|the|for|of|while|when)\s+reading\b",
+                r"reading\s+(?:lamp|light|glasses|spectacles|chair|desk|table|nook|room|stand|corner|bench)",),
+    "letter": (r"letters?\s+(?:opener|box|rack|holder|tray|case|knife|scale)s?\b",
+               r"(?<![a-z])of\s+(?:the\s+)?letters?\b"),
+    "number": (r"numbers?\s+of\b",),
+    "title": (r"titles?\s+deeds?\b",),
+}
+# The words that deny a lettering word after them ("a sign with no text", "a crate without any lettering", "neither
+# text nor logo", "free of text"); a denial reaches only across the words in LETTERING_DENIAL_REACHES and the other
+# lettering words of a list ("no text, logo or signature"): "a box with no lid, labelled FRAGILE", "a no smoking
+# label" and "a sign without paint that says inn" ask. "Free" denies when "of" or "from" follows it; a lettering word
+# followed by "-free" or "-less" ("a text-free sign") is denied.
+LETTERING_DENIALS = ("not", "never", "cannot", "can't", "cant", "won't", "isn't", "wasn't", "doesn't", "don't",
+                     "no", "without", "neither", "nor")
+LETTERING_DENIAL_REACHES = ("any", "a", "an", "the", "its", "their", "his", "her", "yet", "ever", "be", "been", "one",
+                            "single", "visible", "readable", "legible", "or", "and", "say", "says", "that", "which")
+# Words in quotes (straight or curly, opened after no letter, so "a smith's hammer" holds none).
+QUOTED = re.compile(r"(?<![A-Za-z])[\"'\u2018\u201c]([^\"'\u2018\u2019\u201c\u201d]*[A-Za-z0-9]"
+                    r"[^\"'\u2018\u2019\u201c\u201d]*)[\"'\u2019\u201d](?![A-Za-z])")
+# Capitals that do not ask for lettering: things named by their letters.
+CAPITALS_NOT_ASKING = ("TV", "LED", "USB", "DVD", "CD", "PC", "UFO", "DIY", "OK")
+LETTERED_STYLE = "clean silhouette, true materials, crisp detail, no hands, no people"
 
 # Each kind of weapon, its words (longest first wins), and its usual length in metres (a person's weapons: a sword
 # about a metre, a longbow about a person's height, a spear above it).
@@ -235,24 +277,52 @@ CURVED_BLADE_WORDS = "its blade curving in one smooth arc like a sabre's"
 CURVED_BLADE_KIND = "sabre"
 # The thing's word in the judge's descriptions when no known word names it.
 UNKNOWN_THING = "object"
-# People, animals and creatures: characters, which come in the second release. A prompt whose head noun is one of
-# these is answered so and not made; "a statue of a knight",
-# "a wolf skull" and "a king's crown" are objects.
-CHARACTERS_LATER = ("People, animals and creatures come in the second release; this one makes 3-D objects. "
+# Animals come in a later release, characters (people and fantasy creatures) after them. A prompt whose head
+# noun is one of these is answered so and not made; "a statue of a knight", "a wolf skull", "a fish skeleton" and "a
+# king's crown" are objects. A prompt that names both ("a knight on a horse", "a horse with a knight") is a character:
+# the later release; and so is an animal made a fantasy creature ("a zombie dog"). A person only described ("a horse
+# for a knight", "a horse and a statue of a knight") leaves an animal an animal.
+ANIMALS_LATER = ("Animals come in a later release; this one makes 3-D objects. "
+                 "For a statue or a carving of one, say so: \"a stone statue of a horse\".")
+CHARACTERS_LATER = ("People and fantasy creatures come after the animals; this one makes 3-D objects. "
                     "For a statue or a carving of one, say so: \"a stone statue of a dragon\".")
+# People and fantasy creatures: after the animals.
 CHARACTER_WORDS = (
     "person", "people", "man", "men", "woman", "women", "boy", "girl", "child", "children", "baby", "lady", "human",
     "humanoid", "character", "hero", "heroine", "adventurer", "king", "queen", "prince", "princess", "knight",
     "warrior", "soldier", "guard", "archer", "wizard", "witch", "mage", "sorcerer", "priest", "monk", "nun", "farmer",
-    "merchant", "blacksmith", "pirate", "sailor", "hunter", "thief", "bandit", "villager", "peasant", "elf", "elves",
-    "dwarf", "dwarves", "gnome", "halfling", "orc", "goblin", "troll", "ogre", "giant", "dragon", "wyvern", "griffin",
-    "unicorn", "demon", "angel", "ghost", "zombie", "skeleton", "vampire", "werewolf", "mermaid", "fairy", "golem",
-    "robot", "monster", "creature", "beast", "animal", "wolf", "wolves", "dog", "puppy", "cat", "kitten", "horse",
-    "pony", "cow", "bull", "pig", "sheep", "goat", "deer", "stag", "bear", "fox", "rabbit", "lion", "tiger",
-    "elephant", "monkey", "ape", "bird", "eagle", "owl", "raven", "crow", "chicken", "rooster", "fish", "shark",
-    "whale", "dolphin", "snake", "serpent", "lizard", "frog", "toad", "turtle", "spider", "scorpion", "insect",
-    "beetle", "rat", "squirrel", "boar",
+    "merchant", "blacksmith", "pirate", "sailor", "hunter", "thief", "bandit", "villager", "peasant", "rider", "elf",
+    "elves", "dwarf", "dwarves", "gnome", "halfling", "orc", "goblin", "troll", "ogre", "giant", "dragon", "wyvern",
+    "griffin", "unicorn", "demon", "angel", "ghost", "zombie", "skeleton", "vampire", "werewolf", "mermaid", "fairy",
+    "golem", "robot", "monster", "creature", "beast", "cowboy", "cowgirl", "jockey", "horseman", "horsemen",
 )
+# Real animals: a later release.
+ANIMAL_WORDS = (
+    "animal", "wolf", "wolves", "dog", "puppy", "cat", "kitten", "horse", "pony", "cow", "bull", "pig", "sheep",
+    "goat", "deer", "stag", "bear", "fox", "rabbit", "lion", "tiger", "elephant", "monkey", "ape", "bird", "eagle",
+    "owl", "raven", "crow", "chicken", "rooster", "fish", "shark", "whale", "dolphin", "snake", "serpent", "lizard",
+    "frog", "toad", "turtle", "spider", "scorpion", "insect", "beetle", "rat", "squirrel", "boar",
+)
+# Every living thing model-maker does not make yet: the head noun is looked for among these.
+CREATURE_WORDS = CHARACTER_WORDS + ANIMAL_WORDS
+# Words before an animal's name that make it a fantasy creature, after the animals: "a zombie dog", "a skeleton
+# horse", "a ghost cat", "a robot dog" (but "a giant spider" and "a guard dog" are animals).
+UNNATURAL_WORDS = ("zombie", "skeleton", "skeletal", "ghost", "ghostly", "spectral", "undead", "robot", "robotic",
+                   "demon", "demonic", "vampire")
+# A creature's word that, after an animal's name or before "of" and one, names what is left of the animal, an object:
+# "a fish skeleton", "the skeleton of a horse", as "a wolf skull" is a skull ("a skeleton" alone is a character).
+REMAINS_WORDS = ("skeleton",)
+# A phrase after one ending in these names what the likeness shows, not something asked for: "a horse and a statue of
+# a knight" asks for a horse.
+LIKENESS_WORDS = ("statue", "statuette", "figurine", "sculpture", "carving", "toy", "doll", "puppet", "ornament",
+                  "model", "replica", "effigy", "bust", "picture", "painting", "drawing", "image", "portrait",
+                  "engraving", "relief", "shape", "likeness")
+# A phrase after these describes what comes before it, and asks for nothing: "a horse for a knight", "a cat sitting
+# on a throne like a king" ask for an animal.
+DESCRIBING_WORDS = ("for", "like")
+# A phrase after these names the creature that a head of no known word rides or stands on: "a sheriff on a horse"
+# asks for the horse. Not "with": "a pendant with an owl" carries a picture of one.
+CARRIED_ON_WORDS = ("on",)
 # Words that make a creature's likeness an object: "a dragon statue", "a chess knight", "a rocking horse"; and things
 # named after a person's word: "a hand guard" (a guard for a hand, not a guard).
 NOT_A_CHARACTER_WORDS = ("statue", "statuette", "figurine", "sculpture", "carving", "carved", "toy", "chess",
@@ -325,8 +395,8 @@ SUBJECT_KINDS = (
 # What a picture might show instead of a thing: each with its description and the words of a prompt that ask for it
 # (then it is no contrast: "a stone statue of a knight" may look like a person).
 SUBJECT_DISTRACTORS = {
-    "a person": ("a person, a living human being with a face, arms and legs", CHARACTER_WORDS),
-    "an animal": ("an animal, a living creature with a head and legs", CHARACTER_WORDS),
+    "a person": ("a person, a living human being with a face, arms and legs", CREATURE_WORDS),
+    "an animal": ("an animal, a living creature with a head and legs", CREATURE_WORDS),
     "text": ("text, written words and letters on a plain background",
              ("text", "letter", "letters", "lettering", "word", "words", "writing", "written", "inscription",
               "inscribed", "rune", "runes", "sign", "label", "glyph", "glyphs")),
@@ -366,6 +436,12 @@ def subject_contrast(subject):
 # in -ed or -ing as a participle only when what is left holds a vowel (the Porter stemmer's condition for taking the
 # ending off, its step 1b: "sleeping", "spiked", but not "red", "sled", "shed", "king", "wing", "string").
 PARTICIPLE = re.compile(r"[a-z]*[aeiouy][a-z]*(?:ing|ed)")
+# Participles of other forms, which leave the creature the subject when they end its phrase: "a horse ridden by a
+# knight", "a dog led on a rope" ("a horse drawn cart" is a cart). Not those that say what a likeness is made of or how
+# ("made", "cast", "carved", "sewn", "woven", "spun", "blown", "thrown", "beaten", "struck", "hewn").
+IRREGULAR_PARTICIPLES = ("ridden", "held", "drawn", "worn", "led", "fed", "kept", "caught", "bound", "hung", "shod",
+                         "bitten", "born", "torn", "hidden", "driven", "fallen", "slain", "seen", "shown", "frozen",
+                         "stuck", "sat", "stood", "lain")
 # A thing of no word above: its largest size.
 UNKNOWN_SIZE_M = 0.5
 
@@ -375,7 +451,7 @@ class Subject:
     """What the prompt asks for and which checks apply, each with the word that decided it."""
 
     prompt: str
-    kind: str  # "object", "weapon" or "character" (not made: the second release)
+    kind: str  # "object", "weapon", "animal" (not made: a later release) or "character" (after the animals)
     noun: str  # the word that decided the kind ("" when none did)
     weapon_kind: str = ""  # blade, curved blade, hafted, spear, bow, shield ("" for an object)
     handled: bool = False  # a long handle (a hafted weapon or a long-handled tool): shaft and grip checks
@@ -624,23 +700,70 @@ def quality_texts(subject):
 def character_of(text):
     """The person, animal or creature the (lowered) text asks for, or "" when it asks for none: the creature's name
     ending last in the head phrase, not owned ("a king's crown") nor joined to the next word ("a dragon-headed staff"),
-    and followed by nothing or by a participle ("a dragon sleeping"), not by another noun ("a wolf skull"); and no
-    word that makes it a likeness ("a dragon statue")."""
-    head = CHARACTER_PHRASE_END.split(text, maxsplit=1)[0]
-    if any(_found(head, word) for word in NOT_A_CHARACTER_WORDS):
+    and followed by nothing or by a participle ("a dragon sleeping", "a horse ridden by a knight"), not by another noun
+    ("a wolf skull"); and no word that makes it a likeness ("a dragon statue"). When the head phrase names no creature
+    and no thing release 1 knows, a creature in a phrase after "on" ("a sheriff on a horse")."""
+    phrases = _asking_phrases(text)
+    head = phrases[0][1]
+    creature = _creature_in(head, CREATURE_WORDS)
+    if creature in REMAINS_WORDS and len(phrases) > 1 and phrases[1][0] == "of" and _creature_in(phrases[1][1],
+                                                                                                 ANIMAL_WORDS):
+        return ""  # "the skeleton of a fish", as "a fish skeleton"
+    if creature or _known_or_likeness().search(head):
+        return creature
+    for cut, phrase in phrases[1:]:
+        if cut in CARRIED_ON_WORDS:
+            creature = _creature_in(phrase, CREATURE_WORDS)
+            if creature:
+                return creature
+    return ""
+
+
+@functools.lru_cache(maxsize=1)
+def _known_or_likeness():
+    """Any word of a thing release 1 knows or of a likeness, as `_found` finds it (one pattern: a word each would
+    overflow the regex cache)."""
+    alternatives = sorted({*known_things(), *NOT_A_CHARACTER_WORDS}, key=len, reverse=True)
+    return re.compile(rf"(?<![a-z])(?:{'|'.join(map(re.escape, alternatives))})s?(?![a-z])")
+
+
+def _asking_phrases(text):
+    """The (lowered) text cut where a character's head phrase ends (`CHARACTER_PHRASE_END`), each phrase with the
+    word that cut it before it ("" for the first, "," for a comma); without the phrases that only describe: after
+    "for" or "like" ("a horse for a knight"), or after a phrase ending in a likeness word ("a horse and a statue of a
+    knight")."""
+    phrases, cut, start, previous = [], "", 0, ""
+    for match in [*CHARACTER_PHRASE_END.finditer(text), None]:
+        phrase = text[start:match.start()] if match else text[start:]
+        likeness = re.search(rf"(?<![a-z])(?:{'|'.join(LIKENESS_WORDS)})s?\W*$", previous)
+        if not phrases or not (cut in DESCRIBING_WORDS or likeness):
+            phrases.append((cut, phrase))
+        if match:
+            cut, start, previous = match.group(), match.end(), phrase
+    return phrases
+
+
+def _creature_in(phrase, creature_words):
+    """The creature of `creature_words` that `phrase` asks for, read as `character_of` reads a head phrase."""
+    if any(_found(phrase, word) for word in NOT_A_CHARACTER_WORDS):
         return ""
     last = None
-    for word in CHARACTER_WORDS:
-        for match in re.finditer(rf"(?<![a-z]){re.escape(word)}s?(?![a-z])", head):
-            if head[match.end():].startswith(("'", "\u2019", "-")):
+    for word in creature_words:
+        for match in re.finditer(rf"(?<![a-z]){re.escape(word)}s?(?![a-z])", phrase):
+            if phrase[match.end():].startswith(("'", "\u2019", "-")):
                 continue
+            # What is left of an animal is an object: "a fish skeleton".
+            if word in REMAINS_WORDS:
+                before = re.findall(r"[a-z]+", phrase[:match.start()])
+                if before and any(re.fullmatch(rf"{re.escape(animal)}s?", before[-1]) for animal in ANIMAL_WORDS):
+                    continue
             if last is None or (match.end(), len(word)) > last[:2]:
                 last = (match.end(), len(word), word)
     if last is None:
         return ""
-    after = re.findall(r"[a-z]+", head[last[0]:])
+    after = re.findall(r"[a-z]+", phrase[last[0]:])
     things = {*STANDING, *NOT_STANDING, *(w for table in WEAPON_KINDS.values() for w in table)}
-    if not after:
+    if not after or after == [after[0]] and after[0] in IRREGULAR_PARTICIPLES:
         return last[2]
     # A participle and then a thing: the creature's name and the participle say what the thing is like ("a wolf
     # headed staff", "a king sized bed", "a giant spiked mace"), and the thing is what is asked for.
@@ -648,6 +771,31 @@ def character_of(text):
                                                                              for thing in things):
         return last[2]
     return ""
+
+
+def _unnatural(phrase, animal):
+    """The word of `UNNATURAL_WORDS` before `animal` in `phrase` that makes it a fantasy creature ("a zombie dog"),
+    not owned nor joined to the next word ("a ghost-white horse"), or ""."""
+    for match in re.finditer(rf"(?<![a-z])({'|'.join(UNNATURAL_WORDS)})s?(?![a-z'\u2019-])", phrase):
+        if _found(phrase[match.end():], animal):
+            return match.group(1)
+    return ""
+
+
+def creature_kind(text, creature):
+    """("animal" or "character", the word that decides it) for the creature `character_of` found in the (lowered)
+    text. An animal is a character when a person or fantasy creature is named with it, in any phrase of the text that
+    asks for something (`_asking_phrases`) and read as the head phrase is: "a horse with a knight", "a knight riding a
+    horse", "a horse and rider" ask for a character, the later release, and so do "a zombie dog" and "a skeleton
+    horse"; "a giant spider", "a guard dog", "a king's horse", "a horse for a knight" and "a horse and a statue of a
+    knight" ask for an animal."""
+    if creature not in ANIMAL_WORDS:
+        return "character", creature
+    for _, phrase in _asking_phrases(text):
+        person = _unnatural(phrase, creature) or _creature_in(phrase, CHARACTER_WORDS)
+        if person:
+            return "character", person
+    return "animal", creature
 
 
 # A prompt with nothing left to read is not made (a program in front of the pipeline can refuse it with the same
@@ -662,10 +810,15 @@ def subject_of(prompt):
     if not text:
         why["kind"] = "nothing to read: the prompt is empty"
         return Subject(prompt="", kind="object", noun="", why=why, not_yet=EMPTY_PROMPT)
-    character = character_of(text)
-    if character:
-        why["kind"] = f"a character: the word '{character}'; characters come in the second release"
-        return Subject(prompt=cleaned(prompt), kind="character", noun=character, why=why, not_yet=CHARACTERS_LATER)
+    creature = character_of(text)
+    if creature:
+        kind, word = creature_kind(text, creature)
+        if kind == "animal":
+            why["kind"] = f"an animal: the word '{word}'; animals come in a later release"
+            return Subject(prompt=cleaned(prompt), kind="animal", noun=word, why=why, not_yet=ANIMALS_LATER)
+        with_animal = f", named with the animal '{creature}'" if word != creature else ""
+        why["kind"] = f"a character: the word '{word}'{with_animal}; characters come after the animals"
+        return Subject(prompt=cleaned(prompt), kind="character", noun=word, why=why, not_yet=CHARACTERS_LATER)
     several, one = several_of(text)
     if several:
         if one and (several_of(one)[0] or character_of(one)):
@@ -792,7 +945,63 @@ def picture_prompt(subject, lead=DEFAULT_LEAD):
     state = f", {STATE_PICTURE_WORDS[OPENING_PARTS[subject.noun]][subject.state]}" if subject.state else ""
     head = f", {HEAD_PICTURE_WORDS[HEAD_KINDS[subject.noun]]}" if subject.noun in HEAD_KINDS else ""
     curve = f", {CURVED_BLADE_WORDS}" if subject.weapon_kind == "curved blade" else ""
-    return f"{LEADS[lead]} {subject.prompt}{state}{head}{curve}, {view}, {STYLE}"
+    style = LETTERED_STYLE if lettering_asked(subject.prompt) else STYLE
+    return f"{LEADS[lead]} {subject.prompt}{state}{head}{curve}, {view}, {style}"
+
+
+def lettering_asked(prompt):
+    """What in the words asks for lettering on the thing, not denied ("a sign with no text"), or "" when nothing does:
+    a word of `LETTERING_WORDS` (where `LETTERING_NOT_ASKING` does not rule it out), a word of two or more capitals
+    in a prompt that is not all capitals ("a crate marked FRAGILE"), or words in quotes ("a sign 'inn'"). Capitals and
+    quotes are read before the prompt is lowered; a prompt as read (`cleaned`) keeps capitals and single quotes, not
+    double quotes."""
+    text = str(prompt)
+    lowered = text.lower()
+    for word in LETTERING_WORDS:
+        for match in re.finditer(rf"(?<![a-z]){re.escape(word)}s?(?![a-z])", lowered):
+            if not _lettering_ruled_out(lowered, word, match) and not _lettering_denied(lowered, match):
+                return word
+    if any(c.islower() for c in text):
+        for match in re.finditer(r"(?<![A-Za-z])[A-Z]{2,}(?![A-Za-z])", text):
+            if match.group() not in CAPITALS_NOT_ASKING and not _lettering_denied(lowered, match):
+                return match.group()
+    for match in QUOTED.finditer(text):
+        if not _lettering_denied(lowered, match):
+            return match.group(1).strip()
+    return ""
+
+
+def _lettering_ruled_out(lowered, word, match):
+    """Whether a lettering word found (`match`) is in a place `LETTERING_NOT_ASKING` rules out, or is denied by
+    "-free" or "-less" after it."""
+    if re.match(r"-(?:free|less)\b", lowered[match.end():]):
+        return True
+    for pattern in LETTERING_NOT_ASKING.get(word, ()):
+        for found in re.finditer(pattern, lowered):
+            if found.start() <= match.start() < found.end() or found.start() < match.end() <= found.end():
+                return True
+    return False
+
+
+def _lettering_denied(lowered, match):
+    """Whether a denial stands before a lettering word found (`match`): the look-back passes only the words of
+    `LETTERING_DENIAL_REACHES`, other lettering words, and a comma after one ("no text, logo or signature")."""
+    tokens = re.findall(r"[a-z']+|[,;.:]", lowered[:match.start()].replace("\u2019", "'"))[::-1]
+    for at, token in enumerate(tokens):
+        after = tokens[at - 1] if at else None
+        if token in LETTERING_DENIALS or (token == "free" and after in ("of", "from")):
+            return True
+        if token in (",", ";", ".", ":"):
+            # Only a comma within a list of lettering words lets the look-back on.
+            if token != "," or at + 1 == len(tokens) or not _is_lettering_word(tokens[at + 1]):
+                return False
+        elif not (token in LETTERING_DENIAL_REACHES or token in ("of", "from") or _is_lettering_word(token)):
+            return False
+    return False
+
+
+def _is_lettering_word(token):
+    return token in LETTERING_WORDS or (token.endswith("s") and token[:-1] in LETTERING_WORDS)
 
 
 def paint_prompt(subject):

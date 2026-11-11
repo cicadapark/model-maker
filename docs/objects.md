@@ -1,7 +1,8 @@
 # 3-D objects
 
-Release 1 makes 3-D objects, not characters: "an old looking chair", "a rusty iron lantern",
-"an old iron sword", "a double-bitted battle axe". Characters come back in release 2.
+model-maker makes 3-D objects, not animals or characters: "an old looking chair", "a rusty iron lantern",
+"an old iron sword", "a double-bitted battle axe". Animals come in a later release, characters (people and fantasy
+creatures) after the animals.
 
 ```
 ./model-maker make "an old looking chair"
@@ -39,7 +40,8 @@ the barrel's size round.
 Settings worth knowing: `--lead` (the words about light and backdrop the picture model is given
 first), `--paint-steps` (the view painter's steps, 20 by default: on the second trial 20 painted as
 well as 50 by coverage and likeness in under half the time, about 4 minutes, not 8 to 9),
-`--shape-tries`, `--tries`, `--picture-rounds`.
+`--shape-tries`, `--tries`, `--picture-rounds`, `--require-lettering` (every picture must be read for painted
+lettering: without a usable tesseract no job is made; the measured runs use it).
 
 `./model-maker batch PROMPTS.txt --out DIR` runs many prompts stage by stage, so each model is
 loaded once, and writes `DIR/times.csv`, the time of each stage for each object. A stage already
@@ -70,7 +72,7 @@ word decided each choice:
 
 * whether it asks for more than one thing: a pair ("a pair of boots"), a count ("two chairs", "3 swords"), a group
   ("a set of knives"), a known thing in the plural ("leather boots") or two known things joined ("a sword and a
-  shield"). Release 1 makes one object at a time, so such a prompt is answered before anything is painted, with the
+  shield"). model-maker makes one object at a time, so such a prompt is answered before anything is painted, with the
   one thing to ask for instead: `model-maker makes one object at a time, and these words ask for more than one. Try
   one: "a leather boot".` A thing that is one object though named as a pair or a set is made ("a pair of scissors",
   "a pair of tongs", "glasses", "trousers", "a set of drawers"), and so is a count that describes ("a two-handed
@@ -102,8 +104,9 @@ the cut-out, and that is what is checked. The measure cannot tell an object as p
 backdrop from a shadow (2 of the 212, both a white table top): those fail safe, and another try is
 painted.
 | not cut off | the object keeps 1 % of the picture from every edge |
-| shows the thing asked for | SigLIP 2 finds the thing asked for (the prompt and its kind's description) at least three times as likely as the likeliest other kind release 1 makes or a distractor (a person, text, an empty backdrop, several things), from the whole picture and its crop round the cut-out (see "The picture against the prompt" and "War hammers"); and each quality the words name ("curved", "round") at least three times as likely as its opposite (see "Several things, and qualities the words name"); without SigLIP 2 the tries go unjudged and the run says so |
+| shows the thing asked for | SigLIP 2 finds the thing asked for (the prompt and its kind's description) at least three times as likely as the likeliest other kind model-maker makes or a distractor (a person, text, an empty backdrop, several things), from the whole picture and its crop round the cut-out (see "The picture against the prompt" and "War hammers"); and each quality the words name ("curved", "round") at least three times as likely as its opposite (see "Several things, and qualities the words name"); without SigLIP 2 the tries go unjudged and the run says so |
 | shows what the words ask | a thing with a lid, cover or doors: SigLIP 2 finds it shut (or open, as asked) at least three times as likely as the other way, judged by descriptions of what each state looks like ("the edges of its pages in one even block" against "split in two at the middle"), from the whole picture and from its crop round the cut-out |
+| no painted lettering | tesseract reads the cut-out's region, and its words that count (read with a confidence of 70 or more, at least two letters and three letters and digits, at least 8 pixels of 1024 tall) hold at most 4 characters between them; a prompt that asks for lettering ("a sign that says OPEN") is not refused. Without a usable tesseract (optional: version 5 or newer with its English data) it says "not judged" and why, shown, not counted, and the job says it was not read (see "Painted lettering") |
 
 Objects:
 
@@ -180,9 +183,15 @@ exactly that. On the first trial the spear's shaft, the axe's and hammer's hafts
 handle all came out straight and whole. The longbow did not, but for its view, not its thinness:
 painted edge-on, its bend was out of sight and the shape model made it wave. Asked to face the
 viewer, the picture model still painted it in profile with its string, and the shape model filled
-the space between bow and string into a flat plate. **Bows are not made in release 1**: a bow prompt
-is answered that they come later, and nothing is made. A prompt for a person, an animal or a creature is answered
-that characters come in the second release (a statue or a carving of one is an object). How each prompt is read is
+the space between bow and string into a flat plate. **Bows are not made yet**: a bow prompt
+is answered that they come later, and nothing is made. A prompt for an animal is answered that animals come in a
+later release, and one for a person or a fantasy creature that characters come after the animals; a prompt that names
+both ("a knight on a horse", "a horse with a knight") is answered as a character, the later release, and a statue
+or a carving of either is an object. An animal made a fantasy creature ("a zombie dog", "a skeleton horse") is a
+character; a person only described ("a horse for a knight", "a horse and a statue of a knight", "a cat like a king")
+leaves an animal an animal; what is left of an animal ("a fish skeleton", "a wolf skull") is an object; and a head word
+the pipeline does not know does not hide the creature it is on ("a sheriff on a horse" is answered as an animal).
+How each prompt is read is
 tested on one file of cases (`python/tests/prompt_cases.json`), which a program in front of the pipeline can test
 its own reading against.
 
@@ -210,20 +219,24 @@ each clear one must pass "shows the thing asked for" against its own prompt and 
 one case, "prompt-pictures"; see "The picture against the prompt"); the pictures painted with a quality and without it, labelled
 by eye (`tools/trial/quality-cases.toml`: judged against the prompt that names the quality, each showing it must pass
 "shows the thing asked for" and each showing its opposite must fail it, judged as one case, "quality-pictures"; see
-"Several things, and qualities the words name"); the fix-check's and the fifth trial's jugs, a web in the handle's loop (as made they must fail the outline, carved
+"Several things, and qualities the words name"); the picture tries labelled by eye for painted lettering
+(`tools/trial/lettering-cases.toml`: each showing none, and each whose prompt asks for lettering, must pass "no painted
+lettering", each showing letters its prompt does not ask for must fail it, its known misses shown; judged as one case,
+"lettering-pictures", and it needs tesseract 5 or newer; see "Painted lettering"); the fix-check's and the fifth trial's jugs, a web in the handle's loop (as made they must fail the outline, carved
 they must match it, closed and in one piece), and the chairs, stool, tables and lantern whose holes must not be carved;
 the fix-check's book made standing on its edge (laid, it must stand), its chest whose picture is a photograph (it
 must match through a lens) and its candle as the six views painted it (it must keep failing the paint's coverage); the touch-up's first candle, whose fill painted holes and grey patches (it must fail "fill matches the paint round it" while its coverage passes), and its chair, filled in its own wood (it must pass both); the fifth trial's candle, whose foot left out shows a smear of wax and brass (it must fail the fill check), and a clay jug's and a shield's handle's places left out, the model showing one colour there (they must pass it). The state cases need SigLIP 2 in `MODEL_MAKER_MODELS`; it runs on the CPU too, a few seconds a picture. `tools/trial/regression.py run DATA` judges them all on the CPU in a
 few minutes; it runs before any change to the pipeline or its checks, and every case must hold.
 
 The cases and their verdicts are here (`regression.toml`, `state-cases.toml`, `prompt-cases.toml`, `head-cases.toml`,
-`quality-cases.toml`),
+`quality-cases.toml`, `lettering-cases.toml`),
 and so are the sums of their data files (`regression-sums.json`), but the data itself (the made shapes and pictures,
 built from the trials' folders) is not in this repository: a reader can see what each case holds and why, but cannot
 run `regression.py build` or `run` without it (the faults its made-up cases hold are tested in `python/tests/`).
 `tools/trial/regression-prompts.txt` makes the same objects again on the card before a release.
 `tools/trial/unseen-final.txt` holds a set of prompts kept aside during development and made once for the release's
-check.
+check, with `--require-lettering` (as `tools/trial/run_trial.sh` makes its trial), so no pass is counted with its
+pictures unread.
 
 ## Where the models are
 
@@ -598,7 +611,7 @@ steps.
 
 ## The fill judged on the model (11 November 2026)
 
-Release 1's unseen run failed six of its ten objects on "fill matches the paint round it". Two of them, the rocking
+Version 0.1.0's unseen run failed six of its ten objects on "fill matches the paint round it". Two of them, the rocking
 horse and the boots, failed on nothing else and look right: the horse's fill is plausible wood, a little warmer than
 the six views' paint; the inpainter painted the boot's lining and tongue another colour than its outside, and rightly.
 
@@ -959,7 +972,7 @@ picture model painted something else, is caught here.
 
 This uses established zero-shot image-text classification (CLIP's, SigLIP's): the picture is compared with words for
 the thing asked for and with words for every other thing it might show instead, and the thing asked for must be the
-likeliest. The other things are every other kind of thing release 1 makes (`words.SUBJECT_KINDS`, 55 rows), each by a
+likeliest. The other things are every other kind of thing model-maker makes (`words.SUBJECT_KINDS`, 55 rows), each by a
 description of its look with its name first ("a table, a flat top standing on legs"; classification by description,
 as the state check's words are), and five distractors: a person, an animal, text, an empty backdrop, several things.
 The thing asked for is the prompt itself ("a photo of an old looking chair") and its kind's description. Each class's
@@ -975,7 +988,7 @@ model is the state check's, SigLIP 2, on the CPU.
 
 Every distinct picture the trials painted (268, from 13 runs of 16 prompts; `tools/trial/prompt-cases.toml`): each
 against its own prompt, and against every other prompt of the trials (the "shuffled" wrong prompts). The 16 longbows
-are left out because bows are not made in release 1. Labelled by eye, 13 pictures do not clearly show their thing:
+are left out because bows are not made yet. Labelled by eye, 13 pictures do not clearly show their thing:
 all 8 war hammers (no clear hammer face; labelled blind later, one is an axe head and three are hybrids, each copied on
 two cards: see "War hammers") and 5 tables painted from straight
 above (a round top with at most its feet's tips showing, so a table and a stool look alike). They are shown, not held.
@@ -1232,8 +1245,8 @@ the trials rightly passed still passes it, and the made-up faults fail it. The m
     participle followed by a thing names the thing ("a wolf headed staff", "a king sized bed", "a giant spiked mace").
     "a hand guard" (and arm, shin, knee, neck, mouth, finger, fire and cross guards) is an object. A prompt check in
     front of the pipeline reads them the same way when it passes the shared cases (`python/tests/prompt_cases.json`),
-    and eleven such prompts are in them with five characters that must stay characters ("a giant", "a frost
-    giant", "a dragon sleeping on a chest", "a horse grazing", "a knight kneeling").
+    and eleven such prompts are in them with five creatures that must stay characters or animals ("a giant", "a
+    frost giant", "a dragon sleeping on a chest", "a knight kneeling"; the animal "a horse grazing").
 11. **"Never opened".** A negation up to three words before "open", "opened" or "ajar" (or before a word that makes a thing
     not symmetric) denies it: "a book, never opened" and "a chest that cannot be opened" are shut and symmetric. The words
     that stand a thing up are whole words: "a ribbon edged plate" lies.
@@ -1501,11 +1514,11 @@ With the code before, the remade axe, the bearded axe, the butt cap and both shi
 
 ## Several things, and qualities the words name (11 November 2026)
 
-Release 1's unseen run made two objects the prompt did not describe:
+Version 0.1.0's unseen run made two objects the prompt did not describe:
 
 * **"a pair of leather boots" made one boot.** Three of its four picture tries drew two boots, touching, so each
   passed "one piece" as one lump of two; the fourth drew one boot, scored best on the other picture checks and was
-  chosen. Either way the words were not met: release 1 cannot make two boots as two objects.
+  chosen. Either way the words were not met: 0.1.0 cannot make two boots as two objects.
 * **"a short curved dagger" came out straight.** None of its four tries was curved, and nothing checked a quality the
   prompt names.
 
@@ -1513,7 +1526,7 @@ Those ten prompts were looked at to understand the two faults; nothing below was
 
 ### Several things: answered before anything is painted
 
-Release 1 makes one object in one piece. A prompt that asks for more than one thing is now answered at once, before
+model-maker makes one object in one piece. A prompt that asks for more than one thing is now answered at once, before
 any card time, with the one thing to ask for instead (`words.several_of`):
 
     model-maker makes one object at a time, and these words ask for more than one. Try one: "a leather boot".
@@ -1591,11 +1604,11 @@ Two changes came with the curved blade:
   sabre's", and the view "standing upright, its point at the top, seen from the side so its whole curve shows". The
   picture model seldom paints a curve. Tries labelled by eye, the same six prompts ("a curved bronze dagger", "a curved
   hunting knife", "a curved iron sword", "a curved silver dagger", "a curved short sword", "a curved steel sabre"), 8
-  each: with release 1's words 1 of 48 curved (one bronze dagger), with these words and view 7 of 48 (the hunting
+  each: with 0.1.0's words 1 of 48 curved (one bronze dagger), with these words and view 7 of 48 (the hunting
   knife 4 of 8, the bronze dagger, the iron sword and the short sword 1 each, the silver dagger and the sabre none).
   Tried and not kept: a description of the curve alone, the view unchanged ("its whole length bending in one smooth
   arc": the bronze dagger 3 of 8, the iron sword none). A small sample, and still few curved tries: a job whose tries
-  never show the curve now ends at its pictures, failed on "shows the thing asked for", where release 1 made a
+  never show the curve now ends at its pictures, failed on "shows the thing asked for", where 0.1.0 made a
   straight dagger.
 
 ### Measured
@@ -1603,7 +1616,7 @@ Two changes came with the curved blade:
 New picture tries, painted with the pipeline's own picture words and seeds (`tools/trial/paint_tries.py`): 384 on both
 cards, 8 for each prompt and wording. The prompts name a quality ("a curved hunting knife", "a round mirror", "a tall
 clay vase") or its opposite or nothing ("a straight bronze dagger", "a hunting knife", "a square mirror", "a low
-wooden stool", "a wooden table"). None is one of release 1's unseen ten. Every try was labelled by eye before its
+wooden stool", "a wooden table"). None is one of 0.1.0's unseen ten. Every try was labelled by eye before its
 score or prompt was seen: cropped round its cut-out and shuffled under a random code (`tools/trial/quality_sheets.py`).
 "tall" and "squat" were labelled by the cut-out's proportions (tall at least twice as high as wide, squat at most 1.2
 times, unclear between), "square" as four corners, square or oblong. Each picture was judged against the prompt that
@@ -1616,10 +1629,10 @@ names the quality: its own, or its twin's ("a hunting knife" as "a curved huntin
 
 The whole check also judges the thing. It refuses 5 of the 9 curved tries for that: each is a bare curved blade with
 no guard or grip to speak of, taken for a scythe's or a spear's blade (0.002 to 0.32); and one round shield and one
-round mirror (0.35, 0.61, the likeliest other "a coin"), as release 1's check did. The pair is not to blame there.
+round mirror (0.35, 0.61, the likeliest other "a coin"), as 0.1.0's check did. The pair is not to blame there.
 
 The 48 tries painted after the wording was chosen ("a curved hunting knife", "a curved silver dagger", "a curved short
-sword" and "a curved steel sabre" with the words and view kept, the dagger and the short sword also with release 1's
+sword" and "a curved steel sabre" with the words and view kept, the dagger and the short sword also with 0.1.0's
 words) were held out as a check of it: every straight dagger and short sword is refused (28 of 28), the one curved
 short sword passes the pair (0.99), and the curved knives showed the limit below. The sabres are not judged for the
 curve (their kind is curved).
@@ -1661,3 +1674,142 @@ and refuse one showing its opposite; the whole check is shown beside it, and "un
 regression set holds (49 of 49 with it; "quality-pictures" took about 8 minutes on 12 CPU threads). In
 "prompt-pictures" one written prompt fewer passes, a known miss shown and not held (23 of 30, 24 before); every
 other number is as before (own prompts lowest 0.926, other prompts highest 0.500).
+
+## Painted lettering (11 November 2026)
+
+Version 0.1.0's unseen run passed "an iron anvil" with three lines of made-up words painted on its side, and they went on
+into its views and its paint. The picture model paints letters, logos or a signature on some objects, and nothing
+checked for them. The picture words already end "no text, no signature", but the picture model's first text encoder
+(CLIP) reads only 77 tokens and cuts those words off (docs/setup.md, "Warnings you can ignore"; its second encoder, T5,
+reads the whole prompt, and the letters come anyway). That prompt was looked at to understand the fault; nothing
+below was measured or tuned on 0.1.0's unseen ten.
+
+### The check
+
+"no painted lettering" (`lettering.py`) joins the picture checks in the choice of try: a try with lettering the words
+do not ask for is not chosen, and when no try of two rounds is free of it, the job ends at its pictures, failed on it.
+
+* **The reader** is tesseract (Apache-2.0, version 5 or newer, with its English data), an optical character
+  recogniser, run as its own program. It is probed once a run: its version (version 4 takes the option for Sauvola's
+  threshold without using it, says "Could not set option", and reads with Otsu's alone: by the table below, 10 of the
+  32 caught instead of 15) and its English data. The
+  region round the cut-out is read in grey, the backdrop made white, its contrast stretched over the object's own
+  greys, at twice its size, as painted and inverted (light letters cut into dark iron, dark letters on light wood),
+  each with one threshold for the whole region (Otsu's) and with one set from the light round each pixel (Sauvola's:
+  grey letters on a black blade beside a pale handle are lost to one threshold), in tesseract's sparse-text mode. A
+  try takes about 0.45 seconds on the CPU (the median of 20; at most 1.2).
+* **What counts.** Grain, stone joints, rivets, hoops and bristles are read as short scraps ("iit", "Wil", "SSS",
+  "ANY") at middling confidence. A word counts when it is read with a confidence of at least 70, has at least two
+  letters and three letters and digits, is nearly all letters and digits once the punctuation round it is trimmed,
+  and is at least 8 pixels of 1024 tall. A picture has lettering when its counted words hold more than 4 letters and
+  digits between them: one word of five, or two short ones.
+* **Words that ask for lettering** (`words.lettering_asked`: "a sign that says OPEN", "a book with a title on its
+  cover", "a gravestone with an inscription", "a plaque engraved with a name", "a mug printed with HELLO", "a crate
+  marked FRAGILE", "a book called Dune", a rune, a label, a logo; a word in capitals, "a tombstone with RIP"; words in
+  single quotes, "a sign 'inn'") are not refused: the letters are read and listed. Such a picture is also painted
+  without "no text, no signature". A word that only names a thing that often bears letters ("a sign", "a plaque", "a
+  coin") does not ask for them, nor does a lettering word where it means something else ("an engraved silver cup", "a
+  pile of letters", "a number of coins", "a well-read book", "a title deed", "a reading lamp"). A denial ("a sign with
+  no text", "neither text nor logo", "a text-free sign", "free of text") reaches only its own words: "a box with no
+  lid, labelled FRAGILE" and "a no smoking label" ask. Double quotes are dropped when a prompt is read, so a word
+  asked for in them is asked only when it is in capitals ('a sign "OPEN"'): 'a sign "inn"' is not read as asking.
+* **Without a usable tesseract** (it is optional; not installed, version 4 or older, no English data, or a reading
+  that fails or takes over a minute) the check says "not judged" and why: shown, not counted, never a pass; the run
+  says so once. The job says so too: its record, its sidecar (`lettering_judged`, `tesseract_version`), its report and
+  its ledger line, and `tools/trial/summary.py` never counts such a job as a pass (it is shown apart, "not read"). A
+  measured run requires the reader (`--require-lettering`): without one its jobs are "not made", and a try it could
+  not read is counted as failed. A refinish (`model-maker finish`) reads the chosen picture again, as the other
+  picture checks are measured again (it needs no card); without a reader there, the reading made when the try was
+  chosen is kept. `./setup.sh --check-only` lists tesseract, its version and whether it can be used, with how to
+  install it; setup installs no system package.
+
+### In the picture, not in the views
+
+The six views are painted from the chosen picture, and a view cannot change the choice: by then the try is chosen.
+Read the same way, a view takes about 1 second (6 seconds a job, against 0.45 a try), and on the 684 views of the
+trials' 114 made objects nothing was read as lettering. On 0.1.0's anvil (looked at, not tuned on), the picture's
+try with the letters is refused (18 characters read, "EANITIES", "NUISNHIETS"), its three other tries pass, and its
+view from the front, which shows the same words larger and softer, is read as one scrap ("TAL"). So the picture is
+where the check runs.
+
+### Measured
+
+Every distinct picture try of every trial reachable here (808: the trials' pictures folders, the war hammer and the
+quality trials, the game props' pictures; not 0.1.0's unseen ten, nor the reproduction of its anvil), and 160 new
+tries painted for this with the pipeline's own words and seeds (`tools/trial/paint_tries.py`), 8 each: on the 16 GB
+card "an old iron anvil", "a wooden crate", "a brass plaque", "a wooden shipping crate", "a stone gravestone", "a gold
+coin", "a glass potion bottle", "a wooden barrel", "a wooden signboard", "an old leather-bound book"; on the 12 GB card
+"a wooden sign that says OPEN", "a book with a title on its cover", "a brass plaque engraved with a name", "a stone
+gravestone with an inscription", "a tin box", "a bronze bell", "a stone milestone", "a wooden tea chest", "a bronze
+medal", "a wooden chest of drawers".
+
+Labelled blind, by eye (`tools/trial/lettering_sheets.py`: cropped round the cut-out, shuffled under a random code):
+every trial try that looser limits refused (87: confidence 40, height 6), 100 drawn at random from the other 721, and
+all 160 new tries. "letters": letters, words, numbers or a signature large enough to read as such; "unclear": a mark
+too small to read (a maker's stamp a few pixels tall on a handle or a blade, a logo without letters).
+
+| | Trials' tries, labelled (187) | New tries (160) | Every try (968) |
+|---|---|---|---|
+| showing none, refused | 0 of 173 | 0 of 98 | 0 (and none of the 621 not labelled) |
+| a try a trial chose, refused | | | **0 of 65** |
+| unclear, refused | 0 of 8 | 0 of 5 | |
+| letters the words do not ask for, refused | 3 of 6 | 12 of 26 | **15 of 32** |
+| letters the words ask for, passed (by construction) | | 31 of 31 (read in 13) | |
+
+Caught: the trials' leather-bound book with "BLHOM BOORY" on its cover (both cards' tries of that seed; neither was
+chosen), a hunting knife with a maker's name on its blade, and of the new tries every flat inscription: six
+gravestones and two milestones (painted with made-up inscriptions though none was asked), a shipping crate with a
+made-up logo and name, a signboard with a word, an old book, a coin. Missed (17), each a known limit:
+
+* **curved lettering round a rim** (11: coins and medals, and 1 bell): tesseract reads straight lines of text;
+* **letters a few pixels tall** (5: a word on a knife's blade, letters up a hammer's handle, stamps on an axe's blades,
+  a small signature on a bell, the print on an open book's pages), under the height limit or too small to read.
+
+In the random 100, 4 tries showed letters, all small: one is now caught (the knife), 3 are not. So about 3 in 100 of
+the trials' tries carry small lettering the check lets through, as well as the trials' book it refuses.
+
+What these numbers are: the limits were set on these same labelled tries, and there is no held-out set, so "0 of 173"
+and "0 of 98" showing none refused say the limits fit the tries they were set on, not how often a new try showing
+none will be refused. "31 of 31 asked for, passed" holds by construction: when the words ask for lettering the check
+never refuses; only "read in 13" is measured.
+
+### The limits
+
+No try showing none, and no try a trial chose, is refused. The margin is one-sided: the most any try showing none
+holds is one scrap word of 3 characters (a shield, a broom, a closed book), one character under the limit ("more than
+4"); the least any caught try holds is 5, just over it, so the caught side has no margin.
+Changing one limit at a time, on all 968 tries (letters not asked for refused / tries showing none
+refused):
+
+| | refused letters | refused none |
+|---|---|---|
+| **as kept: confidence 70, height 8, more than 4 characters** | **15 of 32** | **0** |
+| confidence 60 | 15 | 4 (a broom, a shield, a mirror, a table: grain and frames read as scraps) |
+| confidence 80 | 12 | 0 |
+| more than 2 characters | 16 | 6 (one 3-letter scrap each) |
+| height 6 or 10 | 15 | 0 |
+| only Otsu's threshold (as painted, inverted) | 10 | 0 |
+| Sauvola's on the inverted region left out | 13 | 0 |
+
+Sauvola's threshold found 5 of the 15 that Otsu's missed (the knife's name, the signboard's word). Measured and left
+out: the same readings at half size, for letters over 60 pixels tall: they found more only on signs whose words asked
+for their letters ("OPEN", 4 characters). Measured with tesseract 5.5.0; no run on another version is recorded.
+
+Measured again on 11 November 2026 after the review's fixes (a word counted before it is kept once, and kept once by
+its text as well as its box; the words that ask for lettering widened and their denials narrowed), on the same 968
+tries' readings and the same labels, nothing read again (the readings are the same; only what is done with them
+changed): every verdict is as before. Letters the words do not ask for: 15 of 32 caught, 17 missed (the 17 known
+misses), as before; showing none, unclear, and every try a job chose (64 found by their jobs' records): none refused,
+as before. Six lettered tries count other numbers of characters (a gravestone's 39 now 36, a book's 8 now 11), each
+on the same side of the limit. No prompt of the labelled tries is asked for lettering otherwise than before. The
+regression case "lettering-pictures", read again with tesseract 5.5.0, gives the same tally: letters not asked for
+15 refused and the 17 known misses passed, letters asked for 31 passed, none 267 and unclear 13 passed.
+
+The labelled set is a regression case, "lettering-pictures" (`tools/trial/lettering-cases.toml`, 343 pictures; the
+20 game props' pictures are left out): every picture showing none and every picture whose prompt asks for lettering
+must pass, every picture showing letters its prompt does not ask for must be refused, but the 17 known misses
+(`known_miss`, shown, not held), and "unclear" is shown. It needs tesseract 5 or newer with its English data: without
+a usable one the case counts as broken; the version that read it is printed and kept in the regression ledger.
+The whole regression set holds with it (53 of 53; "lettering-pictures" took about 4 minutes on one CPU thread), and
+every other number is as before; so it did again after the review's fixes (53 of 53, its lettering read by tesseract
+5.5.0).

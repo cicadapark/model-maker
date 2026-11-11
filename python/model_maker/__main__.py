@@ -60,6 +60,9 @@ def common(parser):
                         help="views added to paint what the six missed, at most (default 4; 0 for none)")
     parser.add_argument("--touch-up-strength", type=float,
                         help="how much of a touch-up view's start the inpainter repaints (default 0.6; 1 from noise)")
+    parser.add_argument("--require-lettering", action="store_true",
+                        help="read every picture for painted lettering: without tesseract 5 or newer and its English "
+                        "data a job is not made (the measured run uses it)")
 
 
 def warn_unverified(args):
@@ -72,7 +75,8 @@ def settings_of(args):
     return pipeline.Settings(models=args.models, sources=args.sources, tries=args.tries, shape_tries=args.shape_tries,
                              triangles=args.triangles, texture=args.texture, verify=not args.no_verify,
                              lead=args.lead, paint_steps=args.paint_steps, picture_rounds=args.picture_rounds,
-                             touch_up_views=args.touch_up_views, touch_up_strength=args.touch_up_strength)
+                             touch_up_views=args.touch_up_views, touch_up_strength=args.touch_up_strength,
+                             require_lettering=args.require_lettering)
 
 
 def report(line):
@@ -107,9 +111,15 @@ def made(prompt, out, size, stands, symmetric, settings, stages, kept=None):
     job = pipeline.Job(folder, prompt, size, stands, symmetric, settings=settings)
     started = time.time()
     pipeline.run([job], settings, report, stages, kept)
-    print(f"{job['prompt']}: {job.record['status']} in {time.time() - started:.0f} s; "
+    print(f"{job['prompt']}: {job.record['status']}{unread_words(job)} in {time.time() - started:.0f} s; "
           f"{os.path.join(folder, job['slug'] + '.glb')}, report {os.path.join(folder, 'report', 'report.html')}")
     return (0 if job.record["status"] == "passes every check" else 1), job
+
+
+def unread_words(job):
+    """What a job's status leaves out: its chosen picture not read for painted lettering."""
+    lettering = job.record.get("lettering")
+    return "" if lettering is None or lettering["judged"] else " (not read for painted lettering)"
 
 
 def prompts_in(path):
@@ -145,7 +155,10 @@ def batch(args):
                                                                   ("pictures", "shape", "paint", "finish")),
                           round(sum(s.values()), 1)])
     passed = sum(job.record["status"] == "passes every check" for job in jobs)
-    print(f"{passed} of {len(jobs)} pass every check; {time.time() - started:.0f} s in all; "
+    unread = sum(job.record["status"] == "passes every check" and bool(unread_words(job)) for job in jobs)
+    print(f"{passed} of {len(jobs)} pass every check"
+          f"{f' ({unread} of them not read for painted lettering)' if unread else ''}; "
+          f"{time.time() - started:.0f} s in all; "
           f"{os.path.join(args.out, 'times.csv')}")
     return 0
 

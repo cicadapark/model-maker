@@ -96,6 +96,9 @@ def written(folder, job, checks, measures, pictures, models_used):
     verdict = (f'<span class="pass">passes all {len(every)} checks</span>' if not failed else
                f'<span class="fail">fails {len(failed)} of {len(every)} checks</span>: '
                + html.escape("; ".join(c["name"] for c in failed)))
+    lettering = job.get("lettering")
+    if lettering is not None and not lettering["judged"]:
+        verdict += " (not read for painted lettering)"
     size = measures.get("size_m", [0, 0, 0])
     size_words = f"{size[0] * 100:.0f} × {size[1] * 100:.0f} × {size[2] * 100:.0f} cm (wide × high × deep)"
     weapon = measures.get("weapon") or {}
@@ -112,7 +115,8 @@ def written(folder, job, checks, measures, pictures, models_used):
         f"{html.escape(size_words)}; size set to {job['size_m']:.2f} m (its largest side; "
         "<code>--size</code> sets it); "
         f"{measures.get('triangles', 0)} triangles.</p><ul class='muted'>{why}</ul></section>",
-        f"<section><h2>Picture</h2><div class='row'>{figures['picture']}</div>"
+        f"<section><h2>Picture</h2><p class='muted'>{html.escape(lettering_words(lettering))}</p>"
+        f"<div class='row'>{figures['picture']}</div>"
         f"<h2>The tries</h2><div class='row tries'>{figures['try']}</div></section>",
         f"<section><h2>Shape</h2><p class='muted'>{html.escape(repair_words(measures.get('repair')))}</p>"
         f"<div class='row'>{figures['outline']}{figures['marks']}</div>"
@@ -138,6 +142,17 @@ def written(folder, job, checks, measures, pictures, models_used):
     with open(path, "w") as file:
         file.write(page)
     return path
+
+
+def lettering_words(lettering):
+    """Whether the chosen picture was read for painted lettering, and by which tesseract, in words."""
+    if lettering is None:
+        return "Not read for painted lettering: made before the check."
+    if not lettering["judged"]:
+        return f"Not read for painted lettering: {lettering['why']}."
+    version = f"tesseract {lettering['tesseract']}" if lettering.get("tesseract") else "tesseract (version not kept)"
+    stage = "when it was chosen" if lettering.get("read_at") == "pictures" else "at the finish"
+    return f"Read for painted lettering by {version}, {stage}."
 
 
 REPAIR_WORDS = [("corners_joined", "corners at the same place joined"),

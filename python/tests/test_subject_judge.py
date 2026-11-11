@@ -283,6 +283,16 @@ class InTheChoiceOfTry(unittest.TestCase):
         def mask(self, picture):
             return np.asarray(picture)[..., 0] < 150
 
+    def setUp(self):
+        # The lettering check reads each try with tesseract when it is installed: faked here (nothing read), so these
+        # tests judge the same on every machine (the 0.2.0 review, missing test 6).
+        from model_maker import lettering
+
+        for name, value in (("reader", lettering.Reader(True, "5.5.0", "")), ("every_reading", [])):
+            patcher = mock.patch.object(lettering, name, return_value=value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     def chosen(self, shares, judge=object()):
         from model_maker import pipeline
 
