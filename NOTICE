@@ -6,7 +6,7 @@ This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 AI models the pipeline uses
 ---------------------------
 
-No model weights are included in this repository. Release 1 uses the models below; registry/models.toml
+No model weights are included in this repository. model-maker uses the models below; registry/models.toml
 lists each one's files, hub revision and licence, and setup.sh downloads them after their licences are
 shown. Each object's sidecar says which models made it.
 
@@ -66,3 +66,12 @@ none is shipped in this repository. Some of their wheels bundle shared libraries
   libquadmath (numpy, scipy): LGPL-2.1-or-later. GCC's quad-precision maths, loaded at run time and
     replaceable. It is not part of this repository. It is the one recorded exception to this project's
     no-LGPL rule; see CONTRIBUTING.md, rule 1.
+
+Programs it runs when they are installed
+----------------------------------------
+
+  tesseract (Apache-2.0; https://github.com/tesseract-ocr/tesseract), with its English data (Apache-2.0):
+    optional. When it is on the PATH, python/model_maker/lettering.py runs it as its own program to read
+    each picture try for painted lettering. Neither setup.sh nor this repository installs or ships it;
+    a system's package brings it (Debian and Ubuntu: tesseract-ocr), with the Leptonica image library it
+    is built on (BSD-2-Clause).

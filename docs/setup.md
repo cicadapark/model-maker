@@ -15,6 +15,21 @@ newer, 24 GB or more of the computer's memory (16 GB to try), git, curl, tar and
 on Debian and Ubuntu, for meshoptimizer). Nothing else: setup brings its own Python and, when the PC has none, its own
 Rust. It uses about 60 GB (models 54 GB, environment 6 GB); keep 75 GB free.
 
+Optional, recommended: tesseract (Apache-2.0), version 5 or newer with its English data, which reads each picture try
+for letters painted on the object (the check "no painted lettering", docs/objects.md, "Painted lettering"). Setup
+installs no system package; install it yourself:
+
+* Debian 12 (5.3.0) and Ubuntu 24.04 (5.3.4): `sudo apt install tesseract-ocr tesseract-ocr-eng`.
+* Ubuntu 22.04 packages version 4.1.1, which is too old (it has no Sauvola threshold, and the check does not use it).
+  Tesseract's own installation page names a PPA with version 5 for Ubuntu
+  (https://tesseract-ocr.github.io/tessdoc/Installation.html): `sudo add-apt-repository ppa:alex-p/tesseract-ocr5`,
+  `sudo apt update`, then `sudo apt install tesseract-ocr tesseract-ocr-eng` (5.4.1 for 22.04; its page calls it
+  unsupported, so it is your choice). Or build tesseract 5 from its source, as that page says.
+
+`./setup.sh --check-only` shows the version found and whether it can be used. Without a usable tesseract a make still
+runs, each try says "not judged" and why, and the job says it was not read for painted lettering (it is never counted
+as a pass by the trial tools; `--require-lettering` makes such a job "not made").
+
 `--check-only` checks the PC, not the models: once they are downloaded, `.venv/bin/python -I setup/fetch_models.py
 --verify` checks every model file against its sum. Nor does it see what else is using the card: on a 12 GB card,
 stop anything else that uses the card before a make (the release check's peak on a 12 GB card was 11.85 GB).
@@ -227,6 +242,8 @@ A make prints some warnings from the libraries it uses. These four are expected 
 * accelerate's "You shouldn't move a model that is dispatched", printed when a model the pipeline offloads is moved;
 * a note about `low_cpu_mem_usage` while a model loads;
 * CLIP's note that the prompt was cut to 77 tokens: the picture model's T5 text encoder still reads the whole prompt.
+  What is cut off is the end of the picture words ("no text, no signature"); letters the picture model paints anyway
+  are caught by the check "no painted lettering" (with tesseract 5 or newer).
 
 ## What the wheels bundle
 

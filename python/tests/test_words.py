@@ -172,7 +172,7 @@ class TrickyPromptsAreReadRight(unittest.TestCase):
                  "a giant rusted iron key": "key", "a giant red mushroom": "mushroom"}
         for prompt, noun in cases.items():
             subject = words.subject_of(prompt)
-            self.assertNotEqual(subject.kind, "character", prompt)
+            self.assertNotIn(subject.kind, ("animal", "character"), prompt)
             self.assertEqual(subject.noun, noun, prompt)
 
     def test_an_ending_in_ed_or_ing_on_no_stem_is_no_participle(self):
@@ -181,10 +181,11 @@ class TrickyPromptsAreReadRight(unittest.TestCase):
         for word in ("sleeping", "standing", "spiked", "headed", "flying", "rusted"):
             self.assertIsNotNone(words.PARTICIPLE.fullmatch(word), word)
 
-    def test_a_creature_doing_something_is_still_a_character(self):
-        for prompt in ("a dragon sleeping", "a big black bear standing", "a dragon sleeping on a chest",
-                       "a horse grazing", "a giant"):
+    def test_a_creature_doing_something_is_still_a_character_or_an_animal(self):
+        for prompt in ("a dragon sleeping", "a dragon sleeping on a chest", "a giant", "a knight kneeling"):
             self.assertEqual(words.subject_of(prompt).kind, "character", prompt)
+        for prompt in ("a big black bear standing", "a horse grazing"):
+            self.assertEqual(words.subject_of(prompt).kind, "animal", prompt)
 
     def test_a_denied_opening_leaves_it_shut_and_symmetric(self):
         for prompt in ("a book, never opened", "a chest that cannot be opened", "a chest, not open"):

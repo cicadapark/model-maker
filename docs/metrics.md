@@ -9,8 +9,8 @@ rest, so the numbers that show progress cannot be picked by hand.
 | `load` | a stage's models loaded | seconds |
 | `stage` | a job's stage done | seconds, the card's peak memory, the tries and their faults |
 | `aborted` | a job's stage raised an error, or its models' loading did | the stage, the error |
-| `job` | the finish (again on each refinish) | status, the failed checks, every counted check's value and limit, seconds per stage, first tries, the trim; its run |
-| `not made` | a prompt refused (a bow, a character, an empty prompt; by `make`, a batch or the warm process alike), or a chest or book when SigLIP 2 is not downloaded | why |
+| `job` | the finish (again on each refinish) | status, the failed checks, every counted check's value and limit, seconds per stage, first tries, the trim, whether the chosen picture was read for painted lettering (`lettering_judged`) and by which tesseract; its run |
+| `not made` | a prompt refused (a bow, an animal, a character, an empty prompt; by `make`, a batch or the warm process alike), or a chest or book when SigLIP 2 is not downloaded | why |
 | `warm` | a job of the warm process done | the jobs it made before, what is left on the card and the process's memory |
 | `run` | a batch's end | its jobs, its whole seconds and its loading, for them to share |
 
@@ -35,7 +35,13 @@ to load, gets its `aborted` line and is set aside while the others go on, and th
 its `job` line (failed on those checks), not after a shape and a paint the finish would fail. Each job's folder is named
 by its slug and a hash of its prompt and options, so a folder never holds another order's job.
 
-`regression.py run` appends a line to `metrics/regression.jsonl`: held, broken, each case's verdict.
+`regression.py run` appends a line to `metrics/regression.jsonl`: held, broken, each case's verdict, and the tesseract
+version that read the lettering case.
+
+A job whose chosen picture was not read for painted lettering (no usable tesseract: `lettering_judged` false) is never
+counted as a pass by the summary: it is shown apart, in its batch's "Not read for lettering" column and beside the
+unseen set's headline. A measured run (the unseen set, a trial) is made with `--require-lettering`, so such a job is
+"not made" instead.
 
     python3 -I tools/trial/summary.py progress [--write FILE]
 

@@ -9,6 +9,10 @@
                                                                  ledger (MODEL_MAKER_LEDGER or metrics/)
     python3 -I tools/trial/summary.py backfill DIR [DIR ...]     once: trial folders made before the ledger into it,
                                                                  each line marked backfilled
+
+A job whose chosen picture was not read for painted lettering (its record's and its ledger line's `lettering_judged`
+false: no usable tesseract) is never counted as a pass: it is shown apart ("not read"). A job made before the check
+(no `lettering_judged`) is counted as it was.
 """
 
 import datetime
@@ -49,7 +53,9 @@ def pictures(folders):
             tries = job.get("picture", {}).get("tries", {})
             ok = sum(t["passed"] for t in tries.values())
             total, passing = total + len(tries), passing + ok
-            faults.update(c["name"] for t in tries.values() for c in t["checks"] if not c["passed"])
+            # A check shown, not counted (lettering not judged), is no fault.
+            faults.update(c["name"] for t in tries.values() for c in t["checks"]
+                          if not c["passed"] and c.get("counted", True))
             rows.append(f"  {name:30} {ok}/{len(tries)} pass")
         print(f"{folder}: {passing} of {total} tries pass; faults {dict(faults)}")
         print("\n".join(rows))
@@ -69,12 +75,24 @@ def paint(folders):
                   f"{likeness.get('mean_delta_e', float('nan')):>8.1f} {likeness.get('share_within_10', 0):>9.0%}")
 
 
+def unread(job):
+    """Whether a job's record or ledger line says its chosen picture was not read for painted lettering."""
+    if "lettering_judged" in job:
+        return job["lettering_judged"] is False
+    return (job.get("lettering") or {}).get("judged") is False
+
+
 def checks(folder):
-    passing = 0
+    passing = not_read = 0
     for name, job in jobs(folder):
+        if job["status"] == "passes every check" and unread(job):
+            not_read += 1
+            print(f"{name:30} {job['status']}, but NOT READ for painted lettering: not counted as a pass")
+            continue
         passing += job["status"] == "passes every check"
         print(f"{name:30} {job['status']}")
-    print(f"{passing} pass every check")
+    print(f"{passing} pass every check" + (f"; {not_read} more pass the rest but were not read for painted lettering "
+                                           "(not counted)" if not_read else ""))
 
 
 def backfill(folders):
@@ -144,7 +162,8 @@ def latest_per_job(lines):
 
 def batch_row(ends):
     made = [e for e in ends if e["event"] == "job"]
-    passed = [e for e in made if e["passed"]]
+    # A job not read for painted lettering passes nothing: it is shown apart.
+    passed = [e for e in made if e["passed"] and not unread(e)]
     minutes = [sum(e["seconds"].values()) / 60 for e in made]
     # The real time a job took, its models' loading with it (the jobs that say their run).
     whole = [e["run"]["whole_seconds"] / 60 for e in made if (e.get("run") or {}).get("whole_seconds") is not None]
@@ -163,6 +182,7 @@ def batch_row(ends):
         "picture_first_round": sum(f["picture_rounds"] == 1 for f in first),
         "shape_first_seed": sum(bool(f["shape_first_passed"]) for f in first),
         "aborted": sum(e["event"] == "aborted" for e in ends),
+        "not_read": sum(unread(e) for e in made),
         "faults": Counter(name for e in made for name in e["failed"]).most_common(3),
         "versions": sorted({e["version"] for e in ends}), "cards": cards,
         "backfilled": any(e.get("backfilled") for e in ends),
@@ -183,8 +203,9 @@ def progress(write=None):
         by_batch[end["batch"]].append(end)
     regressions = [r for r in ledger.read(ledger.REGRESSION_FILE) if r.get("whole", True)]
     now = datetime.datetime.now(datetime.timezone.utc)
-    this_week = [e for e in ends if e["event"] == "job" and e["passed"] and now - datetime.datetime.strptime(
-        e["made_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc) <= WEEK]
+    this_week = [e for e in ends if e["event"] == "job" and e["passed"] and not unread(e)
+                 and now - datetime.datetime.strptime(e["made_at"], "%Y-%m-%dT%H:%M:%SZ").replace(
+                     tzinfo=datetime.timezone.utc) <= WEEK]
     out = ["# model-maker: progress", "",
            f"From the ledger ({len(ends)} jobs, {len(by_batch)} batches), written by the pipeline. Made "
            f"{now:%Y-%m-%d %H:%M} UTC by `tools/trial/summary.py progress`; do not edit by hand.", "",
@@ -200,7 +221,9 @@ def progress(write=None):
             first, last = batch_row(firsts[batch]), batch_row(by_batch[batch])
             out.append(f"- Unseen set ({batch}): {share(first['passed'], first['asked'])} of prompts asked pass every "
                        f"check as first finished ({', '.join(first['versions'])}); as last finished "
-                       f"{share(last['passed'], last['asked'])} ({', '.join(last['versions'])})")
+                       f"{share(last['passed'], last['asked'])} ({', '.join(last['versions'])})"
+                       + (f"; NOT READ for painted lettering, so not counted as passes: {first['not_read']} as first "
+                          f"finished, {last['not_read']} as last" if first["not_read"] or last["not_read"] else ""))
     else:
         out.append("- Unseen set: not run yet (it runs once per release, after the code is frozen)")
     if regressions:
@@ -209,8 +232,8 @@ def progress(write=None):
     out.append(f"- Models made this week that pass every check: {len(this_week)}")
     out += ["", "## Per batch", "",
             "| Batch | Versions | Card | Pass of asked | Objects | Held in the hand | Median min | Median whole min (warm) | "
-            "Card min per pass | Picture 1st round | Shape 1st seed | Aborted | Top faults |",
-            "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+            "Card min per pass | Picture 1st round | Shape 1st seed | Aborted | Not read for lettering | Top faults |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for batch in sorted(by_batch):
         row = batch_row(by_batch[batch])
         median = f"{row['median_min']:.1f}" if row["median_min"] is not None else "-"
@@ -220,7 +243,7 @@ def progress(write=None):
         out.append(f"| {batch}{' (back-filled)' if row['backfilled'] else ''} | {', '.join(row['versions'])} | "
                    f"{', '.join(row['cards'])} | {share(row['passed'], row['asked'])} | {row['objects']} | "
                    f"{row['weapons']} | {median} | {whole} | {per_pass} | {row['picture_first_round']} of {row['made']} | "
-                   f"{row['shape_first_seed']} of {row['made']} | {row['aborted']} | {faults} |")
+                   f"{row['shape_first_seed']} of {row['made']} | {row['aborted']} | {row['not_read']} | {faults} |")
     text = "\n".join(out) + "\n"
     print(text, end="")
     if write:

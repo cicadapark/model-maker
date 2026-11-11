@@ -1,0 +1,27 @@
+# The prompts kept sealed for version 0.2.0: written before its code was frozen; nothing was tuned on them.
+# Each was made once at the frozen code on two cards for the pass rate the README gives; they are now part of the development set.
+a wooden armchair
+a stone garden bench
+an oak wardrobe
+a wooden bed frame
+a small writing desk
+a copper kettle
+a ceramic teapot
+a wooden bucket
+a glass bottle
+a clay flower pot
+an iron cauldron
+a brass oil lamp
+a wooden ladder
+a wooden rake
+a pickaxe
+a blacksmith's hammer
+a pair of iron tongs
+a wooden spinning wheel
+a stone birdbath
+a wooden water wheel
+a short iron mace
+a wooden club
+a kite shield
+a straight steel longsword
+a wooden quarterstaff
