@@ -124,12 +124,18 @@ class Kept:
         """The stage's models closed, so the next stage has the card and the computer's memory to itself."""
         for name in self.stage_models(stage):
             close(self.models.pop(name))
-        empty_card_cache()
+        # Handed back to the system, not only freed: measured, the shape model closed left most of its memory held by
+        # the process until trimmed (memory.give_back).
+        from . import memory
+
+        memory.give_back()
 
     def close(self):
+        from . import memory
+
         for name in list(self.models):
             close(self.models.pop(name))
-        empty_card_cache()
+        memory.give_back()
 
 
 def close(model):

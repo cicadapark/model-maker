@@ -140,6 +140,16 @@ def bench(cell=0.01):
     return surface_of([seat] + legs, cell)
 
 
+def bed_frame(cell=0.02):
+    """A bed frame 2 m long, 1.4 m wide and 0.39 m high (5 times as long as high): a rail round a deck on four legs
+    7 cm square. The deck is whole: a picture does not resolve the gaps between a bed's slats seen from its end."""
+    rails = [((-0.70, 0.25, -1.00), (0.70, 0.39, -0.95)), ((-0.70, 0.25, 0.95), (0.70, 0.39, 1.00)),
+             ((-0.70, 0.25, -1.00), (-0.65, 0.39, 1.00)), ((0.65, 0.25, -1.00), (0.70, 0.39, 1.00))]
+    deck = ((-0.65, 0.30, -0.95), (0.65, 0.33, 0.95))
+    legs = [((x, 0.0, z), (x + 0.07, 0.25, z + 0.07)) for x in (-0.70, 0.63) for z in (-1.00, 0.93)]
+    return surface_of(rails + [deck] + legs, cell)
+
+
 def three_legged_table(short_leg=0.0, cell=0.01):
     """A small table 0.65 m high, 0.75 m across: a top 3 cm thick on three legs 4 cm square at 120 degrees round it,
     as the third trial's round table. `short_leg` raises the first leg's foot that far off the ground."""

@@ -282,11 +282,17 @@ def spread(colours, known, triangles, rounds=SPREAD_ROUNDS):
     return colours
 
 
-def painted(painter, corners, triangles, picture_rgb, mask, text, seed=0, views_out=None, report=print, steps=STEPS):
+def painted(painter, corners, triangles, picture_rgb, mask, text, seed=0, views_out=None, report=print, steps=STEPS,
+            with_views=False, turn=None):
     """The shape's colours from six views painted to fit it: (each corner's colour 0-1, which corners a view saw, the
-    colour cloud (points, normals, colours) in the shape's frame)."""
+    colour cloud (points, normals, colours) in the shape's frame); with `with_views`, a fourth: {"view_of": each cloud
+    point's view (0-5), "directions": each view's direction towards its camera in the shape's frame (6 x 3)}. `turn`
+    (3 x 3): the shape is painted turned by it (a hafted weapon standing upright, `upright`), and the cloud and the
+    directions are turned back into the shape's own frame."""
     from .mesh_tools import corner_normals
 
+    if turn is not None:
+        corners = np.asarray(corners, dtype=np.float64) @ np.asarray(turn).T
     points, centre, scale = standard_with(corners.astype(np.float64))
     normals = corner_normals(points, triangles)
     cams = cameras()
@@ -298,11 +304,14 @@ def painted(painter, corners, triangles, picture_rgb, mask, text, seed=0, views_
     views = painter.views(control, text, reference(picture_rgb, mask), seed, steps)
     if views_out:
         os.makedirs(views_out, exist_ok=True)
+        from . import credentials
+
         for k, image in enumerate(views):
-            image.save(os.path.join(views_out, f"view-{k}.png"))
+            credentials.save_picture(image, os.path.join(views_out, f"view-{k}.png"), credentials.OBJECT_MODELS)
     total = np.zeros((len(points), 3))
     weights = np.zeros(len(points))
     cloud = []
+    view_of, directions = [], []
     for v, image in enumerate(views):
         cols, rows, depth = projected(points, mvps[v])
         position, normal, zbuf = maps[v]
@@ -319,8 +328,17 @@ def painted(painter, corners, triangles, picture_rgb, mask, text, seed=0, views_
         keep = np.isfinite(zbuf) & ((normal @ -towards) >= CLOUD_LEAST_FACING)
         cloud.append((from_standard(position[keep], centre, scale), from_standard(normal[keep], np.zeros(3), 1.0),
                       rgb[keep]))
+        view_of.append(np.full(int(keep.sum()), v, dtype=np.int8))
+        directions.append(from_standard(-towards[None], np.zeros(3), 1.0)[0])
         report(f"view {v}: colours {int(takes.sum())} corners")
     known = weights > 0
     colours = np.where(known[:, None], total / np.maximum(weights, 1e-12)[:, None], 0.5)
     cloud = tuple(np.concatenate([part[k] for part in cloud]).astype(np.float32) for k in range(3))
+    if turn is not None:
+        back = np.asarray(turn, dtype=np.float64)
+        cloud = ((cloud[0] @ back).astype(np.float32), (cloud[1] @ back).astype(np.float32), cloud[2])
+        directions = [d @ back for d in directions]
+    if with_views:
+        return spread(colours, known, triangles), known, cloud, {
+            "view_of": np.concatenate(view_of), "directions": np.asarray(directions, dtype=np.float32)}
     return spread(colours, known, triangles), known, cloud

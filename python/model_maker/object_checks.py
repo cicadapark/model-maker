@@ -23,8 +23,18 @@ from .picture_checks import Check
 OUTLINE_SIDE = 384
 OUTLINE_RENDER_SIDE = 448
 OUTLINE_TURNS = tuple(range(-90, 91, 15))
-# The painter is asked for a view slightly from above.
-OUTLINE_TILTS = (0.0, 12.0, 24.0)
+# The painter is asked for a view slightly from above: the coarse grid's tilts run from level to this, every
+# `OUTLINE_TILT_STEP` degrees at most (`outline_tilts`).
+OUTLINE_MOST_TILT = 24.0
+OUTLINE_TILT_STEP = 12.0
+# A coarse grid finds the view only when its samples lie inside the measure's basin round it (coarse-to-fine matching
+# needs its coarse steps finer than the capture range: Borgefors, 1988). A deep, low thing seen from its end changes
+# its outline fastest with the tilt: seen from a tilt t, its outline is h cos t + d sin t high (h its height, d its
+# depth along the line of sight). Between two neighbouring tilts that height may grow by at most this share. The sealed
+# run's bed frame (2 m deep, 0.39 m high) matches its picture 6 degrees above (edges 1.3 % apart) and lies within 10 %
+# of it only from 3 to 9 degrees, its outline 17 % lower or higher; the grid's 0 and 12 degrees (14 % and 15 %, its
+# outline 35 % lower and 34 % higher) lost to a wrong view from its side.
+OUTLINE_TILT_HEIGHT_SHARE = 0.25
 OUTLINE_REFINE = ((5.0, 4.0), (2.0, 2.0), (1.0, 1.0))
 # Each refining step size is repeated while it gains, at most this many times.
 MOST_PATTERN_MOVES = 8
@@ -168,13 +178,35 @@ def view_search(painted, aspect, corners, triangles, by_box=False, counted=None,
                 best = moved
         return best
 
-    coarse = [max((tried(turn, tilt, distance) for turn in OUTLINE_TURNS for tilt in OUTLINE_TILTS),
+    tilts = outline_tilts(corners)
+    coarse = [max((tried(turn, tilt, distance) for turn in OUTLINE_TURNS for tilt in tilts),
                   key=lambda t: t[0]) for distance in OUTLINE_DISTANCES]
     _, turn, tilt, distance = max((refined(best) for best in coarse), key=lambda t: t[0])
     made, cut = made_at(turn, tilt, distance)
     both = int(np.count_nonzero(painted & made & counted))
     union = int(np.count_nonzero((painted | made) & counted)) + cut
     return OutlineView(both / max(1, union), turn, tilt, distance, painted, made, cut)
+
+
+def outline_tilts(corners):
+    """The coarse grid's tilts for a surface: from level to `OUTLINE_MOST_TILT`, at most `OUTLINE_TILT_STEP` apart,
+    and close enough that its outline's height (h cos t + d sin t, d its largest size across, the deepest it can be
+    seen) grows by at most `OUTLINE_TILT_HEIGHT_SHARE` between neighbours, in whole degrees. A thing as deep as high or
+    less keeps the grid of 0, 12 and 24 degrees."""
+    size = np.ptp(np.asarray(corners, dtype=np.float64), axis=0)
+    height, across = float(size[1]), float(max(size[0], size[2]))
+    tilts, tilt = [0.0], 0.0
+    while True:
+        t = np.radians(tilt)
+        seen_high = height * np.cos(t) + across * np.sin(t)
+        growth = across * np.cos(t) - height * np.sin(t)
+        step = OUTLINE_TILT_STEP if growth <= 0 else min(
+            OUTLINE_TILT_STEP, float(np.degrees(OUTLINE_TILT_HEIGHT_SHARE * seen_high / growth)))
+        # Whole degrees, as the refinement steps by whole degrees from them.
+        tilt += max(1.0, float(np.floor(step)))
+        if tilt >= OUTLINE_MOST_TILT:
+            return tuple(tilts + [OUTLINE_MOST_TILT])
+        tilts.append(tilt)
 
 
 def edge_of(mask):

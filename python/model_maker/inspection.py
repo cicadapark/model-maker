@@ -143,6 +143,23 @@ def views_check(shares):
                  + ", ".join(f"{s:.1%}" for s in shares) + f"; at most {MOST_BLACK_VIEW_SHARE:.0%})")
 
 
+def views_agree_check(record):
+    """The six painted views against each other, shown beside the checks, not counted (`view_agreement`): how unlike
+    the side view most out of family is to its neighbours, in the try kept. A try over the limit was painted again
+    from the next seed, and the one that agrees best kept; polished metal's views differ by their reflections."""
+    from .view_agreement import REPAINT_FROM, UNLIKE_DELTA_E
+
+    tries = record["tries"]
+    kept = next((t for t in tries if t["seed"] == record["kept_seed"]), tries[-1])
+    painted_again = (f"; painted from {len(tries)} seeds ("
+                     + ", ".join(f"seed {t['seed']}: {t['worst']:.0%}" for t in tries)
+                     + f"), seed {kept['seed']} kept") if len(tries) > 1 else ""
+    return Check("painted views agree", kept["worst"] * 100, REPAINT_FROM * 100, "%", kept["worst"] < REPAINT_FROM,
+                 f"the side view most unlike its neighbours differs from them by over {UNLIKE_DELTA_E:.0f} delta E in "
+                 f"{kept['worst']:.0%} of the surface they both see (painted again from {REPAINT_FROM:.0%})"
+                 f"{painted_again}; the bake uses each view where it sees the surface squarest", counted=False)
+
+
 def fill_check(fit):
     """`fit`: the touch-up's fill as the finished model shows it (`pipeline.judged_fill`). The coverage counts a texel
     painted; this judges what it shows. The fill kept on the model fails when its colours are found nowhere in the

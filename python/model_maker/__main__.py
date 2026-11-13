@@ -11,9 +11,13 @@
     model-maker bug-report JOB_FOLDER [--out FILE] [--with-model]
                                                          one file for a problem report, nothing personal in it
     model-maker reproduce REPORT_FILE --out DIR          a report's job made again here, and compared with it
+    model-maker credentials [--make-test] [--read PICTURE ...]
+                                                         which certificate signs the pictures' content credentials
 
 The models are read from --models (or MODEL_MAKER_MODELS), the view painter's code (MV-Adapter) from --sources (or
-MODEL_MAKER_SOURCES): see docs/objects.md.
+MODEL_MAKER_SOURCES): see docs/objects.md. Every picture is written with its content credentials (C2PA), signed with
+--signing-key and --signing-cert (or MODEL_MAKER_SIGNING_KEY and MODEL_MAKER_SIGNING_CERT), else with a test
+certificate made on this computer: see docs/objects.md, "Content credentials".
 """
 
 import argparse
@@ -63,6 +67,30 @@ def common(parser):
     parser.add_argument("--require-lettering", action="store_true",
                         help="read every picture for painted lettering: without tesseract 5 or newer and its English "
                         "data a job is not made (the measured run uses it)")
+    signing_options(parser)
+
+
+def signing_options(parser):
+    parser.add_argument("--signing-key", help="the PEM private key that signs the pictures' content credentials "
+                        "(default MODEL_MAKER_SIGNING_KEY; else a test certificate made on this computer)")
+    parser.add_argument("--signing-cert", help="its certificate chain, PEM, the signer's own first (default "
+                        "MODEL_MAKER_SIGNING_CERT)")
+
+
+def use_signing(args):
+    """The key and certificate that sign every picture of this run; a pair that does not work ends it here."""
+    from . import credentials
+
+    missing = credentials.missing_packages()
+    if missing:
+        print(f"model-maker: {', '.join(missing)} not installed: the pictures' content credentials need them (new in "
+              f"0.2.1). Run ./setup.sh again.", file=sys.stderr)
+        sys.exit(2)
+    try:
+        credentials.use(credentials.chosen(getattr(args, "signing_key", None), getattr(args, "signing_cert", None)))
+    except credentials.NotSigned as error:
+        print(f"model-maker: {error}", file=sys.stderr)
+        sys.exit(2)
 
 
 def warn_unverified(args):
@@ -72,6 +100,7 @@ def warn_unverified(args):
 
 def settings_of(args):
     warn_unverified(args)
+    use_signing(args)
     return pipeline.Settings(models=args.models, sources=args.sources, tries=args.tries, shape_tries=args.shape_tries,
                              triangles=args.triangles, texture=args.texture, verify=not args.no_verify,
                              lead=args.lead, paint_steps=args.paint_steps, picture_rounds=args.picture_rounds,
@@ -110,7 +139,11 @@ def made(prompt, out, size, stands, symmetric, settings, stages, kept=None):
     folder = pipeline.job_folder(out, prompt, size, stands, symmetric)
     job = pipeline.Job(folder, prompt, size, stands, symmetric, settings=settings)
     started = time.time()
-    pipeline.run([job], settings, report, stages, kept)
+    try:
+        pipeline.run([job], settings, report, stages, kept)
+    except pipeline.NotEnoughMemory as short:
+        print(f"model-maker: {short}", file=sys.stderr)
+        return pipeline.NOT_ENOUGH_MEMORY_EXIT, None
     print(f"{job['prompt']}: {job.record['status']}{unread_words(job)} in {time.time() - started:.0f} s; "
           f"{os.path.join(folder, job['slug'] + '.glb')}, report {os.path.join(folder, 'report', 'report.html')}")
     return (0 if job.record["status"] == "passes every check" else 1), job
@@ -143,7 +176,12 @@ def batch(args):
     ledger.run_began(max(1, sum(not job.subject.not_yet for job in jobs)))
     started = time.time()
     # A job whose stage fails is set aside with its own ledger line; the batch goes on, and its times are written.
-    pipeline.run(jobs, settings, report, args.stages.split(","), keep_going=True)
+    try:
+        pipeline.run(jobs, settings, report, args.stages.split(","), keep_going=True)
+    except pipeline.NotEnoughMemory as short:
+        print(f"model-maker: {short}", file=sys.stderr)
+        ledger.run_ended([job.record["id"] for job in jobs if "id" in job.record])
+        return pipeline.NOT_ENOUGH_MEMORY_EXIT
     # The batch's whole time and loading, once, for its jobs to share (docs/metrics.md).
     ledger.run_ended([job.record["id"] for job in jobs if "id" in job.record])
     with open(os.path.join(args.out, "times.csv"), "w", newline="") as file:
@@ -164,6 +202,7 @@ def batch(args):
 
 
 def finish(args):
+    use_signing(args)
     jobs = [pipeline.Job(folder) for folder in args.folders]
     # The ledger keeps each job's own settings (its record's); only the texture is this run's.
     pipeline.finish_stage(jobs, pipeline.Settings(texture=args.texture, verify=False), report, keep_going=True)
@@ -205,6 +244,7 @@ def reproduce(args):
     from . import bug_report as reports
 
     warn_unverified(args)
+    use_signing(args)
 
     def remake(order, out):
         settings = pipeline.Settings(models=args.models, sources=args.sources, verify=not args.no_verify,
@@ -235,12 +275,14 @@ def main(argv=None):
     common(one)
     many = steps.add_parser("batch", help="make every prompt of a file (one a line), stage by stage")
     many.add_argument("prompts")
-    many.add_argument("--out", required=True, help="the folder the jobs' folders and times.csv go in")
+    many.add_argument("--out", required=True, help="the folder the jobs' folders and times.csv go in; run "
+                      "again with the same --out, a batch goes on where it stopped (each job's finished stages kept)")
     many.add_argument("--size", type=float, help="every object's largest side (default: each its usual)")
     common(many)
     again = steps.add_parser("finish", help="bake, check, export and report made jobs again (CPU)")
     again.add_argument("folders", nargs="+")
     again.add_argument("--texture", type=int, default=pipeline.DEFAULT_TEXTURE)
+    signing_options(again)
     look = steps.add_parser("inspect", help="the object checks on a mesh made elsewhere (CPU)")
     look.add_argument("mesh")
     look.add_argument("--picture", required=True)
@@ -272,6 +314,14 @@ def main(argv=None):
     again_made.add_argument("--sources", help="the view painter's code, MV-Adapter (default MODEL_MAKER_SOURCES or "
                             "./sources)")
     again_made.add_argument("--no-verify", action="store_true", help="skip the models' sha256 check")
+    signing_options(again_made)
+    steps.add_parser("credentials", help="which certificate signs the pictures' content credentials, and what a "
+                     "picture's say (its own options: model-maker credentials --help)")
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["credentials"]:
+        from . import credentials
+
+        return credentials.main(argv[1:])
     args = parser.parse_args(argv)
     from .registry import MODEL_MISSING_EXIT, ModelMissing
 

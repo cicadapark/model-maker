@@ -66,6 +66,11 @@ none is shipped in this repository. Some of their wheels bundle shared libraries
   libquadmath (numpy, scipy): LGPL-2.1-or-later. GCC's quad-precision maths, loaded at run time and
     replaceable. It is not part of this repository. It is the one recorded exception to this project's
     no-LGPL rule; see CONTRIBUTING.md, rule 1.
+  c2pa-python's native library (libc2pa_c): c2pa-rs's C interface (Content Authenticity Initiative;
+    MIT OR Apache-2.0), with its Rust crates linked in, all under permissive licences (MIT, Apache-2.0,
+    BSD, ISC, Zlib, Unicode-3.0 and the like; the root certificates' list, webpki-roots, under
+    CDLA-Permissive-2.0). It signs and reads the pictures' content credentials (C2PA).
+  cryptography: its extension module holds OpenSSL 3 (Apache-2.0).
 
 Programs it runs when they are installed
 ----------------------------------------

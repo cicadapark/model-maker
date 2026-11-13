@@ -9,10 +9,13 @@ import os
 import numpy as np
 from PIL import Image, ImageDraw
 
-from . import render
+from . import credentials, render
 
 # How the report names a subject's kind (the record's own words, "object" and "weapon", stay as they are).
 KIND_WORDS = {"object": "3-D object", "weapon": "3-D object held in the hand"}
+# Over the pictures of an object model-maker made: what made them, where they are seen.
+MADE_BY_AI_LINE = ("Made by AI: every picture on this page was made by AI models, or shows their work with "
+                   "model-maker's checks drawn over it.")
 # Under the models used: who made it, and the licence terms that come with it.
 MADE_WITH_NOTE = ("Made by AI models from a text prompt. We claim no rights in what you make; the models' terms apply "
                   "(NOTICE). The use restrictions of the CreativeML Open RAIL++-M licence (Stable Diffusion XL, its "
@@ -85,12 +88,26 @@ def _check_rows(checks):
     return "\n".join(rows)
 
 
-def written(folder, job, checks, measures, pictures, models_used):
-    """Writes `folder/report.html` and its pictures (`pictures`: {file name: (PIL image, caption)}); returns its
-    path. `checks` are dicts grouped by stage: {"picture": [...], "shape": [...], "paint": [...]}."""
+def pictures_written(folder, pictures, signed=False):
+    """The report's pictures (`pictures`: {file name: (PIL image, caption)}) written into `folder`; `signed`: each with
+    its content credentials, as model-maker's own work (credentials.report_picture_kind)."""
     os.makedirs(folder, exist_ok=True)
     for name, (image, _) in pictures.items():
-        image.save(os.path.join(folder, name))
+        path = os.path.join(folder, name)
+        if signed:
+            source_type, model_ids = credentials.report_picture_kind(name)
+            credentials.save_picture(image, path, model_ids, source_type)
+        else:
+            image.save(path)
+
+
+def written(folder, job, checks, measures, pictures, models_used, marking=None, pictures_done=False):
+    """Writes `folder/report.html` and its pictures (`pictures`: {file name: (PIL image, caption)}, unless
+    `pictures_done`: written already); returns its path. `checks` are dicts grouped by stage: {"picture": [...],
+    "shape": [...], "paint": [...]}. `marking`: the content credentials' record (credentials.marked_pictures) of a
+    job model-maker made, said under its pictures and its models; None for a mesh made elsewhere (inspect)."""
+    if not pictures_done:
+        pictures_written(folder, pictures)
     every = [c for group in checks.values() for c in group if c.get("counted", True)]
     failed = [c for c in every if not c["passed"]]
     verdict = (f'<span class="pass">passes all {len(every)} checks</span>' if not failed else
@@ -108,6 +125,7 @@ def written(folder, job, checks, measures, pictures, models_used):
     why = "".join(f"<li>{html.escape(k)}: {html.escape(v)}</li>" for k, v in subject.get("why", {}).items())
     figures = {kind: "".join(_figure(n, c) for n, (_, c) in pictures.items() if n.startswith(kind))
                for kind in ("picture", "try", "outline", "turntable", "bare", "coverage", "marks", "views")}
+    made_by_ai = f"<p>{html.escape(MADE_BY_AI_LINE)}</p>" if marking is not None else ""
     sections = [
         f"<section><h1>{html.escape(job['prompt'])}</h1><p>{verdict}</p>"
         f"<p class='muted'>{html.escape(KIND_WORDS.get(subject['kind'], subject['kind']))}"
@@ -115,7 +133,7 @@ def written(folder, job, checks, measures, pictures, models_used):
         f"{html.escape(size_words)}; size set to {job['size_m']:.2f} m (its largest side; "
         "<code>--size</code> sets it); "
         f"{measures.get('triangles', 0)} triangles.</p><ul class='muted'>{why}</ul></section>",
-        f"<section><h2>Picture</h2><p class='muted'>{html.escape(lettering_words(lettering))}</p>"
+        f"<section><h2>Picture</h2>{made_by_ai}<p class='muted'>{html.escape(lettering_words(lettering))}</p>"
         f"<div class='row'>{figures['picture']}</div>"
         f"<h2>The tries</h2><div class='row tries'>{figures['try']}</div></section>",
         f"<section><h2>Shape</h2><p class='muted'>{html.escape(repair_words(measures.get('repair')))}</p>"
@@ -134,6 +152,7 @@ def written(folder, job, checks, measures, pictures, models_used):
     sections.append("<section><h2>Made with</h2><div class='wide'><table><tr><th>model</th><th>role</th>"
                     f"<th>version</th><th>licence</th></tr>{model_rows}</table></div>"
                     f"<p>{html.escape(MADE_WITH_NOTE)}</p>"
+                    + (f"<p>{html.escape(credentials.words_of(marking))}</p>" if marking is not None else "") +
                     f"<p class='muted'>Times: {html.escape(timing_words(job.get('seconds', {})))}</p></section>")
     page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' "
             f"content='width=device-width, initial-scale=1'><title>{html.escape(job['slug'])} report</title>"

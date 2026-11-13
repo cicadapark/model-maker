@@ -16,6 +16,9 @@
 #   .tools/uv, .tools/python    uv (a pinned release, its sha256 checked) and the CPython 3.11 it installs
 #   .venv/                      the Python environment, from python/requirements.lock (every wheel's sha256 checked),
 #                               then every package's licence checked (python/model_maker/check_licences.py)
+#   .tools/c2pa-test/           a test certificate made here, which signs the pictures' content credentials (C2PA)
+#                               unless you give your own (docs/objects.md, "Content credentials"); its key is yours
+#                               alone (mode 600) and never leaves this folder
 #   .tools/rust/                Rust (rustup, pinned and checked), only when this PC has neither rustup nor a cargo
 #                               as new as Cargo.toml's rust-version
 #   target/release/             model-maker-simplify, built from this repository
@@ -331,6 +334,12 @@ install_python() {
     "$venv/bin/python" -I python/model_maker/check_licences.py
 }
 
+make_test_certificate() {
+    # Every picture is signed with content credentials: by your own key and certificate when given
+    # (MODEL_MAKER_SIGNING_KEY and MODEL_MAKER_SIGNING_CERT), else by this test certificate.
+    "$here/model-maker" credentials --make-test
+}
+
 install_rust() {
     if usable_rust; then
         return
@@ -406,6 +415,7 @@ setup() {
     step "uv and Python"
     install_uv
     install_python
+    make_test_certificate
     step "Rust and model-maker-simplify"
     install_rust
     build_rust

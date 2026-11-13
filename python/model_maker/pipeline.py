@@ -21,13 +21,13 @@ import time
 import numpy as np
 from PIL import Image
 
-from . import ledger, registry, words
+from . import credentials, ledger, memory, registry, words
 from .kept import Kept
 
 MODEL_FOLDERS = {"flux1-schnell": "flux1-schnell", "birefnet": "birefnet", "triposg": "triposg",
                  "mv-adapter": "mv-adapter", "sdxl-base-1.0": "sdxl-base-1.0", "sdxl-vae": "sdxl-vae-fp16-fix",
                  "siglip2-so400m": "siglip2-so400m-patch14-384"}
-MODELS_USED = ["flux1-schnell", "birefnet", "triposg", "mv-adapter-ig2mv-sdxl", "sdxl-base-1.0", "sdxl-vae-fp16-fix"]
+MODELS_USED = list(credentials.OBJECT_MODELS)
 # SigLIP 2: whether each try shows the thing asked for (subject_judge), and for a thing with a lid, cover or doors,
 # whether they are shut or open as asked (state_judge). A thing with a lid, cover or doors is not made without it; the
 # rest are, their tries unjudged (setup lets it be declined).
@@ -161,6 +161,16 @@ class Job:
         self.save()
 
 
+def _json_to(path, value):
+    with open(path, "w") as file:
+        json.dump(value, file, indent=1, default=float)
+
+
+def _bytes_to(path, data):
+    with open(path, "wb") as file:
+        file.write(data)
+
+
 def written(path, write):
     """`write(partial)` to a file beside `path`, then moved onto `path` in one step, so a kill mid-write leaves no
     file that looks finished (a stage is done when its file is there, so a cut-short archive would make every later
@@ -225,9 +235,14 @@ def each_job(todo, stage, settings, work, report, keep_going, after=None):
                 result = work(job, found)
         except Exception as error:
             if not keep_going:
+                memory.give_back()
                 raise
             set_aside(job, stage, error, report)
+            memory.give_back()
             continue
+        # The job's arrays are dropped with its stage (each stage reads its job's files from its folder), and the
+        # memory they held handed back, so a batch's memory does not grow with its jobs.
+        memory.give_back()
         if after is not None:
             after(job, result)
 
@@ -276,7 +291,7 @@ def pictures_stage(jobs, settings, report=print, kept=None, keep_going=False):
 
 
 def picture_job(job, settings, paint, cutter, judge, found, report):
-    from . import lettering, painter, picture_checks, state_judge, subject_judge
+    from . import lettering, painter, picture_checks, state_judge, subject_judge, upright
 
     started = time.time()
     subject = job.subject
@@ -308,13 +323,19 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
             check = lettering.add_lettering_check(result, np.asarray(picture.convert("RGB")), mask, lettering_asked,
                                                   settings.require_lettering)
             report(f"picture {seed}: {check.words}")
+        if subject.weapon_kind == "hafted":
+            # Ranked, never refused: the finish stands the weapon upright whatever the picture (upright).
+            for seed, picture, mask, result in tried:
+                result.checks.append(upright.standing_check(mask))
         made += tried
         if any(result.passed for _, _, _, result in made):
             break
     rounds = round_number + 1
+    # Each picture with its content credentials (credentials.py): made by AI, and by which models.
     for seed, picture, mask, result in made:
-        picture.save(job.path("pictures", f"{seed}.png"))
-        Image.fromarray(mask.astype(np.uint8) * 255).save(job.path("pictures", f"{seed}-mask.png"))
+        credentials.save_picture(picture, job.path("pictures", f"{seed}.png"), credentials.PICTURE_MODELS)
+        credentials.save_picture(Image.fromarray(mask.astype(np.uint8) * 255), job.path("pictures", f"{seed}-mask.png"),
+                                 credentials.CUT_OUT_MODELS)
     best = picture_checks.best_try([result for _, _, _, result in made])
     seed, picture, mask, result = made[best]
     chosen_lettering = next(c for c in result.checks if c.name == lettering.NAME)
@@ -446,17 +467,14 @@ class LazyInpainter:
 
 
 def paint_job(job, settings, painter, report, inpainter=None):
-    from . import paint, touch_up
+    from . import touch_up
 
     started = time.time()
     shape = np.load(job.path("shape.npz"))
     rgb = np.asarray(Image.open(job.path("picture.png")).convert("RGB"))
     mask = np.asarray(Image.open(job.path("mask.png"))) > 127
-    colours, known, cloud = paint.painted(painter, shape["corners"], shape["triangles"], rgb, mask,
-                                          words.paint_prompt(job.subject), seed=PAINT_SEED,
-                                          views_out=job.path("views"), report=report,
-                                          steps=settings.paint_steps)
-    job.record["paint"] = {"steps": settings.paint_steps}
+    colours, known, cloud, views, record = painted_views(job, painter, shape, rgb, mask, settings, report)
+    job.record["paint"] = {"steps": settings.paint_steps, "six_views": record}
     sources = np.zeros(len(cloud[0]), dtype=np.int16)
     if inpainter is not None and settings.touch_up_views:
         # What the six views missed, painted from views chosen to see it, the fill judged (see touch_up).
@@ -470,7 +488,42 @@ def paint_job(job, settings, painter, report, inpainter=None):
     # The record first, the paint (which marks the stage done) last, whole or not at all.
     written(job.path("painted.npz"), lambda path: np.savez_compressed(
         path, colours=colours.astype(np.float32), known=known, cloud_points=cloud[0], cloud_normals=cloud[1],
-        cloud_colours=cloud[2], cloud_from=sources))
+        cloud_colours=cloud[2], cloud_from=sources,
+        # Each point's view (-1 the touch-up's), and each view's direction towards its camera: the bake leaves a
+        # view's point out where another view painted the place more squarely (view_agreement).
+        cloud_view=np.concatenate([views["view_of"], np.full(len(sources) - len(views["view_of"]), -1, np.int8)]),
+        view_directions=views["directions"]))
+
+
+def painted_views(job, painter, shape, rgb, mask, settings, report):
+    """The six views painted, and painted again from the next seed while a side view is out of family with its
+    neighbours (`view_agreement.REPAINT_FROM`), at most `view_agreement.MOST_REPAINTS` times; the try that agrees best
+    is kept, its views in views/ and every try's in views/seed-N/. Returns (colours, known, cloud, its views, the
+    record: each try's seed and agreement, the seed kept)."""
+    from . import paint, upright, view_agreement
+
+    # A hafted weapon is painted standing upright, as the finish turns it (upright); its paint is kept in the frame
+    # the shape was made in.
+    turn = upright.rotation_for_paint(shape["corners"].astype(np.float64), shape["triangles"]) \
+        if job.subject.weapon_kind == "hafted" else None
+    tries, made = [], []
+    for repaint in range(view_agreement.MOST_REPAINTS + 1):
+        seed = PAINT_SEED + repaint
+        found = paint.painted(painter, shape["corners"], shape["triangles"], rgb, mask, words.paint_prompt(job.subject),
+                              seed=seed, views_out=job.path("views", f"seed-{seed}"), report=report,
+                              steps=settings.paint_steps, with_views=True, turn=turn)
+        agreement = view_agreement.measured(*found[2], found[3]["view_of"])
+        tries.append({"seed": seed, **agreement})
+        made.append(found)
+        report(f"views from seed {seed}: the most unlike side view {agreement['worst']:.0%} unlike its neighbours")
+        if agreement["worst"] < view_agreement.REPAINT_FROM:
+            break
+    kept = view_agreement.kept_try(tries)
+    chosen = job.path("views", f"seed-{tries[kept]['seed']}")
+    for name in sorted(os.listdir(chosen)):
+        shutil.copyfile(os.path.join(chosen, name), job.path("views", name))
+    record = {"tries": tries, "kept_seed": tries[kept]["seed"], "repaint_from": view_agreement.REPAINT_FROM}
+    return (*made[kept], record)
 
 
 def repository_version():
@@ -497,6 +550,8 @@ def finish_stage(jobs, settings, report=print, keep_going=False):
     def work(job, _):
         started = time.time()
         grouped, measures = finished(job, settings, report)
+        # Saved with the finish's time, last: the batch's run started again skips a job finished from this paint.
+        job.record["finished_from"] = made_stamp(job)
         job.timed("finish", time.time() - started)
         return grouped, measures
 
@@ -551,7 +606,7 @@ def judged_fill(folder, painted, touch_record, made_corners, made_triangles):
 
 def finished(job, settings, report=print):
     from . import bake, glb, inspection, likeness, lying, picture_checks as P, render
-    from . import lettering, state_judge, subject_judge
+    from . import lettering, state_judge, subject_judge, view_agreement
     from . import report as pages
     from .mesh_tools import corner_normals
 
@@ -566,9 +621,20 @@ def finished(job, settings, report=print):
     corners, triangles, laid, level = judgement.corners, judgement.triangles, judgement.laid, judgement.level
     checks, measures, overlay = judgement.checks, judgement.measures, judgement.overlay
     painted = None
+    views_agree = None
     if job.has("painted.npz"):
         painted = np.load(job.path("painted.npz"))
         colours, cloud = judgement.paint_followed(made_corners, painted)
+        if "cloud_view" in painted.files:
+            # One view per place: where two views see a surface, the squarer one's points only (view_agreement).
+            keep = view_agreement.one_view_per_place(painted["cloud_points"], painted["cloud_normals"],
+                                                     painted["cloud_view"], painted["view_directions"])
+            cloud = tuple(np.asarray(part)[keep] for part in cloud)
+            views_agree = (job.record.get("paint", {}).get("six_views") or
+                           {"tries": [{"seed": PAINT_SEED, **view_agreement.measured(
+                               painted["cloud_points"], painted["cloud_normals"], painted["cloud_colours"],
+                               painted["cloud_view"])}], "kept_seed": PAINT_SEED})
+            views_agree = {**views_agree, "points_kept": round(float(keep.mean()), 4)}
     else:
         report(f"{job['slug']}: not painted; baked in plain clay")
         colours, cloud = np.full((len(corners), 3), 0.75), None
@@ -581,6 +647,9 @@ def finished(job, settings, report=print):
         shares = [inspection.black_share(np.asarray(Image.open(path).convert("RGB")) / 255) for path in views]
         measures["views_black"] = shares
         paint_checks.append(inspection.views_check(shares))
+    if views_agree is not None:
+        measures["views_agree"] = views_agree
+        paint_checks.append(inspection.views_agree_check(views_agree))
     fill_shown = None
     touch_record = job.record.get("paint", {}).get("touch_up")
     if cloud is not None and (touch_record or {}).get("views"):
@@ -660,7 +729,8 @@ def finished(job, settings, report=print):
         "paint_steps": job.record.get("paint", {}).get("steps"),
         "picture_lead": job.record.get("picture", {}).get("lead", "floating"),
         "seeds": {"picture": job.record.get("picture", {}).get("seed"),
-                  "shape": job.record.get("shape", {}).get("seed"), "paint": PAINT_SEED},
+                  "shape": job.record.get("shape", {}).get("seed"),
+                  "paint": (job.record.get("paint", {}).get("six_views") or {}).get("kept_seed", PAINT_SEED)},
         "subject": {k: v for k, v in job["subject"].items() if k != "prompt"},
         "size_m": job["size_m"], "models": models_used,
         # Which simplifier brought the kept shape to its budget (the tool's words; None for a job made before it was
@@ -682,14 +752,6 @@ def finished(job, settings, report=print):
         "lettering": job.record["lettering"],
         "measures": json.loads(json.dumps(measures, default=float)),
     }
-    with open(job.path(f"{slug}.provenance.json"), "w") as file:
-        json.dump(provenance, file, indent=1, default=float)
-    data = glb.glb_bytes(slug, baked["corners"], baked["triangles"], normals, baked["uvs"], baked["texture"],
-                         marks=marks, parts=parts, extras={"made_by": "model-maker", "prompt": job["prompt"],
-                                              "provenance": f"{slug}.provenance.json",
-                                              "status": job.record["status"]})
-    with open(job.path(f"{slug}.glb"), "wb") as file:
-        file.write(data)
     pictures = {"picture.png": (pages.thumbnail(picture, 360), "the picture it was made from"),
                 "picture-cut.png": (pages.thumbnail(pages.mask_picture(mask), 360), "its cut-out")}
     for seed, result in job.record.get("picture", {}).get("tries", {}).items():
@@ -719,9 +781,31 @@ def finished(job, settings, report=print):
         if job.has(os.path.join("views", f"view-{k}.png")):
             pictures[f"views-{k}.png"] = (pages.thumbnail(Image.open(job.path("views", f"view-{k}.png")), 200),
                                           f"painted view {k}")
-    pages.written(job.path("report"), job.record, grouped, measures, pictures, models_used)
+    # Every picture of the job with its content credentials: the report's written signed, any made before model-maker
+    # signed its pictures signed now (their pixels as they are); the sidecar and the report say what holds.
+    pages.pictures_written(job.path("report"), pictures, signed=True)
+    marking = credentials.marked_pictures(credentials.job_pictures(job.folder), job.folder)
+    provenance["content_credentials"] = marking
+    written(job.path(f"{slug}.provenance.json"), lambda path: _json_to(path, provenance))
+    # The .glb's texture is a picture the models painted: signed too. The .glb itself says plainly what made it.
+    data = glb.glb_bytes(slug, baked["corners"], baked["triangles"], normals, baked["uvs"], baked["texture"],
+                         marks=marks, parts=parts, extras={"made_by": "model-maker", "prompt": job["prompt"],
+                                              "provenance": f"{slug}.provenance.json",
+                                              "status": job.record["status"],
+                                              "made_with_ai": MADE_WITH_AI_NOTE,
+                                              "generator": {"name": credentials.GENERATOR,
+                                                            "version": provenance["version"]}},
+                         texture_signed=lambda texture: credentials.signed_bytes(
+                             texture, "image/png", credentials.TRAINED, credentials.OBJECT_MODELS))
+    written(job.path(f"{slug}.glb"), lambda path: _bytes_to(path, data))
+    pages.written(job.path("report"), job.record, grouped, measures, pictures, models_used, marking,
+                  pictures_done=True)
     job.save()
     return grouped, measures
+
+
+# The .glb's plain note (asset.extras): a mesh need not be marked, but saying it costs nothing.
+MADE_WITH_AI_NOTE = "This 3-D object was made by AI models (its sidecar names them), with model-maker's own code."
 
 
 # A thing with a lid, a cover or doors is not made without the state judge (setup lets SigLIP 2 be declined).
@@ -766,10 +850,64 @@ def no_picture_passed(job, settings, report):
     report(f"{job['slug']}: no picture passed its checks; not shaped ({job.record['status']})")
 
 
+# A run stopped before a stage the computer's memory cannot hold (75, try again later, is a missing model's).
+NOT_ENOUGH_MEMORY_EXIT = 74
+
+
+class NotEnoughMemory(Exception):
+    """A stage not started for want of the computer's memory (memory.room_for); the batch stops, and goes on from that
+    stage when started again with the same --out."""
+
+
+# A stage is wanted for a job whose file that stage writes last is not there yet (each written whole or not at all:
+# `written`); the finish whenever it has not finished since its paint.
+STAGE_FILES = {"pictures": "picture.png", "shape": "shape.npz", "paint": "painted.npz"}
+
+
+def made_stamp(job):
+    """What the finish is made from, as a stamp: the paint's file (or, unpainted, the shape's), its size and time."""
+    for name in ("painted.npz", "shape.npz"):
+        if job.has(name):
+            found = os.stat(job.path(name))
+            return f"{name} {found.st_size} {found.st_mtime_ns}"
+    return None
+
+
+def finished_since_paint(job):
+    """Whether the job was finished from the paint (or shape) it has now, its model written."""
+    return (job.record.get("finished_from") is not None and job.record.get("finished_from") == made_stamp(job)
+            and job.has(f"{job['slug']}.glb"))
+
+
+def stage_wanted(job, stage):
+    if stage in STAGE_FILES:
+        return not job.has(STAGE_FILES[stage])
+    return not finished_since_paint(job)
+
+
+def check_memory(stage, out, report):
+    """A stage this batch's folder measured a need for, which the memory cannot hold now, is not started: killed by the
+    system's out-of-memory killer, a batch loses what it was doing; stopped here, it is started again with the same
+    --out and goes on from this stage. Against the trials' needs alone it only warns (memory.py)."""
+    measured = memory.measured_needs(out).get(stage) if out else None
+    if measured:
+        room, why = memory.room_for(stage, measured)
+        if not room:
+            raise NotEnoughMemory(f"{why}, as this batch measured it: not started. The jobs' finished stages are "
+                                  f"kept; free some memory and run the same command again to go on from here.")
+        return
+    room, why = memory.room_for(stage, memory.KNOWN_NEEDS_MB[stage])
+    if not room:
+        report(f"memory: {why}, as measured on our trials' machine; going on. If the system stops this run for want "
+               f"of memory, close other programs and run the same command again: finished stages are kept.")
+
+
 def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "finish"), kept=None, keep_going=False):
     """Each stage over the jobs, but for things not made yet (each says why, and is left as it is). `kept`: the warm
     process's models, kept between jobs (see kept); a cold run loads each stage's own. `keep_going` (a batch): a job
     whose stage raises is set aside and the rest go on."""
+    # Which certificate signs the pictures' content credentials, said once a run (the test one: untrusted).
+    report(credentials.current().words)
     for job in jobs:
         if job.subject.not_yet:
             not_made(job, job.subject.not_yet, report)
@@ -790,6 +928,8 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
                 if not job.set_aside and not job.has("picture.png"):
                     not_made(job, f"{NEEDS_LETTERING_READER}: {lettering.reader().why}", report)
                     job.set_aside = True
+    # The batch's folder: where each stage's measured need of the computer's memory is kept (memory.py).
+    out = os.path.dirname(os.path.abspath(jobs[0].folder)) if jobs else None
     for stage in stages:
         jobs = [job for job in jobs if not job.set_aside]
         if stage in ("shape", "paint"):
@@ -797,8 +937,20 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
                 if not job.has("shape.npz") and job.record.get("picture", {}).get("passed") is False:
                     no_picture_passed(job, settings, report)
             jobs = [job for job in jobs if not job.set_aside]
+        if not any(stage_wanted(job, stage) or (stage == "finish" and not keep_going) for job in jobs):
+            continue
+        check_memory(stage, out, report)
+        memory.reset_peak()
         if stage == "finish":
-            finish_stage(jobs, settings, report, keep_going)
+            # A batch started again finishes only the jobs not finished from their present paint; `make` finishes
+            # its job every time (it is quick, and the command a user runs again to see a change).
+            finish_stage([job for job in jobs if not keep_going or stage_wanted(job, "finish")], settings, report,
+                         keep_going)
         else:
             {"pictures": pictures_stage, "shape": shape_stage, "paint": paint_stage}[stage](jobs, settings, report, kept,
                                                                                          keep_going)
+        memory.give_back()
+        peak, held = memory.peak_mb(), memory.in_use_mb()
+        if peak is not None and out is not None:
+            memory.record_need(out, stage, peak)
+            report(f"memory: the {stage} stage's peak {peak / 1024:.1f} GB; {held / 1024:.1f} GB held after it")

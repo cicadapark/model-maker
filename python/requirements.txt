@@ -5,9 +5,14 @@
 # Measuring and exporting (the checks, the bake, the .glb, the report; CPU only)
 numpy==2.4.6                # BSD-3-Clause
 scipy==1.17.1               # BSD-3-Clause
-pillow==12.3.0              # MIT-CMU
+pillow==13.0.0              # MIT-CMU
 scikit-image==0.26.0        # BSD-3-Clause (marching cubes)
 trimesh==5.1.1              # MIT (reading meshes made elsewhere; MV-Adapter's camera helpers import it)
+# Content credentials: a signed C2PA manifest in every picture the pipeline writes (model_maker/credentials.py)
+c2pa-python==0.38.1         # MIT OR Apache-2.0 (its native library is c2pa-rs's, MIT OR Apache-2.0, every crate in it
+                            # permissive: python/model_maker/check_licences.py)
+cryptography==50.0.2        # Apache-2.0 OR BSD-3-Clause (the test certificate, the key's kind; its wheel holds OpenSSL 3,
+                            # Apache-2.0)
 # The models (an NVIDIA card)
 torch==2.5.1                # BSD-3-Clause (from PyPI on Linux x86_64: the CUDA 12.4 build)
 torchvision==0.20.1         # BSD-3-Clause (BiRefNet's backbone)
@@ -15,7 +20,7 @@ diffusers==0.31.0           # Apache-2.0
 transformers==4.46.3        # Apache-2.0
 accelerate==1.1.1           # Apache-2.0
 bitsandbytes==0.44.1        # MIT (FLUX.1 [schnell] in 4 bits)
-setuptools==80.9.0          # MIT (triton, under bitsandbytes, imports it; a venv made by uv has none)
+setuptools==84.2.1          # MIT (triton, under bitsandbytes, imports it; a venv made by uv has none)
 safetensors==0.8.0          # Apache-2.0
 huggingface-hub==0.26.2     # Apache-2.0
 sentencepiece==0.2.2        # Apache-2.0

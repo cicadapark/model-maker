@@ -55,6 +55,7 @@ jobs:
           blocks = re.split(r"\n(?=\S)", open(sys.argv[1]).read())
           print("\n".join(b for b in blocks if b.split("==")[0] in names))' python/requirements.lock \
             numpy scipy pillow scikit-image trimesh imageio lazy-loader networkx packaging tifffile \
+            c2pa-python cryptography cffi pycparser \
             > "$RUNNER_TEMP/test-requirements.txt"
           .venv/bin/pip install --quiet --no-deps --require-hashes --only-binary :all: -r "$RUNNER_TEMP/test-requirements.txt"
           # Without torch (setup.sh installs it; a runner has no card) the tests that need it skip, each saying why:
@@ -99,6 +100,30 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install --quiet --no-deps --require-hashes --only-binary :all: -r python/requirements.lock
           .venv/bin/python -I python/model_maker/check_licences.py --list
+
+  audit:
+    name: vulnerability audit (Python packages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: Known vulnerabilities in the locked packages
+        # pip-audit from its own lock (tools/ci/pip-audit.lock, every wheel's sha256 checked) reads the environment's
+        # lock as it is: every package and version pinned, so nothing is resolved or installed (--disable-pip), and
+        # a package it cannot look up fails the job (--strict) as a known vulnerability does. The advisories it does
+        # not fail on are listed, each with why and a review date, in tools/ci/pip-audit-ignore.toml, and only those.
+        run: |
+          python -m venv .audit
+          .audit/bin/pip install --quiet --no-deps --require-hashes --only-binary :all: -r tools/ci/pip-audit.lock
+          ignored=$(python3 -I -c 'import sys, tomllib
+          for entry in tomllib.load(open(sys.argv[1], "rb"))["ignore"]:
+              print("--ignore-vuln", entry["id"])' tools/ci/pip-audit-ignore.toml)
+          echo "ignored, as tools/ci/pip-audit-ignore.toml says why: $ignored"
+          # shellcheck disable=SC2086
+          .audit/bin/pip-audit --requirement python/requirements.lock --require-hashes --disable-pip --strict \
+            --progress-spinner off --desc $ignored
 
   setup-check:
     name: setup.sh --check-only (runs; a runner has no GPU, so it reports that)
