@@ -26,7 +26,7 @@ comes with a report of every check and a sidecar naming every model used and its
 
 ## What it makes
 
-See them in 3-D, turned round in your browser: **[cicadapark.com/model-maker](https://cicadapark.com/model-maker/)**.
+See them in 3-D, turned round in your browser: **[Model Maker Studio](https://cicadapark.com/model-maker-studio/)** (cicadapark.com).
 
 ![Eight 3-D objects made by model-maker, each from the line of text under it: a chair, a barrel, a lantern, a clay jug, a shield, a sword, an axe and a spear](docs/images/examples.webp)
 
