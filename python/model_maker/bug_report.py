@@ -14,8 +14,9 @@ It leaves out the large in-between files (.npz), the other tries' pictures, the 
 environment and anything that looks like a token. In every text it copies, the user's home folder, user name, machine
 name, e-mail addresses, network addresses (IPv4 and IPv6) and other absolute paths are replaced by placeholders, and
 the file is written only when a check of every copied text finds none of them left. Pictures go as PNGs with their
-text and metadata chunks dropped; a picture of another kind (.jpg, .webp) is left out. The prompt is sent whole: it
-is what the remake makes.
+text and metadata chunks dropped, but their content credentials (C2PA: what made the picture, signed; never a name or
+a path model-maker wrote) kept; a picture of another kind (.jpg, .webp) is left out. The prompt is sent whole: it is
+what the remake makes.
 """
 
 import dataclasses
@@ -55,6 +56,9 @@ GENERIC_NAMES = {"root", "user", "users", "admin", "administrator", "guest", "ho
 PNG_KEPT_CHUNKS = {b"IHDR", b"PLTE", b"IDAT", b"IEND", b"tRNS", b"gAMA", b"cHRM", b"sRGB", b"iCCP", b"sBIT", b"pHYs",
                    b"bKGD"}
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+# A PNG's content credentials (C2PA's manifest store): kept, as long as every other chunk is, since its signature holds
+# for the file's bytes as they were signed (with any chunk dropped, it would no longer hold and is dropped too).
+PNG_CREDENTIALS_CHUNK = b"caBX"
 
 HOME_PATH = re.compile(r"(?<![\w.<>-])(?:/home|/Users|/var/home|/export/home)/([^/\\\s\"'<>`]+)"
                        r"|(?<![\w.<>-])/root(?![\w.-])"
@@ -370,21 +374,21 @@ def job_lines(paths, job_id):
 
 
 def png_without_text(data):
-    """A PNG's bytes with only the chunks that say how to show it: no text, EXIF or time. (count of dropped chunks)."""
+    """A PNG's bytes with only the chunks that say how to show it, and its content credentials: no text, EXIF or time.
+    (count of dropped chunks)."""
     if not data.startswith(PNG_SIGNATURE):
         return data, 0
-    kept, dropped, at = [PNG_SIGNATURE], 0, len(PNG_SIGNATURE)
+    chunks, at = [], len(PNG_SIGNATURE)
     while at + 8 <= len(data):
         length, kind = struct.unpack(">I4s", data[at:at + 8])
-        chunk = data[at:at + 12 + length]
-        if kind in PNG_KEPT_CHUNKS:
-            kept.append(chunk)
-        else:
-            dropped += 1
+        chunks.append((kind, data[at:at + 12 + length]))
         at += 12 + length
         if kind == b"IEND":
             break
-    return b"".join(kept), dropped
+    others_dropped = any(kind not in PNG_KEPT_CHUNKS and kind != PNG_CREDENTIALS_CHUNK for kind, _ in chunks)
+    kept_kinds = PNG_KEPT_CHUNKS if others_dropped else PNG_KEPT_CHUNKS | {PNG_CREDENTIALS_CHUNK}
+    kept = [chunk for kind, chunk in chunks if kind in kept_kinds]
+    return PNG_SIGNATURE + b"".join(kept), len(chunks) - len(kept)
 
 
 def glb_cleaned(data, clean):

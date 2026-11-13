@@ -87,6 +87,32 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
         self.assertNotIn("steel", words.HEAD_PICTURE_WORDS["hammer"])
         self.assertNotIn("striking face", words.picture_prompt(words.subject_of("a battle axe")))
 
+    def test_a_mace_and_a_club_are_told_they_are_short_with_a_heavy_head(self):
+        # With the view alone every try was a long rod or a cane (docs/trials/2026-11-11-030-diagnosis.md).
+        for prompt, kind in (("a short iron mace", "mace"), ("a spiked mace", "mace"), ("a wooden club", "club"),
+                             ("a knotted oak club", "club")):
+            subject = words.subject_of(prompt)
+            self.assertEqual(subject.weapon_kind, "hafted", prompt)
+            said = words.picture_prompt(subject)
+            self.assertIn(f"{subject.prompt}, {words.HEAD_PICTURE_WORDS[kind]}, {words.HAFTED_VIEW}", said)
+            self.assertIn("short", words.HEAD_PICTURE_WORDS[kind])
+        # No material named: an iron mace and an oak club keep their own.
+        for kind in ("mace", "club"):
+            for material in ("iron", "steel", "wood", "oak"):
+                self.assertNotIn(material, words.HEAD_PICTURE_WORDS[kind])
+        self.assertNotIn("cudgel", words.picture_prompt(words.subject_of("a spiked mace")))
+
+    def test_a_thing_known_only_loosely_by_its_name_is_described(self):
+        for prompt, name in (("a wooden spinning wheel", "spinning wheel"), ("an old spinning wheel", "spinning wheel"),
+                             ("a wooden water wheel", "water wheel"), ("a mill water wheel", "water wheel")):
+            subject = words.subject_of(prompt)
+            said = words.picture_prompt(subject)
+            self.assertIn(f"{subject.prompt}, {words.THING_PICTURE_WORDS[name]}, {words.OBJECT_VIEW}", said)
+        for prompt in ("a wooden cart wheel", "a wheelbarrow", "a wooden chair", "an iron cauldron",
+                       "a stone water wheelhouse"):
+            said = words.picture_prompt(words.subject_of(prompt))
+            self.assertFalse(any(described in said for described in words.THING_PICTURE_WORDS.values()), prompt)
+
     def test_a_lid_or_cover_is_shut_unless_the_words_open_it(self):
         expected = {"a leather-bound book, closed": "closed", "a wooden treasure chest": "closed",
                     "an open wooden chest": "open", "a book lying open": "open", "an oak wardrobe": "closed",

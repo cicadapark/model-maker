@@ -528,8 +528,13 @@ def touched_up(inpaint, corners, triangles, colours, cloud, text, seed=0, most=M
                 break
         share, kept_try, painted, left_out, checked = min(tries, key=lambda t: t[0])
         if views_out:
-            Image.fromarray((painted * 255).round().astype(np.uint8)).save(f"{views_out}/touch-up-{k}.png")
-            Image.fromarray(mask.astype(np.uint8) * 255).save(f"{views_out}/touch-up-{k}-mask.png")
+            from . import credentials
+
+            credentials.save_picture(Image.fromarray((painted * 255).round().astype(np.uint8)),
+                                     f"{views_out}/touch-up-{k}.png", credentials.OBJECT_MODELS)
+            # Where our own code asked the inpainter to paint: no model made it, and its credentials say so.
+            credentials.save_picture(Image.fromarray(mask.astype(np.uint8) * 255), f"{views_out}/touch-up-{k}-mask.png",
+                                     (), credentials.ALGORITHMIC)
         kept = wanted & ~left_out
         cloud = (np.concatenate([cloud[0], surface[kept]]).astype(np.float32),
                  np.concatenate([cloud[1], facing[kept]]).astype(np.float32),

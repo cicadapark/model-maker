@@ -56,6 +56,12 @@ ALLOWED_BUNDLED = {
     "libopenjp2": "BSD-2-Clause", "libavif": "BSD-2-Clause", "liblcms2": "MIT", "libfreetype": "FTL (FreeType)",
     "libharfbuzz": "MIT", "libbrotli": "MIT", "libzstd": "BSD-3-Clause", "liblzma": "0BSD (xz)", "libxcb": "MIT",
     "libXau": "MIT",
+    # c2pa-python's native library: c2pa-rs's C interface (0.91.3), MIT OR Apache-2.0, with its Rust crates linked in.
+    # Every crate of its tree (`cargo metadata` of c2pa-c-ffi 0.91.3) is under MIT, Apache-2.0, BSD, ISC, Zlib,
+    # Unicode-3.0, 0BSD, CC0-1.0, BSL-1.0 or the Unlicense (each with MIT or Apache-2.0 beside it where it is one of the
+    # last two), but webpki-roots, CDLA-Permissive-2.0 (the root certificates' list, data); cbindgen, MPL-2.0, only
+    # writes its C header at build time and is not in the library. No OpenSSL: it signs with ring and RustCrypto.
+    "libc2pa_c": "MIT OR Apache-2.0 (c2pa-rs; its crates permissive, see above)",
 }
 # The rule's one recorded exception (CONTRIBUTING.md, rule 1): an LGPL library that comes inside a standard package's
 # own PyPI wheel, is loaded only at run time and stays replaceable. It is allowed and listed in NOTICE.

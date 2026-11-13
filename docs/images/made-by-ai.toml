@@ -1,0 +1,78 @@
+# Which pictures of docs/images show AI-made work, for tools/sign_pictures.py (content credentials, C2PA):
+#   .venv/bin/python tools/sign_pictures.py docs/images --list docs/images/made-by-ai.toml
+# A picture not named here is left alone. "ai": only the models' work; "composite": the models' work with our own
+# captions, marks or page around it. The version is the model-maker version whose pipeline made what the picture shows
+# (the pictures made while 0.2.0 was being made say 0.2.0).
+
+version = "0.2.0"
+
+[[picture]]
+path = "examples.webp"
+kind = "composite"
+models = "object"
+why = "renders of eight 3-D objects model-maker made (the models' shapes and paint), our captions under them"
+
+[[picture]]
+path = "clay-jug-turning.webp"
+kind = "ai"
+models = "object"
+why = "renders of one 3-D object model-maker made, turned in steps of 45 degrees: nothing of ours drawn on it"
+
+[[picture]]
+path = "report-chair.webp"
+kind = "composite"
+models = "object"
+why = "the top of an object's report page: the picture model's picture and tries, the cut-out, the outline and the turntable, in our page"
+
+[[picture]]
+path = "fill/*.webp"
+kind = "composite"
+models = "object"
+why = "close views of 3-D objects model-maker made and the inpainter's fill, our outlines and captions on them"
+
+[[picture]]
+path = "qualities/curved-dagger-before.webp"
+kind = "composite"
+models = "picture"
+version = "0.1.0"
+why = "the picture model's four tries for 0.1.0's unseen \"a short curved dagger\", our outline and captions"
+
+[[picture]]
+path = "qualities/*-judged.webp"
+kind = "composite"
+models = "picture"
+why = "the picture model's tries in a grid, our captions with the check's verdicts under them"
+
+[[picture]]
+path = "sealed-0.2.1.webp"
+kind = "composite"
+models = "object"
+version = "0.2.1"
+why = "renders of the 50 objects 0.2.1's sealed run made on the 16 GB card, our prompts and verdicts under them"
+
+[[picture]]
+path = "sealed-0.2.0.webp"
+kind = "composite"
+models = "object"
+why = "renders of the 25 objects 0.2.0's sealed run made on the 16 GB card, our prompts and verdicts by eye under them"
+
+[[picture]]
+path = "lettering-the-anvil.webp"
+kind = "composite"
+models = "object"
+why = "two picture tries of \"an iron anvil\" and the made anvil from the front, our boxes round what the lettering check read and our captions with its verdicts"
+
+[[picture]]
+path = "lettering-asked.webp"
+kind = "composite"
+models = "picture"
+why = "the picture model's tries for prompts that ask for lettering, our boxes round what the check read and our captions"
+
+[[picture]]
+path = "lettering-known-misses.webp"
+kind = "composite"
+models = "picture"
+why = "the picture model's tries whose letters the check misses, our boxes and captions"
+
+# Not AI-made, left alone:
+#   qualities/several-things.webp: a terminal's text, what model-maker's own code answers to prompts; no model drew it

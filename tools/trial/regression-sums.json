@@ -11,6 +11,12 @@
   "picture.png": "3d046ff9f6925040ce5736844b259ee7b865597a688ec434b29d8f4bbc356342",
   "shape.npz": "fa4cf393cb3ff28fc75fbf108bf82ab274621e705011ae1e8b942e2f1a9566ec"
  },
+ "bed-frame-from-its-end": {
+  "job.json": "f06a81597090ab1167d2e1bb1e5164afcbd9d9836104c4320c79adbef79d49b6",
+  "mask.png": "8b61340f1181c7e1097562061dbae1b2c11c874a51fd88f2fdab137ae37505ae",
+  "picture.png": "33fa1939845cb8ae00b92056692af6252c0186c1b7d93628e314a3325d612971",
+  "shape.npz": "bbab937469edc5ccc1fa77ba44d99a9b5a127719d3f8cacd7783e70d8acbf4f1"
+ },
  "book-made-on-its-edge": {
   "job.json": "26a2549ea2a54dcb43265c3de7c4eafc3716f4efd57497bcd699e641b37e8cec",
   "mask.png": "cbdb5e3c3b762c549ec40f25fb2640edf659bc5b6ae19125065bfa0408d3b7b7",

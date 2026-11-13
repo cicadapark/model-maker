@@ -322,8 +322,18 @@ def checked(rgb, mask):
     return result
 
 
+# A shown measure that ranks the tries that pass (never refuses one): a hafted weapon standing upright (upright).
+RANKING_CHECKS = ("standing upright",)
+
+
+def ranked_well(result):
+    """Whether a try passes the shown measures that rank tries (`RANKING_CHECKS`); True when it has none."""
+    return all(c.passed for c in result.checks if c.name in RANKING_CHECKS)
+
+
 def best_try(results):
-    """The index of the best try: the passing ones first, then by score; the first of equals."""
+    """The index of the best try: the passing ones first, then those the ranking measures prefer (a hafted weapon
+    painted upright), then by score; the first of equals."""
     if not results:
         return None
-    return max(range(len(results)), key=lambda k: (results[k].passed, results[k].score, -k))
+    return max(range(len(results)), key=lambda k: (results[k].passed, ranked_well(results[k]), results[k].score, -k))

@@ -1,0 +1,522 @@
+# Known advisories CI's vulnerability audit does not fail on (.github/workflows/ci.yml, the job "vulnerability
+# audit"): each one names the advisory, the package and version it was read against, why it does not apply to
+# model-maker or cannot be fixed yet, and the date it must be looked at again. tools/test_audit_ignores.py fails once
+# a review date has passed, so an entry cannot stay without being read again. Nothing else is ignored.
+#
+# 0.2.1 keeps the model stack (torch, transformers, diffusers, accelerate) at the versions its results were measured
+# with; Pillow, filelock, setuptools and certifi were raised. The model stack moves in its own version.
+
+[[ignore]]
+id = "PYSEC-2025-189"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-190"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-191"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-192"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-193"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-194"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-195"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-198"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-203"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-204"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-205"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-206"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-207"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-208"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-209"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-41"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-139"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1856"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1970"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-2286"
+package = "torch"
+version = "2.5.1"
+why = """Held at 2.5.1 for 0.2.1: moving torch changes model-maker's results (measured on 11 November: with the same
+seeds 3 of 12 runs went from pass to fail), so the model stack moves in its own version, measured against a noise
+floor. These advisories need a hostile model file, pickle or archive, or code that calls the affected function on
+untrusted input; model-maker loads only safetensors and checkpoints whose sha256 the registry pins, runs locally and
+serves nothing on a network."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2024-227"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2024-228"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2024-229"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-211"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-212"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-213"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-214"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-215"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-216"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-217"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-218"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2025-40"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1977"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1980"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1981"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1982"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1983"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1984"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1985"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1986"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1987"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-1988"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-2288"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-2289"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-2290"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-3929"
+package = "transformers"
+version = "4.46.3"
+why = """Held at 4.46.3 for 0.2.1 with torch (see torch's entries): the upgrade changes results. These advisories
+concern loading untrusted model files or configs (remote code, pickle, regex on hostile input); model-maker loads
+only the sha256-pinned SigLIP 2 and BiRefNet files the registry lists, offline, with trust_remote_code off, and gives
+the tokenizer only its own prompt text."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-2446"
+package = "diffusers"
+version = "0.31.0"
+why = """Held at 0.31.0 for 0.2.1 with torch and transformers (see torch's entries): the upgrade changes results.
+These advisories concern loading untrusted pipelines or files; model-maker loads only the registry's sha256-pinned
+FLUX.1 [schnell], SDXL and MV-Adapter files, offline, and fetches no remote code."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-40"
+package = "diffusers"
+version = "0.31.0"
+why = """Held at 0.31.0 for 0.2.1 with torch and transformers (see torch's entries): the upgrade changes results.
+These advisories concern loading untrusted pipelines or files; model-maker loads only the registry's sha256-pinned
+FLUX.1 [schnell], SDXL and MV-Adapter files, offline, and fetches no remote code."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-41"
+package = "diffusers"
+version = "0.31.0"
+why = """Held at 0.31.0 for 0.2.1 with torch and transformers (see torch's entries): the upgrade changes results.
+These advisories concern loading untrusted pipelines or files; model-maker loads only the registry's sha256-pinned
+FLUX.1 [schnell], SDXL and MV-Adapter files, offline, and fetches no remote code."""
+review = "2026-12-31"
+
+[[ignore]]
+id = "PYSEC-2026-3804"
+package = "accelerate"
+version = "1.1.1"
+why = """Held at 1.1.1 for 0.2.1 with torch (see torch's entries): no fixed version is listed. The advisory
+concerns loading untrusted checkpoints; model-maker loads only the registry's sha256-pinned model files, offline."""
+review = "2026-12-31"

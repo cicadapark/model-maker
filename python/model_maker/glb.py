@@ -98,17 +98,20 @@ def png_bytes(texture):
     return out.getvalue()
 
 
-def glb_bytes(name, corners, triangles, normals, uvs, texture, marks=None, extras=None, parts=None):
+def glb_bytes(name, corners, triangles, normals, uvs, texture, marks=None, extras=None, parts=None,
+              texture_signed=None):
     """The .glb's bytes. `marks`: {name: (position, up, facing)} empty nodes under the object's node. `parts`: meshes
     our own code adds (a bow's string), each {"name", "corners", "triangles", "colour"} in one plain colour, a node
-    under the object's node."""
+    under the object's node. `texture_signed`: the texture's PNG bytes with its content credentials in them, from its
+    plain ones (credentials.signed_bytes)."""
     from .mesh_tools import corner_normals
 
     buffer = _Buffer()
     attributes = {"POSITION": buffer.floats(corners, "VEC3", bounds=True), "NORMAL": buffer.floats(normals, "VEC3"),
                   "TEXCOORD_0": buffer.floats(uvs, "VEC2")}
     indices = buffer.indices(triangles)
-    image_view = buffer.view(png_bytes(texture))
+    texture_png = png_bytes(texture)
+    image_view = buffer.view(texture_signed(texture_png) if texture_signed else texture_png)
     nodes = [{"name": name, "mesh": 0}]
     meshes = [{"name": name, "primitives": [{"attributes": attributes, "indices": indices, "material": 0}]}]
     materials = [{"name": f"{name} paint", "pbrMetallicRoughness": {

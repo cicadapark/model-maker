@@ -195,6 +195,20 @@ must_pass = ["outline matches the picture", "base level", "no holes"]
 carved_holes = 0
 
 [[case]]
+name = "bed-frame-from-its-end"
+why = """0.2.0's sealed run's bed frame (16 GB card, 2026-11-11): right by eye, but it failed the outline and the holes. Its
+picture shows it from its foot end, 6 degrees above; it is 2 m deep and 0.39 m high, so its outline grows by its depth
+times the tilt's change, and from the search's coarse tilts (0, 12 and 24 degrees) it lay 14 % and 15 % from its picture.
+A view from its side won (edges 9.9 % and 25.5 % apart), and from there its slats' gaps are open, holes the picture
+lacks. With the coarse tilts following its depth it is judged from its end, 6 degrees above, with no hole of its own
+(it must pass the holes). Its outline lies 1.3 % and 4.4 % from its picture there: a small true misfit (its rail a
+little shallower, its legs a little thicker, its far corners a little wider), at the 95th percentile's limit of 4 %, so the outline is not held either way"""
+source = "2026-11-11-sealed-1.1-2c3ea6e-3080/batch/wooden-bed-frame-33963dac"
+prompt = "a wooden bed frame"
+must_pass = ["holes the picture shows are open", "no holes", "one main piece", "base level", "left-right symmetry"]
+carved_holes = 0
+
+[[case]]
 name = "candle-dish-unpainted"
 why = """the fix-check's candle (2026-11-10), painted by the six views alone: the dish's inner wall and the candle's foot
 in it, seen only from above at a slant, are in none of them squarely (85.8 % of the surface as seen). The paint stage

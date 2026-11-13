@@ -10,6 +10,23 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 ./model-maker make "an old iron sword" --size 0.9
 ```
 
+## What a PC needs
+
+| | |
+|---|---|
+| System | Linux on x86_64 |
+| Graphics card | NVIDIA, 12 GB or more (tried on 12 GB and 16 GB), a driver with CUDA 12 or newer |
+| Computer's memory | 24 GB or more (16 GB to try) |
+| Disk | about 60 GB used (models 54 GB, environment 6 GB); keep 75 GB free |
+| Setup | about 20 to 35 minutes (57 GB downloaded; clean PCs took 19 to 33 minutes) |
+| One object | about 7.5 to 10 minutes on a 16 GB card; 8 to 13 minutes on a 12 GB card ("The chair and the sword on 12 GB", below) |
+| Also needed | git, curl, tar, a C and C++ compiler; `setup.sh` brings its own Python and, if needed, its own Rust |
+| Recommended | tesseract 5 or newer with its English data (`sudo apt install tesseract-ocr tesseract-ocr-eng` on Debian 12 or Ubuntu 24.04; Ubuntu 22.04's is version 4: below), to refuse picture tries with letters painted on the object |
+
+`setup.sh` brings everything into this folder: its own Python, the pinned packages, Rust if there is none, the view
+painter's code and the models, each after its licence is shown and accepted, every file checked against its sha256.
+One model, FLUX.1 [schnell], is gated ("A gated model", below).
+
 Linux on x86_64 with an NVIDIA card of 12 GB or more (tried on 16 GB and 12 GB, below), a driver with CUDA 12 or
 newer, 24 GB or more of the computer's memory (16 GB to try), git, curl, tar and a C/C++ compiler (`build-essential`
 on Debian and Ubuntu, for meshoptimizer). Nothing else: setup brings its own Python and, when the PC has none, its own
@@ -233,6 +250,32 @@ Checks:
 * The lock pins wheels for CPython 3.11 on Linux x86_64 only; a newer stack (PyTorch for Python 3.13 and later) would
   need the whole pipeline tried again.
 
+## Your own signing certificate
+
+Every picture is signed with content credentials (`docs/objects.md`, "Content credentials"). Without a key of your
+own, setup makes a test certificate in `.tools/c2pa-test` (`./model-maker credentials --make-test` makes it again);
+checkers call what it signs untrusted. A certificate checkers trust comes from a certificate authority on the
+**C2PA trust list**, issued under the C2PA certificate policy to a **conforming generator product**:
+
+1. The product is evaluated in the C2PA conformance program (assurance level 1, or level 2 with hardware-backed keys)
+   and listed on its conforming products list. Since 1 January 2026 the interim trust list is frozen: no new
+   certificates come from it.
+2. You make a key pair (ES256, an EC P-256 key, is the usual kind; ES384, ES512, PS256 and Ed25519 also sign), keep
+   the private key where no one else can read it, and send the CA a certificate signing request with your
+   organisation's name (`O`), which checkers show. The CA vets you and signs; fees are the CA's own.
+3. You give the key and the chain the CA returns (your certificate first, then its issuers) to model-maker:
+
+       export MODEL_MAKER_SIGNING_KEY=/path/to/signer.key MODEL_MAKER_SIGNING_CERT=/path/to/chain.pem
+       ./model-maker credentials        # signs a trial picture and reads it back
+
+   and, so signatures outlive the certificate, a time-stamping authority from the C2PA TSA trust list
+   (`MODEL_MAKER_TIMESTAMP_URL`).
+
+The trust list's CAs, the conformance program and the certificate policy:
+<https://opensource.contentauthenticity.org/docs/signing/get-cert> and
+<https://opensource.contentauthenticity.org/docs/conformance/trust-lists>. Never commit a private key: `.tools/` is
+outside git, and a key of your own belongs outside this folder.
+
 ## Warnings you can ignore
 
 A make prints some warnings from the libraries it uses. These four are expected and change nothing:
@@ -251,7 +294,7 @@ A package's own licence line is not enough: a wheel can bundle shared libraries 
 FFmpeg under the LGPL). `python/model_maker/check_licences.py` lists every shared library a package of the environment
 bundles (its `<package>.libs/` folder, `torch/lib/`, ...; a package's own Python extension modules are its own code) and
 compares each with an allow-list that names its licence; a library not on the list fails the check until its licence
-is read and it is added (`--list` prints them all). On the locked environment it finds 93:
+is read and it is added (`--list` prints them all). On the locked environment it finds 94:
 
 | Bundled by | Libraries | Licence |
 |---|---|---|
@@ -262,6 +305,7 @@ is read and it is added (`--list` prints them all). On the locked environment it
 | torch | libgomp | GPL-3.0 with the GCC Runtime Library Exception |
 | nvidia-*-cu12, torch, torchvision | CUDA, cuBLAS, cuDNN, cuFFT, cuRAND, cuSOLVER, cuSPARSE(Lt), NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG | NVIDIA's own licences: free to use and to ship with an application, not open source |
 | nvidia-nccl-cu12 | NCCL | BSD-3-Clause |
+| c2pa-python | libc2pa_c (c2pa-rs's C interface, its Rust crates linked in; no OpenSSL) | MIT OR Apache-2.0; its crates MIT, Apache-2.0, BSD, ISC, Zlib, Unicode-3.0 and the like, the root certificates' list CDLA-Permissive-2.0 |
 | pillow, torchvision | libjpeg-turbo, libpng, zlib, libwebp, libtiff, OpenJPEG, libavif, Little CMS, FreeType, HarfBuzz, Brotli, zstd, xz, libxcb, libXau | IJG/BSD-3, libpng, Zlib, BSD-3, libtiff, BSD-2, BSD-2, MIT, FTL, MIT, MIT, BSD-3, 0BSD, MIT, MIT |
 
 **libquadmath** (GCC's quad-precision maths) comes inside numpy's and scipy's own PyPI wheels, linked dynamically and

@@ -1,0 +1,52 @@
+# The prompts kept sealed for version 0.2.1: written before its work began; nothing was tuned on them.
+# Each was made once with 0.2.0 and once with 0.2.1 on two cards, the same seeds, for the table in docs/results.md; they are now part of the development set.
+a wooden dining chair
+a carved wooden throne
+a pine kitchen table
+a rustic wooden bench
+a small bedside table
+a small iron-bound chest
+an oak wine barrel
+a wicker laundry basket
+a tin bucket
+a stoneware water jug
+a clay cooking pot
+an enamel coffee pot
+a green glass wine bottle
+a terracotta planter
+a hanging iron lantern
+a silver candlestick
+a round hand mirror
+a wooden serving tray
+a jewellery box with a lid
+a steel battle axe
+a woodcutter's axe
+a hunting spear
+a bronze short sword
+a round iron buckler
+a carpenter's hammer
+a wooden rolling pin
+a cast iron frying pan
+a copper saucepan
+a wooden spoon
+a ceramic mug
+a pewter tankard
+a brass hourglass
+a brass telescope
+a globe on a wooden stand
+a wooden easel
+an iron birdcage
+a wooden coat stand
+an upholstered sofa
+a wooden water trough
+a leather satchel
+an iron shovel
+a pitchfork
+a garden hoe
+a scythe
+a blacksmith's bellows
+a stone mortar
+a halberd
+a trident
+an iron helmet
+a wooden wagon wheel

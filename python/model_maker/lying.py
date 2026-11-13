@@ -101,7 +101,12 @@ def chosen_pose(poses):
 def laid(subject, corners, triangles):
     """The surface laid on its likeliest resting face when its words say it lies (else as it is): (corners,
     triangles, record). The record says whether it was laid, the pose (its share, how far it turned) and the
-    other poses, and holds the rotation and shift that took the made shape to the laid one."""
+    other poses, and holds the rotation and shift that took the made shape to the laid one. A hafted weapon is turned
+    instead so its haft stands upright, head up (`upright`), with a record of the same kind."""
+    if subject.weapon_kind == "hafted":
+        from . import upright
+
+        return upright.turned(corners, triangles)
     if not subject.lies:
         return corners, triangles, {"laid": False, "words": subject.why.get("lies", "not a thing that lies")}
     poses = stable_poses(corners, triangles)
@@ -140,8 +145,9 @@ def from_made(points, record, directions=False):
 
 
 def lay_check(record):
-    """The laying, shown beside the checks (not counted: the base checks judge the pose it leaves)."""
+    """The laying, shown beside the checks (not counted: the base checks judge the pose it leaves); for a hafted
+    weapon, its turn upright."""
     from .picture_checks import Check
 
-    return Check("laid on its broad face", record.get("turned_deg", 0.0), 0.0, "°", True, record["words"],
+    return Check("haft upright" if record.get("upright") else "laid on its broad face", record.get("turned_deg", 0.0), 0.0, "°", True, record["words"],
                  counted=False)

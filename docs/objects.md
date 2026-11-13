@@ -17,8 +17,9 @@ This document gives every check with its limit, and what each limit and fix was 
 from the release's trials: prompt sets made end to end on a 16 GB card (an RTX 3080 laptop card) and a 12 GB card (an
 RTX 3060), named by their order ("the first trial", "the third trial", "the fifth trial", "the 12 GB card's fourth
 trial"), and the "fix-check", the ten regression prompts made again after the third trial's fixes. The notes of the
-first two are in `docs/trials/`; the later trials' notes, their made objects and the regression set's data are not
-published (they are large, and hold machine-specific records): what they showed is given here.
+first two, and the diagnosis of 0.2.0's sealed run, are in `docs/trials/`; the later trials' notes, their made objects
+and the regression set's data are not published (they are large, and hold machine-specific records): what they showed
+is given here.
 
 ## The steps
 
@@ -112,7 +113,7 @@ Objects:
 
 | Check | Passes when |
 |---|---|
-| outline matches the picture | judged against the cut-out the shape model was given (its largest piece, its pinholes filled), from the view that matches best (its turn, its tilt and the camera's distance: straight on, or through a lens 6, 4 or 3 times the object's size away, as the picture is a photograph; the views compared by the edges' mean distance, each camera distance refined), on a canvas as wide as the picture needs (a model wider still from that view fails), the outlines' edges lie at most 1.9 % of the height apart on average and 4 % at the 95th percentile (a compact shape offset all round by 1.9 % overlaps its picture 85 %), and no piece one outline has in a gap of the other (a web between legs) is thicker than 8 %; the overlap itself is shown, as it is unfair to thin parts: a chair leg a pixel off counts wholly against it |
+| outline matches the picture | judged against the cut-out the shape model was given (its largest piece, its pinholes filled), from the view that matches best (its turn, its tilt and the camera's distance: straight on, or through a lens 6, 4 or 3 times the object's size away, as the picture is a photograph; the views compared by the edges' mean distance, each camera distance refined; the tilts tried from level to 24° closer together for a deep, low thing, see "False refusals"), on a canvas as wide as the picture needs (a model wider still from that view fails), the outlines' edges lie at most 1.9 % of the height apart on average and 4 % at the 95th percentile (a compact shape offset all round by 1.9 % overlaps its picture 85 %), and no piece one outline has in a gap of the other (a web between legs) is thicker than 8 %; the overlap itself is shown, as it is unfair to thin parts: a chair leg a pixel off counts wholly against it |
 | holes the picture shows are open | each hole of the cut-out with an inner part (1.9 % of the height in from its edge) of at least 50 canvas pixels, showing the backdrop's colour (within 10, delta E), is covered by the model's outline at most a third, seen from the camera found with those inner parts left out; and no hole of the model's own outline is covered by the picture more than a third. Counted only when a hole was judged; holes too small say "not judged" (see "Holes the picture shows") |
 | no holes | no edge is used by one triangle only |
 | one main piece | the main piece is 98 % of the surface; loose pieces (touching nothing) are listed |
@@ -162,6 +163,45 @@ within 3.5 cm of it), so a frame tilted by a one-sided head puts no mark off the
 along the bar of the handle the hand holds, and its nodes' +Y runs along that bar.
 Each node's +Y points toward the tip and its +Z is the blade's flat side, so a game puts the hand's
 palm at `grip` with its fingers round +Y. The sidecar lists them too.
+
+## Content credentials
+
+Every picture model-maker writes carries content credentials: a signed C2PA manifest inside the file that says it
+was made by AI models, and by which. That is the picture tries and their cut-outs, the chosen picture, the six painted
+views and the touch-up's pictures, the texture inside the `.glb`, and the report's pictures. It is on by default and
+needs no network. Please do not strip it: a picture shown or passed on without it no longer says it was made by AI.
+
+A manifest holds:
+
+* one action, `c2pa.created`, with its digital source type from the IPTC vocabulary: `trainedAlgorithmicMedia` for a
+  picture that is the models' work alone (a try, a painted view, a turntable of the made object),
+  `compositeWithTrainedAlgorithmicMedia` for a report picture that draws model-maker's own marks over it (the outline,
+  the grip and tip, the paint's coverage), and `algorithmicMedia` for a touch-up's mask, which our own code makes;
+* the generator, model-maker and its version, and the models whose work the picture shows, by name;
+* the signature and its certificate chain.
+
+It never holds the prompt, a path, a file name or the user's or the computer's name. The prompt is in the object's
+sidecar: a picture travels alone and its manifest is signed, so what is in it could not be taken out again. The
+sidecar's `content_credentials` and the report say how many of the job's pictures carry credentials that hold,
+whether a test certificate signed them, and any picture whose mark no longer holds (changed since it was signed).
+`model-maker finish` signs the report's pictures it writes, and any picture of the job made before pictures were
+signed (their pixels as they are). A bug report keeps each PNG's credentials. The `.glb` also says in plain words, in
+`asset.extras`, that it was made by AI models: a mesh need not be marked, but a note costs nothing.
+
+**The certificate.** `--signing-key` and `--signing-cert` (or `MODEL_MAKER_SIGNING_KEY` and
+`MODEL_MAKER_SIGNING_CERT`) give your own key and certificate chain, both PEM; without them the pictures are signed
+with a test certificate `setup.sh` makes on your computer (`.tools/c2pa-test`, its key readable by you alone). C2PA
+checkers report a picture signed with it as signed by an untrusted certificate. That is true: the mark is still there
+and still machine-readable. `docs/setup.md`, "Your own signing certificate", says how to get one checkers trust. Your
+own certificate's names (its organisation, for one) are shown with every picture it signs. `MODEL_MAKER_TIMESTAMP_URL`
+names a time-stamping authority, so signatures stay valid after the certificate ends (every signing then uses the
+network).
+
+    ./model-maker credentials                     which certificate signs, and a trial signature read back
+    ./model-maker credentials --read PICTURE...   what each picture's manifest says
+
+Pictures made before (a website's, this README's) get their credentials with `tools/sign_pictures.py`, from a list
+that names each AI-made picture and why; every other picture is left alone (`docs/images/made-by-ai.toml`).
 
 ## Thin parts
 
@@ -1813,3 +1853,377 @@ a usable one the case counts as broken; the version that read it is printed and 
 The whole regression set holds with it (53 of 53; "lettering-pictures" took about 4 minutes on one CPU thread), and
 every other number is as before; so it did again after the review's fixes (53 of 53, its lettering read by tesseract
 5.5.0).
+
+## The painted views judged against each other, and one view per place (11 November 2026)
+
+In 0.2.0's sealed run a white ceramic teapot came out with its right side black and a pale glass bottle dark on one
+side, and every check passed: the view painter had painted one of its six views out of family with the others, and
+the bake took it (docs/trials/2026-11-11-030-diagnosis.md). The coverage counts a texel painted whatever its colour,
+"painted views not black" looks for a view that came back wholly black, and the likeness sees the object only from
+the picture's side.
+
+**The views judged.** Neighbouring side views see a strip of the same surface, round 45 degrees. Where both painted a
+place (points within 2.5 of the cloud's spacing, facing within about 25 degrees), their colours are compared; a pair
+is unlike where they differ by over 30 delta E, and a side view's disagreement is the lesser of its two pairs' shares
+(an odd view disagrees with both its neighbours; its neighbours each agree with their other side). This is the
+photo-consistency idea of texturing from photographs (Waechter, Moehrle and Goesele 2014 drop a view whose colour is
+an outlier among the views of a face), between the view painter's views (`view_agreement.measured`).
+
+**Painted again.** A view unlike both neighbours over a share of 0.5 has the six views painted again from the next seed,
+at most twice, and the try that agrees best is kept (as the touch-up keeps its best fill). The kept try's views are in
+`views/`, every try's in `views/seed-N/`, and each try's measure is in the record (`paint.six_views`) and shown in the
+report as "painted views agree" (shown, not counted: polished metal's views differ by their reflections whatever the
+seed). The kept seed is the sidecar's paint seed. The limit was set on the paint of the 167 trial objects kept: the four
+single-view faults scored 0.52 to 0.91; 17 objects reach 0.5, the other 13 polished metal or iron.
+
+**One view per place.** Where two views painted a place, the bake mixed its nearest painted points from both, and two
+unlike views interleaved into a fine stipple. A view's painted point is now left out of the bake where another view
+painted the same place more squarely by over 0.05 (on the 45-degree seam both stay): one view per place, as texturing
+from photographs chooses a view per face (Lempitsky and Ivanov 2007) and as MV-Adapter's own projection weights views by
+the cosine to the surface. A place only one view painted keeps its paint, however slanted: a first version compared each
+point with all six directions, so a view blocked from a place by the object itself still pushed out the only paint
+there: the coverage fell by up to 3 points (a candle in its dish 85.7 % to 82.8 %), and two objects fell under the 90 %
+limit (a chair 90.68 % to 89.97 %, a stone well 90.10 % to 89.64 %); comparing only with what another view did paint,
+the coverage of the 167 objects changes by 0.04 points down at most (0.45 up), and none crosses the 90 % limit
+(`tools/trial/view_selection.py --coverage`).
+
+**End to end** (`2026-11-11-030-views-e2e`, the 16 GB card, the sealed run's own seeds for picture and shape):
+
+| Object | Views from seed 0 | Kept | 0.2.0 | Now |
+|---|---|---|---|---|
+| ceramic teapot | 0.91 unlike | seed 1, 0.02 | passed, wrong: a black side | white all round; fails the fill check (below) |
+| glass bottle | 0.81 | seed 1, 0.02 | passed, flawed: dark on one side | pale all round, passes |
+| copper kettle | 0.77 | seed 1, 0.47 | passed | passes; copper, its front still with silvery reflections |
+| wooden armchair | 0.01 | seed 0 (painted once) | passed | the same, passes |
+
+The coverage is as before to within 0.03 points (the teapot 97.82 % to 97.80 %). The paint stage took 57 s to 120 s
+longer for the three painted again (the view painter's six views, then the touch-up). The teapot now fails "fill
+matches the paint round it": with the new views the touch-up left a place unpainted along the handle's foot on the lid,
+4.0 % of the object across (the limit 3 %), whose ring is black handle and white lid, so it counts as a smear. By eye
+it is a thin line, not a fault: a false refusal of a kind a later version's work takes up, not this one's.
+
+**Polished metal, one limit.** 13 of the 17 trial objects over the limit are metal or iron, whose views differ by their
+reflections. Is a limit per material needed? The six views of six of them were painted again from seeds 1 and 2
+(`2026-11-11-030-reseed-metal` and `-reseed`, the views alone):
+
+| Object | Seed 0 | Seed 1 | Seed 2 | Kept by the pipeline |
+|---|---|---|---|---|
+| copper kettle | 0.77 | 0.47 | 0.51 | seed 1, 0.47 (two paints) |
+| steel longsword | 0.66 | 0.11 | 0.64 | seed 1, 0.11 (two paints) |
+| round shield, iron boss | 0.67 | 0.48 | 0.54 | seed 1, 0.48 (two paints) |
+| pickaxe | 0.59 | 0.68 | 0.18 | seed 2, 0.18 (three paints) |
+| spear, leaf-shaped head | 0.73 | 0.71 | 0.79 | seed 1, 0.71 (three paints) |
+| copper cooking pot | 0.82 | 0.79 | 0.77 | seed 2, 0.77 (three paints) |
+
+Four of the six come under the limit with a repaint; two do not, and cost two paints for little. A limit per material
+would have to find the material in the words, and the spear's prompt names none, while the kettle, the sword and the
+pickaxe gain from the repaint. One limit is kept; the cost is time on about one object in ten.
+
+All 364 Python tests pass and the regression set holds whole (53 of 53); its cases were made before the views were
+recorded, so they are baked as before.
+
+## False refusals (11 November 2026)
+
+0.2.0's sealed run failed four objects that look right by eye: the wooden bed frame on both cards ("outline matches
+the picture" and "holes the picture shows are open"), the iron cauldron on the 16 GB card and the writing desk on the
+12 GB card ("fill matches the paint round it"; the desk also "left-right symmetry"); and the teapot painted again (the
+repaint above) fails the fill on a place 4.0 % of its size across (limit 3 %). Each was traced in its stored data before anything
+was changed, and a change was kept only where it measures better on every stored object.
+
+### The bed frame: the view search never drew it from its own tilt (fixed)
+
+The picture shows the bed from its foot end, a few degrees above. The outline check judged it from 79° round and 14°
+above, from its side (edges 9.9 % and 25.5 % of the height apart), and from there the gaps between its slats are open
+and the picture covers them: so it also failed the holes. Drawn from its end, 6° above, through a lens 4 sizes away,
+it lies 1.3 % from its picture with no hole of its own; the search never drew that view.
+
+The search draws a coarse grid (13 turns, the tilts 0, 12 and 24°, 4 camera distances) and refines the best of it. A
+bed is 2 m deep and 0.39 m high: seen from a tilt t its outline is h cos t + d sin t high, and grows by its depth times
+the tilt's change, so its look changes fastest with the tilt of anything the trials hold. From its end its edges lie
+within 10 % of its picture only from 3 to 9° (its outline 17 % lower or higher than at 6°); at 0 and 12° they lie 14 %
+and 15 % away (35 % lower, 34 % higher), and a wrong view from its side (about 11 %) won the coarse grid. The slats were not
+the cause: from the end at 12° the model's gaps are 1.5 of the picture's pixels wide, and the outline is as far off with
+every hole filled (14.0 %).
+
+A coarse-to-fine search finds a view only when its coarse steps are finer than the measure's capture range round it
+(Borgefors, 1988, hierarchical chamfer matching). The tilts now follow the thing's proportions
+(`object_checks.outline_tilts`): from level to 24°, in whole degrees, never more than 12° apart, and close enough that
+its outline's height grows by at most a quarter between neighbours (d taken as its largest size across, the deepest it
+can be seen). A thing as deep as high or less keeps 0, 12 and 24°; a bench 3.3 times as long as high is tried at 0, 4, 9,
+15, 23 and 24°, the bed at 0, 2, 5, 9, 14, 20 and 24°: about twice as many coarse views for such things; the rest
+search as before.
+
+Both beds are now judged from their end, 0° round and 6° above, through a lens 4 sizes away, with no hole of their
+own: the holes pass. The outline still fails on both, now by a little and truly. The 16 GB card's lies 1.32 % and
+4.43 % from its picture (the thickest piece in a gap 5.2 %): its rail a little shallower than the picture's, its legs a
+little thicker, its far corners a little wider. The 12 GB card's (stored only as its finished model) lies
+2.24 % and 3.91 %: its legs stand a little inside the picture's, and two short centre feet hang under its rail where
+the picture has none. No limit was moved. The search's other views agree that the 16 GB card's bed sits at the limit:
+a third of a degree changes its 95th percentile by a point (3.4 % at 6.3° through a lens 3 sizes away, 5.0 % at 6.6°).
+
+What did not work: a finer last step of the tilt (the tilt that grows the outline by the mean's limit, a third of a
+degree for the bed). It found a lower mean (1.23 %) but a higher 95th percentile (4.95 %): the search minimises the
+mean, and finer steps only move the bed along the edge of the 95th percentile's limit. Not kept.
+
+**Measured on every stored finished object** (`tools/trial/rejudge.py`: 217 jobs of the trials, the sealed run on both
+cards and this version's trials among them; each judged by the code before and after, shape checks and fill, nothing written
+into the jobs; 41 jobs stored only as their finished model are judged on it): two verdicts change, both beds' holes,
+fail to pass; no verdict changes from pass to fail, and no other check changes. Seven jobs are judged from another view,
+all deeper than high (the two beds; two birdbaths, two buckets and a cauldron, whose 95th percentiles move by 0.28 points up at
+most and 0.62 down, every verdict the same). The regression set gains `bed-frame-from-its-end` (it must pass the
+holes; its outline, at the limit, is held neither way), and a test draws a made-up bed frame from its end at 3, 6 and
+9° (the search found it from 61° round before).
+
+### The teapot's and the cauldron's fill: the places are smeared; the eye forgives them (not changed)
+
+Every place over 3 % that a touch-up view left unpainted, on the 41 stored jobs that have one (176 places, copies of
+a job in several trial folders counted each time; each place's pixels drawn from its touch-up view), was measured again
+by three other readings of "smear", each an established one, against the places labelled by eye:
+
+* **A seam between two colours.** A place on the line where two materials meet (a black handle on a white lid) shows
+  the colours of both and their blends; the matting equation reads such a pixel as a mix of the two (Porter and Duff
+  1984; the colour-line model of Levin, Lischinski and Weiss 2008). The ring was split into its two colours and the
+  inside judged as their blends, placed by its distance to each side. It separates nothing: nearly every ring is two
+  colours (at least 85 % of it within 20 of one of two medians, in 174 of the 176 places), and the labelled smears'
+  insides lie on the line between them too (78 to 100 %; the teapot's 99 %), as a colour spread from a ring is a
+  blend of it. Nor is the teapot's place a sharp edge: only 16 % of its pixels show the colour of the side they lie
+  nearer, where an edge would show nearly all; the handle's black runs across the white lid and white flecks lie on
+  the black.
+* **CIEDE2000** (the CIE's difference of 2001, which weighs lightness less away from mid-grey, in darks and lights):
+  within 15 of their medians the cauldron's larger place reads 78 % (ring) and 81 % (inside) one colour, the 16 GB
+  card's bucket's, smeared by eye, 81 % and 78 %; within 10 or 12 they lie as close.
+* **Chromaticity alone** (CIE 1976 u'v', blind to shading, as colour Retinex tells a change of material from shading;
+  0.031, which is delta E 20 at mid-grey): the teapot and the cauldron pass, but so do the strength-0.99 candle's three
+  smears (grey patches on its brass and wax: a smear of lightness alone), and that candle would pass the check: a new
+  miss.
+
+So the places are what the check says: the teapot's is the handle's black spread over the lid with white flecks on it,
+on a strip 4.0 % across, and the cauldron's two (14.2 % and 13.0 %) are the grey the view from above paints on an inner
+wall seen at a slant, as on the flower pot whose smear is labelled a fault. On the near-black iron and on the handle's
+foot the eye does not see them at a turntable's size. No reading measures better, and no limit was moved. The
+cauldron's places have another cause, not fixed yet (the slanted colour on inner walls). The 12 GB card's desk's
+fill (a place 4.5 % across on a box on its top) could not be measured again: its stored copy holds no paint data.
+
+### The desk's symmetry: its pen pot is part of it (not changed)
+
+The 12 GB card's desk is mirror-symmetric to 0.97 % on average; its 98th percentile reads 8.6 % (limit 5 %). Every
+point lying more than 5 % from its mirror image is above 76 % of its height, on the things on its top, most of them on
+the pen pot: 2.9 % of its surface. They are not loose: the desk is one piece (100 % of its surface). A
+symmetry judged without them would have to tell them from a part of the object. The made-up chair with one armrest,
+which must fail, has 4.4 % of its surface unmatched, above its seat (57 to 71 % of its height); with a leg missing,
+4.1 %. A pen pot fused to a desk's top and an armrest on one side are the same to the measure: a part on one side,
+above the main surface, a few per cent of the surface. The check is right that the desk is not symmetric; whether
+things standing on a desk belong to "a small writing desk" is the picture's question, not the shape's. Not changed.
+
+All 382 Python tests pass (5 skipped), and the regression set holds whole: 54 of 54, the 53 cases before and
+`bed-frame-from-its-end`.
+
+## Insides, bake-only (11 November 2026)
+
+0.2.0's sealed run's flower pots, bucket and cauldron, and the trials' candle dishes, jugs, wheelbarrow and well, show
+grey or dark patches on their inner walls. The diagnosis (`docs/trials/2026-11-11-030-diagnosis.md`) found two
+sources: the colour the view from above gave the corners of a wall it sees only at a slant, past the rim, and the
+touch-up's fill there. This item was time-boxed to two days and bake-only: what the stored paint allows without
+painting again. The answer is: very little, and nothing was changed.
+
+### What texturing from photographs does with places seen badly
+
+* **MV-Adapter's own projection** (its `uv.py` and `pipeline_texture.py`, at the commit the registry names): a texel is
+  valid for a view only above a facing of 0.2 and away from depth edges (depth gradient under 0.1, grown by 5 pixels);
+  the valid views are blended by their facing cubed; the texels no view validly sees are filled from the valid ones
+  round them in the texture (`inpaint_cvc`, its UV padding), not from a slanted view.
+* **mvs-texturing** (Waechter, Moehrle and Goesele 2014): one view per face, chosen by how large and sharp the face is
+  in it (its gradient magnitude integral), so a face seen at a slant loses to a square view; the faces no view
+  textures go to its hole filling (on by default), not to a slanted view.
+* **Paint3D** (Zeng et al. 2024): the views a 2-D model paints carry its lighting, shadows and reflections; the
+  lighting is taken out afterwards by a model trained on textures without it (UVHD). It is a new model whose weights'
+  licence is unchecked, and it is deferred.
+
+### Four ways measured
+
+The bake uses the colour cloud (a view's pixels where it sees the surface at a facing of 0.55 or more); wherever the
+cloud does not reach, it shows the corners' own colours, which take a view's colour from a facing of 0.2. So a corner
+the cloud does not reach was seen only at a slant, or not at all. On the stored paint of the 51 distinct vessels and
+open objects of the trials (both cards' runs, the 0.1.0 unseen run's well, wheelbarrow, basket, cooking pot and
+bookshelf; `tools/trial/insides.py`), those corners were coloured four ways:
+
+| Way | Those corners take | Coverage |
+|---|---|---|
+| as made | the slanted view's colour | as made |
+| 1 | the colour spread from the corners the cloud reaches round them (`paint.spread`), as both methods above fill what no view sees well | unchanged on all 51 |
+| 2 | the same, never spread across a crease (normals more than 45° apart: a wall's colour not from its floor) | unchanged |
+| 3 | way 2 spread from the six views' paint only, the touch-up's fill left out where they did not paint | falls by up to 8.7 points (the bucket 93.1 % to 84.4 %); unchanged where nothing was touched up |
+
+**Labelled by eye, blind** (102 pictures, each object as made and by way 1 from 55° above, shuffled under codes and
+labelled before the key was opened): 17 objects smeared inside as made, 12 by way 1. The six that came clean are all
+jugs: the pale streaks inside their necks, which only the view from above sees and only at a slant, become even clay.
+One changed the other way (the 12 GB card's cauldron, "faint streaks" to "mild patches"), but its two pictures are the
+same to the eye side by side: label noise. The 11 still smeared are the ones this item was for: both flower pots, the
+bucket, the 16 GB card's cauldron, four candles' dishes, the wheelbarrow's tray, the well and an open chest's inner
+wall.
+
+**Why the smears stay.** Drawn where the cloud reaches, the flower pot's inner wall is almost all unreached, but its
+reached islands are the touch-up's kept fill, and grey; the view from above painted even the part of the wall it sees
+squarely grey, and the well's inner wall pale. The shadow is in the paint, not in the bake's choice of it (Paint3D's
+point). Way 3, which leaves out the touch-up's fill, takes some of the bucket's dark smears away, but the walls stay
+grey from the six views' own paint, and the coverage falls under its 90 % limit on objects right by eye: the cauldrons
+from 95.4 % and 95.5 % to 87.4 % and 87.5 %, a new refusal each.
+
+**Way 1 refuses seven objects more.** Judged on all 217 stored jobs (`tools/trial/rejudge.py`, the finish's checks with
+way 1's colours), no verdict changes from fail to pass and seven change from pass to fail, all "fill matches the paint
+round it": the well, the bookshelf, both lamps, the 12 GB card's flower pot, cauldron and birdbath. A place left
+unpainted whose ring holds two colours showed one colour as made (the slanted view's) and now shows both, spread ring by
+ring into streaks; the birdbath's strip, pale and even as made, is pale with dark streaks. The check reads that as a
+smear, and by eye it is one. So way 1 trades six jugs' necks for seven new refusals, and is not kept.
+
+**The bookshelf's back** is plain and even in its stored paint, as made and every way; it did not reproduce.
+
+**What would work** is outside a bake from stored paint: paint without lighting (Paint3D's UV model, licence to check),
+or a touch-up that paints an inner wall from its rim's own colour and material and is judged against the rim, not
+against the shadowed paint round the place. Both need the card.
+
+## Maces, clubs and things the picture model knows only loosely (11 November 2026)
+
+In 0.2.0's sealed run the short iron mace was made as a long rod with a small knob, a sceptre, and passed "shows the
+thing asked for"; the club found no picture; the spinning wheel came out a wheel on a stand and the water wheel a
+ship's helm. The picture model knows these names only loosely, and the words said nothing more. As for the war
+hammer, they now describe what shows, after the user's words: a mace's heavy head ringed with flanges or spikes on a
+short handle, a club thick and heavy at its top (`HEAD_PICTURE_WORDS`), a spinning wheel's bench, treadle and spindle,
+a water wheel's ring of paddles (`THING_PICTURE_WORDS`, for a thing with no kind of its own, when its name is in the
+prompt). Measured blind on eight tries a prompt, the four sealed prompts and seven others: maces 26 of 32 tries (0
+with the old words), clubs 13 of 24 (0), spinning wheels 16 of 16 (0), paddled water wheels 11 of 16 (4). The judge
+was not changed: a sceptre among its kinds refused every quarterstaff, a club of its own passed sticks, and "short"
+as a quality refuses short swords. The measurements, the paint faults of the same run (a view painted out of family,
+lighting painted into a vessel's inside) and a check tried and rejected are in
+`docs/trials/2026-11-11-030-diagnosis.md`.
+
+**End to end** (`2026-11-11-030-words-e2e`, the 16 GB card, nine prompts none of them sealed): an iron, a flanged, a
+spiked and a bronze mace all came out maces and passed every check; the old spinning wheel is a spinning wheel (it
+fails "holes the picture shows are open" at 33.3 % against 33 %); the mill water wheel came out a spoked wheel with no
+paddles (it fails the paint's coverage); the three clubs are thick sticks with a knob at most (two pass every check,
+the knotted oak club fails "haft straight" and "no kink": it is knotted). Two of the four maces' chosen pictures were
+tilted, and their models lean about 40 degrees in their own frame: the shape checks measure a hafted thing along its
+own long axis, so they pass, and the grip and tip marks follow the haft, but the object does not stand along the up
+axis. A tilted try can be told from the cut-out alone: its long axis (the mask's second moments) leans 18 to 86 degrees
+in 13 of the 14 tilted maces labelled, against 0 to 14 degrees in the 12 upright ones and at most 3 in the 59 rods and
+sticks (the fourteenth tilted one is painted head down, upright). The weapon is now turned so its haft stands (below).
+
+## A hafted weapon stood upright, head up (11 November 2026)
+
+A mace, a club or an axe painted lying, tilted or head down is made so: the shape model keeps the picture's frame.
+Refusing tilted tries would throw away 14 of the 26 maces the words trial painted, so the weapon is turned instead
+(`upright.py`), and the tilt only ranks the tries.
+
+* **The turn.** The haft is found as the weapon checks find it (the slices along the weapon's long axis, followed along
+  its line, its longest narrow stretch) and its direction is the straight line through those slices' middles. The head
+  is the end the picture shows at the top, as the words ask, unless the other end is at least 1.5 times as wide (the
+  maces painted head down measured their top end 0.14 to 0.54 of their bottom's width, the plain sticks and clubs
+  painted the right way up 0.88 and over). The least rotation that brings the haft onto the up axis, head up, is applied
+  after the shape stage, as a thing that lies is laid (`lying.laid`, whose record it shares: the outline is still judged
+  in the frame the shape was made in), and shown as "haft upright" (not counted). The view painter paints the weapon
+  standing (its paint kept in the shape's own frame), and the grip and tip marks are measured on the turned weapon.
+* **The ranking.** Each try of a hafted weapon is shown its lean: the long axis of its cut-out (its second moments)
+  against the picture's vertical. Among the tries that pass, those leaning 16 degrees or less are chosen first (the
+  middle of the measured gap between the upright maces, 0 to 14, and the tilted ones, 18 to 86). A tilted try is never
+  refused.
+
+**Measured** (`2026-11-11-030-upright`; `tools/trial/upright_measure.py`, the haft's lean found again by level slabs
+of the turned shape, not by the frame the turn uses): every labelled mace and club try of the words trial made into a
+shape (112, one shape each), the end-to-end maces and clubs, and every hafted object of the earlier trials.
+
+| Shapes | Turned | The haft's lean afterwards | Head up |
+|---|---|---|---|
+| 14 maces painted tilted or head down | 36 to 179 degrees | 3.0 degrees at most | 14 of 14 |
+| 12 maces painted upright | 13 degrees at most | 0.2 at most | 12 of 12 |
+| 30 rods and 29 sticks (upright pictures) | 0.9 degrees at most | 0.3 at most | |
+| the end-to-end flanged and bronze maces | 40 and 31 degrees | 0.2 and 0.1 | both |
+| 23 hafted objects made end to end in the trials (axes, war hammers, a mallet, quarterstaffs, maces, clubs; those two among them) | 1.1 degrees at most but those two | 0.6 at most | |
+
+The grip and the tip are the same points of the weapon before and after: the grip's distance from the butt and the
+length are unchanged to the millimetre, and the marks of the turned weapon, turned back, lie on those of the weapon as
+made (0.0 mm apart), in all 131 of the 135 where a grip is found. Two hooked sticks the words trial painted as clubs (labelled "other") are turned head
+down, their hook being their wider end. The two tilted maces, painted and finished again standing, pass every check,
+their paint's coverage as before (99.67 % and 99.35 % made tilted; 99.54 % and 99.29 % standing). All Python tests pass
+but one that fails on objects-first as it is (the README's pictures list, `test_credentials`), and the regression set
+holds whole (54 of 54, with the bed frame case added since).
+
+## A long batch: its memory, a resume, a guard (12 November 2026)
+
+0.2.0's code ran a 50-prompt baseline as one `model-maker batch` on the 12 GB card's machine; after 6.6 hours the
+system's out-of-memory killer ended it at a 36 GB peak, and nothing it had made was kept as a batch could go on from.
+
+**Where the memory went.** Measured on the 16 GB card (`2026-11-12-030-batch`, the batch's resident memory sampled
+every 2 s; `tools/trial/batch_memory.py`), eight prompts with the old code, light settings:
+
+| Stage | Peak | Least free | At its jobs' ends |
+|---|---|---|---|
+| pictures | 21.9 GB | 4.7 GB | 17.2 to 20.9 GB, growing job by job |
+| shape | 24.2 GB | 1.5 GB | 8.9 to 14.8 GB |
+| paint | 18.4 GB | 6.3 GB | 11.5 to 18.4 GB |
+| finish | 18.8 GB | 5.1 GB | 18.0 to 18.2 GB |
+
+The whole batch: 24.2 GB at its peak, over 42 minutes. Sixteen prompts with the old code: 25.1 GB.
+
+Two things held memory, neither of them the jobs' own arrays (each stage reads its job's files from its folder, and the
+finish over 40 stored jobs in one process stayed at 0.4 to 0.5 GB between jobs, 1.5 GB at its peak):
+
+* **Memory freed but not handed back.** A stage's models closed at its end are freed, but glibc keeps a freed heap
+  for the process, and torch keeps the pinned memory it freed: the shape model closed left 3.5 of its 4.6 GB held
+  until `malloc_trim` gave all but 0.3 GB back. So each stage started on top of what the one before had held: the
+  shape stage reached 24.2 GB (1.5 GB left free in the container), and the finish, which needs under 3 GB, ran at
+  18 GB, the paint's models still held.
+* **The picture stage growing job by job,** about 0.5 GB a job (17.2 GB after the first, 20.9 GB after the eighth): the
+  picture model's offload moves its parts between the card and the computer's memory for every picture, and the
+  freed copies were not handed back. At fifty prompts that is the 36 GB the baseline died at.
+
+**The fix.** After each job and each stage, the memory freed is handed back (`memory.give_back`: the garbage
+collector, torch's caches of the card and of pinned memory, glibc's `malloc_trim`); the models of a stage are kept for
+its jobs and closed at its end, as before. With it, eight prompts and seventeen:
+
+| Prompts | Pictures | Shape | Paint | Finish | Whole batch |
+|---|---|---|---|---|---|
+| 8 | 21.6 GB | 16.5 GB | 17.5 GB | 2.7 GB | 21.6 GB over 41 min |
+| 16 | 21.1 GB | 17.1 GB | 17.3 GB | 2.3 GB | 21.1 GB over 74 min |
+
+The peak no longer grows with the batch, and the stages no longer stack: the shape stage's peak fell from 24.2 to 16.5 GB
+(the least memory left free from 1.5 to 8.9 GB), the finish's from 18.8 to 2.7 GB.
+
+**Going on where it stopped.** Every file a stage writes last is written under a temporary name and renamed when
+whole (the picture, the shape, the paint, and now the model and its sidecar), so a stage is done exactly when its file
+is there. `model-maker batch` started again with the same `--out` skips each job's done stages, redoes a stage cut
+short, and finishes only the jobs not finished from their present paint (the record keeps what each was finished from).
+
+Tried on four prompts (`resume-cut`): the batch was killed while the chair's views were painted (two of six done),
+then started again with the same `--out`. It skipped the pictures and shapes done, painted the chair again, and
+finished all four: each job's verdict is the same as an uninterrupted run of the same prompts (`resume-whole`), 3 of 4
+passing every check on both.
+
+**The guard.** Before each stage the run compares the memory free to it (what the system has free, and what the
+process holds) with the stage's need. Against the peak a batch measured in an earlier run in the same folder
+(`memory.json`), a stage that does not fit is not started: the batch says what it needs and what is free, keeps
+everything done, and exits with 74; run again with the same `--out` when there is room (MODEL_MAKER_MEMORY_CHECK=0
+turns the check off). Against the needs measured here alone (pictures 22.4 GB, shape 13.7, paint 20.2, finish 2.8 on
+the 16 GB card) it only warns and goes on: those peaks count model file pages the system can drop and read again, and
+PCs with less memory made objects with 0.2.0. Each stage's peak is printed as the batch goes.
+
+## Pillow 13, and the model stack held (13 November 2026)
+
+CI's audit of the locked packages (`pip-audit`) found 105 known advisories. Pillow, which decodes every picture the
+pipeline reads (also one a user hands to `model-maker inspect`), carried 40 of them; filelock, setuptools and certifi
+a few more. The model stack (torch, transformers, diffusers, accelerate) carried the rest.
+
+Raising the whole stack changed results: with the same seeds, 3 of 12 runs of six objects on two cards went from
+passing to failing (the armchair on both cards, the kettle on the 12 GB one), as the shape stage's numbers drift with a
+new torch. So this version raises only Pillow (12.3 to 13.0), filelock, setuptools and certifi, and keeps the model
+stack at the versions its results were measured with. Pillow 13 was proven not to move a model's input: every input
+Pillow makes (the decode, the cut-out's resizes, the judges' crop and image processor, the shape model's input, the
+paint's reference, the touch-up's and the lettering reader's resizes) was hashed over 241 pictures under each version,
+and all 2,410 are the same, byte for byte (`tools/trial/pillow_inputs.py`). The model stack's 50 advisories (72 with
+their aliases) are listed in `tools/ci/pip-audit-ignore.toml`, each with why it does not reach model-maker (its models
+are files whose sha256 the registry pins, loaded offline; nothing is served on a network) and a review date; the
+stack moves in a version of its own, measured against a noise floor (two runs of the old environment first).
+
+Then the whole pipeline: the six objects (an armchair, a chair, a kettle, a teapot, a bottle and a sword) made with
+the same seeds under Pillow 12.3 and under 13 on the 12 GB card. Each chose the same picture seed, shape seed and
+paint seed; the chosen pictures are identical to the pixel; and all 134 checks have the same verdict and the same
+value. Both runs took 67 minutes.

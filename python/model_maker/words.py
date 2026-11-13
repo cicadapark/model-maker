@@ -117,9 +117,26 @@ WEAPON_KINDS = {
 # asked away: the head is described as it should look. Measured in docs/objects.md, "War hammers".
 HEAD_PICTURE_WORDS = {
     "hammer": "its head a heavy blunt block with a flat square striking face",
+    # Asked for "a short iron mace" or "a wooden club" alone, every try of the sealed run and of the 0.3.0 trial was a
+    # long rod with a small knob, or a cane (0 maces of 32 tries, 0 clubs of 24); with these words, 26 maces of 32 and
+    # 13 clubs of 24 (docs/trials/2026-11-11-030-diagnosis.md).
+    "mace": ("a short one-handed weapon, its heavy head a ball ringed with flanges or spikes, much wider than its "
+             "handle, the handle short, about as long as a forearm"),
+    "club": "a short thick cudgel, much thicker and heavier at its top than at its grip, about as long as an arm",
+}
+# Things the picture model does not know by their name alone, described by what shows (Black Forest Labs' prompting
+# guide: describe the visible details that set a subject apart rather than relying on its name), said after the user's
+# words when the prompt names one. Asked for "a wooden spinning wheel" or "an old spinning wheel", it painted a wheel on
+# a stand in 15 tries of 16 (none with a spindle); with these words, a spinning wheel in 16 of 16. A water wheel: a
+# ring of paddles in 4 tries of 16, 11 of 16 with these words (docs/trials/2026-11-11-030-diagnosis.md).
+THING_PICTURE_WORDS = {
+    "spinning wheel": ("a machine for spinning yarn: a long sloping bench on three legs, a large spoked wheel at one "
+                       "end turned by a foot treadle below it, a small spindle and bobbin at the other end"),
+    "water wheel": ("the big wheel of a water mill: its rim lined all round with many flat wooden paddles standing "
+                    "out from it, on a thick axle"),
 }
 HEAD_KINDS = {"war hammer": "hammer", "warhammer": "hammer", "hammer": "hammer", "maul": "hammer",
-              "mallet": "hammer", "sledgehammer": "hammer", "sledge hammer": "hammer"}
+              "mallet": "hammer", "sledgehammer": "hammer", "sledge hammer": "hammer", "mace": "mace", "club": "club"}
 # Kinds of thing not made yet, and why, said to whoever asks for one. Bows (the second trial, 2026-11-09): painted
 # edge-on, the shape model made the bow wave; asked to face the viewer, the picture model still painted it in profile
 # with its string, and the shape model filled the space between bow and string into a flat plate.
@@ -944,6 +961,7 @@ def picture_prompt(subject, lead=DEFAULT_LEAD):
         view = OBJECT_VIEW
     state = f", {STATE_PICTURE_WORDS[OPENING_PARTS[subject.noun]][subject.state]}" if subject.state else ""
     head = f", {HEAD_PICTURE_WORDS[HEAD_KINDS[subject.noun]]}" if subject.noun in HEAD_KINDS else ""
+    head += "".join(f", {said}" for name, said in THING_PICTURE_WORDS.items() if _found(subject.prompt.lower(), name))
     curve = f", {CURVED_BLADE_WORDS}" if subject.weapon_kind == "curved blade" else ""
     style = LETTERED_STYLE if lettering_asked(subject.prompt) else STYLE
     return f"{LEADS[lead]} {subject.prompt}{state}{head}{curve}, {view}, {style}"

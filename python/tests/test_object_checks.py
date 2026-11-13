@@ -185,6 +185,31 @@ class Outline(unittest.TestCase):
             passed, view, (mean, far, apart) = outline_passes(picture, corners, triangles)
             self.assertTrue(passed, (turn, tilt, distance, view.turn, view.tilt, view.distance, mean, far, apart))
 
+    def test_a_deep_low_thing_seen_from_its_end_is_matched_at_its_own_tilt(self):
+        # The sealed run's bed frame, 2 m deep and 0.39 m high, was pictured from its foot end 6 degrees above. Its
+        # outline grows by its depth times the tilt's change, so from the coarse grid's 0 and 12 degrees it lay far
+        # from its picture, and a wrong view from its side won (edges 9.9 % and 25.5 % apart). The coarse grid's tilts
+        # now follow the thing's depth (`outline_tilts`).
+        corners, triangles = shapes.bed_frame()
+        for tilt, distance in ((6, 4.0), (3, 6.0), (9, None)):
+            picture = render.silhouette(corners, triangles, 0, 1024, tilt, distance)
+            passed, view, values = outline_passes(picture, corners, triangles)
+            self.assertTrue(passed, (tilt, distance, view.turn, view.tilt, view.distance, values))
+            self.assertLess(min(abs(view.turn), abs(abs(view.turn) - 180)), 3, (tilt, view.turn))
+
+    def test_the_coarse_tilts_follow_the_depth(self):
+        # A chair, higher than it is deep, keeps the grid of 0, 12 and 24 degrees; a bed frame's tilts lie close
+        # enough that its outline grows by at most a quarter between neighbours.
+        self.assertEqual(O.outline_tilts(shapes.chair()[0]), (0.0, 12.0, 24.0))
+        corners, _ = shapes.bed_frame()
+        tilts = O.outline_tilts(corners)
+        size = np.ptp(corners, axis=0)
+        seen_high = [size[1] * np.cos(np.radians(t)) + max(size[0], size[2]) * np.sin(np.radians(t)) for t in tilts]
+        self.assertEqual((tilts[0], tilts[-1]), (0.0, O.OUTLINE_MOST_TILT))
+        self.assertGreater(len(tilts), 3)
+        for low, high in zip(seen_high, seen_high[1:]):
+            self.assertLessEqual(high / low, 1 + O.OUTLINE_TILT_HEIGHT_SHARE + 1e-6)
+
     def test_a_plank_wider_than_the_canvas_is_compared_whole(self):
         # A 10:1 plank pictured from the front was cut to the 6:1 canvas, which it filled,
         # and "matched" a view of the plank nearly end-on (cut to fill it too) with an overlap of 1.000. Now the canvas
