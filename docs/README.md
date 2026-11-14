@@ -16,6 +16,7 @@ Using it:
 
 How it works:
 
+* [`how-it-works.md`](how-it-works.md): the whole process in one diagram, and each step in words.
 * [`objects.md`](objects.md): 3-D objects from a prompt, every check and its limit, the marks, thin parts.
 * [`metrics.md`](metrics.md): the job ledger, what each line holds, and the summary made from it.
 * [`trials/`](trials/): the notes of the release's first two trials, and of the diagnosis of 0.2.0's sealed run: what

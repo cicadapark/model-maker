@@ -40,6 +40,7 @@ The rest, with the setup's times and the recommended tesseract: [`docs/setup.md`
 
 ## More
 
+* [How it works](docs/how-it-works.md): the whole process in one diagram.
 * [The documentation](docs/README.md): what you get, results and limits, setup, how it works.
 * [How to report a problem](docs/problems.md).
 * [Licences and content credentials](docs/licences.md): Apache-2.0 ([`LICENSE`](LICENSE)); the models' terms

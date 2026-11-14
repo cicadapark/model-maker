@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>model-maker pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: one column of steps top to bottom; retries loop back on the left (or right, for the views), dead ends leave to the right. */
+:root {
+  --bg: #f6f7f5; --fg: #1d2421; --muted: #5b6661; --line: #9aa59f; --surface: #ffffff;
+  --gen: #b4690e; --gen-fill: #fbf1e3; --judge: #0f766e; --judge-fill: #e3f3f1; --ours: #3b5b8c; --ours-fill: #e8eef7;
+  --pass: #2f7d32; --pass-fill: #e6f2e6; --stop: #b3261e; --stop-fill: #fbe9e7;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif; --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141a17; --fg: #e6ebe8; --muted: #a3ada8; --line: #5d6863; --surface: #1c2420;
+    --gen: #f0a54a; --gen-fill: #2e2414; --judge: #4fc7bb; --judge-fill: #12302d; --ours: #8fb0e6; --ours-fill: #1b2638;
+    --pass: #7cc47f; --pass-fill: #17301a; --stop: #f08a80; --stop-fill: #3a1b18; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141a17; --fg: #e6ebe8; --muted: #a3ada8; --line: #5d6863; --surface: #1c2420;
+  --gen: #f0a54a; --gen-fill: #2e2414; --judge: #4fc7bb; --judge-fill: #12302d; --ours: #8fb0e6; --ours-fill: #1b2638;
+  --pass: #7cc47f; --pass-fill: #17301a; --stop: #f08a80; --stop-fill: #3a1b18; color-scheme: dark;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding: 28px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+main { max-width: 940px; margin: 0 auto; display: grid; gap: 22px; }
+h1 { font-family: var(--font-display); font-weight: 600; font-size: 2rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 65ch; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 14px; height: 14px; border-radius: 3px; border: 2px solid; display: inline-block; }
+.k-gen { border-color: var(--gen); background: var(--gen-fill); } .k-judge { border-color: var(--judge); background: var(--judge-fill); }
+.k-ours { border-color: var(--ours); background: var(--ours-fill); } .k-pass { border-color: var(--pass); background: var(--pass-fill); }
+.k-stop { border-color: var(--stop); background: var(--stop-fill); }
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 6px; }
+.diagram svg { display: block; width: 100%; min-width: 720px; height: auto; }
+svg text { font-family: var(--font-body); fill: var(--fg); font-size: 13px; }
+svg .title { font-family: var(--font-display); font-weight: 600; font-size: 15px; }
+svg .who { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+svg .small { font-size: 12px; fill: var(--muted); }
+svg .label { font-size: 12px; fill: var(--muted); font-style: italic; }
+svg .gen rect { fill: var(--gen-fill); stroke: var(--gen); } svg .judge rect { fill: var(--judge-fill); stroke: var(--judge); }
+svg .ours rect { fill: var(--ours-fill); stroke: var(--ours); } svg .pass rect { fill: var(--pass-fill); stroke: var(--pass); }
+svg .stop rect { fill: var(--stop-fill); stroke: var(--stop); }
+svg rect { stroke-width: 2; }
+svg .gen .who { fill: var(--gen); } svg .judge .who { fill: var(--judge); } svg .ours .who { fill: var(--ours); }
+svg .pass .who { fill: var(--pass); } svg .stop .who { fill: var(--stop); }
+svg .flow { stroke: var(--line); stroke-width: 2; fill: none; }
+svg .retry { stroke: var(--gen); stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+svg .out { stroke: var(--stop); stroke-width: 2; fill: none; }
+svg .dev { stroke: var(--ours); stroke-width: 2; fill: none; }
+svg .decision { fill: var(--surface); stroke: var(--fg); stroke-width: 2; }
+svg .arrow-flow { fill: var(--line); } svg .arrow-retry { fill: var(--gen); } svg .arrow-out { fill: var(--stop); } svg .arrow-dev { fill: var(--ours); }
+svg .band { fill: var(--bg); stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 4; }
+.notes { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.notes section { min-width: 0; }
+.notes h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; margin: 0 0 4px; }
+.notes p { margin: 0; color: var(--muted); font-size: 14px; }
+</style></head>
+<body>
+<main>
+  <h1>From one line of text to a checked 3-D object</h1>
+  <p class="lede">What model-maker does with a prompt, step by step: which AI model makes each thing, which one judges it,
+  what our own code measures, and where a failure sends the work back or stops it. The numbers are the pipeline's own
+  settings in version 0.2.1.</p>
+  <div class="legend" aria-label="Legend">
+    <span><i class="k-gen"></i>AI model that makes</span>
+    <span><i class="k-judge"></i>AI model that judges</span>
+    <span><i class="k-ours"></i>our own code</span>
+    <span><i class="k-pass"></i>made</span>
+    <span><i class="k-stop"></i>not made</span>
+    <span><svg width="34" height="10" aria-hidden="true"><line x1="0" y1="5" x2="34" y2="5" stroke="currentColor" stroke-width="2" stroke-dasharray="6 5"/></svg>try again</span>
+  </div>
+
+  <div class="diagram">
+  <svg viewBox="0 0 900 2130" role="img" aria-labelledby="dt dd">
+    <title id="dt">The model-maker pipeline</title>
+    <desc id="dd">Text is read; picture tries are painted by FLUX and cut out by BiRefNet, judged by our checks, SigLIP 2 and tesseract, with a second round of tries if none passes; TripoSG builds the shape, our code prepares it (a hafted weapon turned upright, a book laid flat) and checks it, with a second shape if a check fails; MV-Adapter on SDXL paints six views, which must agree with their neighbours or are painted again; our code bakes them and SDXL inpainting touches up unseen places, with more seeds when the fill is foreign; a short leg is levelled and the paint checked; then the .glb, report and sidecar, every picture signed. Between releases, failures go into the regression set.</desc>
+    <defs>
+      <marker id="a-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-flow"/></marker>
+      <marker id="a-retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-retry"/></marker>
+      <marker id="a-out" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-out"/></marker>
+      <marker id="a-dev" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-dev"/></marker>
+    </defs>
+
+    <g class="ours"><rect x="140" y="20" width="380" height="58" rx="8"/>
+      <text x="160" y="44" class="title">Your text</text>
+      <text x="160" y="64">"an old looking chair"   (and a size, if you give one)</text></g>
+    <line x1="330" y1="78" x2="330" y2="104" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="106" width="380" height="92" rx="8"/>
+      <text x="160" y="128" class="who">OUR CODE</text>
+      <text x="160" y="148" class="title">Read the words</text>
+      <text x="160" y="168">what kind of thing, held in the hand or not, its size,</text>
+      <text x="160" y="186">qualities ("curved", "round"), open or shut, lettering asked</text></g>
+    <path d="M520,152 H596" class="out" marker-end="url(#a-out)"/>
+    <g class="stop"><rect x="600" y="104" width="280" height="100" rx="8"/>
+      <text x="618" y="128" class="who">NOT MADE</text>
+      <text x="618" y="148">Answered at once, no card time:</text>
+      <text x="618" y="167" class="small">animals and characters come later;</text>
+      <text x="618" y="184" class="small">bows not yet; "a pair of", "two …":</text>
+      <text x="618" y="197" class="small">ask for one thing</text></g>
+    <line x1="330" y1="198" x2="330" y2="232" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="gen"><rect x="140" y="234" width="380" height="74" rx="8"/>
+      <text x="160" y="256" class="who">FLUX.1 [schnell]</text>
+      <text x="160" y="276" class="title">Paint 4 picture tries</text>
+      <text x="160" y="296">one object on a plain backdrop, 4 seeds</text></g>
+    <line x1="330" y1="308" x2="330" y2="330" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="gen"><rect x="140" y="332" width="380" height="58" rx="8"/>
+      <text x="160" y="354" class="who">BiRefNet</text>
+      <text x="160" y="376" class="title">Cut each try out of its backdrop</text></g>
+    <line x1="330" y1="390" x2="330" y2="412" class="flow" marker-end="url(#a-flow)"/>
+
+    <rect x="140" y="414" width="380" height="196" rx="8" class="band"/>
+    <text x="160" y="436" class="title">Judge every try</text>
+    <g class="ours"><rect x="156" y="448" width="348" height="46" rx="6"/>
+      <text x="170" y="466" class="who">OUR CODE</text>
+      <text x="170" y="485" class="small">one whole object, no shadow or floor, not cut off</text></g>
+    <g class="judge"><rect x="156" y="502" width="348" height="46" rx="6"/>
+      <text x="170" y="520" class="who">SigLIP 2</text>
+      <text x="170" y="539" class="small">shows the thing asked for; curved, round; open or shut</text></g>
+    <g class="judge"><rect x="156" y="556" width="348" height="46" rx="6"/>
+      <text x="170" y="574" class="who">tesseract</text>
+      <text x="170" y="593" class="small">no lettering painted on it, unless the words ask for it</text></g>
+    <line x1="330" y1="610" x2="330" y2="630" class="flow" marker-end="url(#a-flow)"/>
+
+    <polygon points="330,632 444,672 330,712 216,672" class="decision"/>
+    <text x="330" y="668" text-anchor="middle" class="title" style="font-size:14px">Does any</text>
+    <text x="330" y="686" text-anchor="middle" class="title" style="font-size:14px">try pass?</text>
+    <path d="M216,672 H90 V271 H136" class="retry" marker-end="url(#a-retry)"/>
+    <text x="112" y="470" text-anchor="middle" class="label" transform="rotate(-90 112 470)">no, first round: paint 4 more tries</text>
+    <path d="M444,672 H596" class="out" marker-end="url(#a-out)"/>
+    <text x="454" y="664" class="label">no, after 8 tries</text>
+    <g class="stop"><rect x="600" y="636" width="280" height="72" rx="8"/>
+      <text x="618" y="660" class="who">NOT MADE</text>
+      <text x="618" y="680">No picture passed its checks;</text>
+      <text x="618" y="697" class="small">the report says which check, and why</text></g>
+    <line x1="330" y1="712" x2="330" y2="746" class="flow" marker-end="url(#a-flow)"/>
+    <text x="340" y="734" class="label">yes: the best try is chosen</text>
+
+    <g class="gen"><rect x="140" y="748" width="380" height="74" rx="8"/>
+      <text x="160" y="770" class="who">TripoSG</text>
+      <text x="160" y="790" class="title">Build the 3-D shape from the picture</text>
+      <text x="160" y="810">first seed 42</text></g>
+    <line x1="330" y1="822" x2="330" y2="844" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="846" width="380" height="110" rx="8"/>
+      <text x="160" y="868" class="who">OUR CODE</text>
+      <text x="160" y="888" class="title">Repair and prepare the shape</text>
+      <text x="160" y="908">open holes the picture shows; 60,000 triangles;</text>
+      <text x="160" y="926">real size in metres; set down on its base;</text>
+      <text x="160" y="944">a hafted weapon turned upright; a book laid flat</text></g>
+    <line x1="330" y1="956" x2="330" y2="978" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="980" width="380" height="130" rx="8"/>
+      <text x="160" y="1002" class="who">OUR CODE</text>
+      <text x="160" y="1022" class="title">Check the bare shape</text>
+      <text x="160" y="1042">outline against the picture; holes open; no holes;</text>
+      <text x="160" y="1060">one piece; every foot down, level, centre over base;</text>
+      <text x="160" y="1078">mirror-symmetric where the words imply it</text>
+      <text x="160" y="1098" class="small">in the hand: blade straight, no kink, grip and tip found</text></g>
+    <line x1="330" y1="1110" x2="330" y2="1130" class="flow" marker-end="url(#a-flow)"/>
+
+    <polygon points="330,1132 444,1172 330,1212 216,1172" class="decision"/>
+    <text x="330" y="1168" text-anchor="middle" class="title" style="font-size:14px">Every check</text>
+    <text x="330" y="1186" text-anchor="middle" class="title" style="font-size:14px">passes?</text>
+    <path d="M216,1172 H90 V785 H136" class="retry" marker-end="url(#a-retry)"/>
+    <text x="112" y="980" text-anchor="middle" class="label" transform="rotate(-90 112 980)">no, first shape: build a second (seed 43)</text>
+    <line x1="330" y1="1212" x2="330" y2="1246" class="flow" marker-end="url(#a-flow)"/>
+    <text x="340" y="1234" class="label">yes, or the better of the two shapes</text>
+
+    <g class="gen"><rect x="140" y="1248" width="380" height="74" rx="8"/>
+      <text x="160" y="1270" class="who">MV-Adapter on SDXL</text>
+      <text x="160" y="1290" class="title">Paint the shape from six sides</text>
+      <text x="160" y="1310">front, back, left, right, above, below, fitted to it</text></g>
+    <line x1="330" y1="1322" x2="330" y2="1344" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="1346" width="380" height="74" rx="8"/>
+      <text x="160" y="1368" class="who">OUR CODE</text>
+      <text x="160" y="1388" class="title">Check the six views agree</text>
+      <text x="160" y="1408">each side view against its neighbours, where both saw</text></g>
+    <path d="M520,1383 H560 V1285 H524" class="retry" marker-end="url(#a-retry)"/>
+    <text x="568" y="1316" class="label">a view unlike both its neighbours:</text>
+    <text x="568" y="1334" class="label">paint the six again from the next seed,</text>
+    <text x="568" y="1352" class="label">at most twice; the try that agrees best is kept</text>
+    <line x1="330" y1="1420" x2="330" y2="1442" class="flow" marker-end="url(#a-flow)"/>
+
+    <rect x="140" y="1444" width="380" height="162" rx="8" class="band"/>
+    <g class="ours"><rect x="156" y="1456" width="348" height="56" rx="6"/>
+      <text x="170" y="1476" class="who">OUR CODE</text>
+      <text x="170" y="1498">Bake the views into one 2048 × 2048 texture</text></g>
+    <g class="gen"><rect x="156" y="1520" width="348" height="74" rx="6"/>
+      <text x="170" y="1540" class="who">SDXL inpainting</text>
+      <text x="170" y="1562">Touch up places no view reached,</text>
+      <text x="170" y="1580" class="small">from up to 4 more views chosen to see them</text></g>
+    <path d="M504,1546 H560 V1584 H508" class="retry" marker-end="url(#a-retry)"/>
+    <text x="568" y="1554" class="label">fill has colours found nowhere round it:</text>
+    <text x="568" y="1572" class="label">paint that view again from another seed;</text>
+    <text x="568" y="1590" class="label">still foreign: leave it out, counted unpainted</text>
+    <line x1="330" y1="1606" x2="330" y2="1628" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="1630" width="380" height="92" rx="8"/>
+      <text x="160" y="1652" class="who">OUR CODE</text>
+      <text x="160" y="1672" class="title">Finish and check</text>
+      <text x="160" y="1692">a leg a little short levelled; the shape checked again;</text>
+      <text x="160" y="1710">the paint covers the surface; the fill matches round it</text></g>
+    <line x1="330" y1="1722" x2="330" y2="1744" class="flow" marker-end="url(#a-flow)"/>
+
+    <g class="ours"><rect x="140" y="1746" width="380" height="92" rx="8"/>
+      <text x="160" y="1768" class="who">OUR CODE</text>
+      <text x="160" y="1788" class="title">Write the .glb, its report and its sidecar</text>
+      <text x="160" y="1808" class="small">grip and tip marked; every model, licence and seed named;</text>
+      <text x="160" y="1826" class="small">every picture signed with content credentials (C2PA)</text></g>
+    <path d="M520,1770 H596" class="flow" marker-end="url(#a-flow)"/>
+    <path d="M520,1820 H596" class="flow" marker-end="url(#a-flow)"/>
+    <g class="pass"><rect x="600" y="1748" width="280" height="44" rx="8"/>
+      <text x="618" y="1775"><tspan class="who">MADE</tspan>  passes every check</text></g>
+    <g class="stop"><rect x="600" y="1798" width="280" height="44" rx="8"/>
+      <text x="618" y="1825"><tspan class="who">MADE</tspan>  marked failing, checks named</text></g>
+
+    <rect x="40" y="1880" width="830" height="226" rx="10" class="band"/>
+    <text x="60" y="1908" class="title">Between releases: how a failure makes the next version better</text>
+    <g class="ours"><rect x="60" y="1928" width="178" height="74" rx="8"/>
+      <text x="74" y="1952" class="title" style="font-size:14px">Look by eye</text>
+      <text x="74" y="1972" class="small">every object, turned</text>
+      <text x="74" y="1990" class="small">all round and from below</text></g>
+    <g class="ours"><rect x="264" y="1928" width="178" height="74" rx="8"/>
+      <text x="278" y="1952" class="title" style="font-size:14px">Keep the case</text>
+      <text x="278" y="1972" class="small">each caught failure joins</text>
+      <text x="278" y="1990" class="small">the regression set</text></g>
+    <g class="ours"><rect x="468" y="1928" width="178" height="74" rx="8"/>
+      <text x="482" y="1952" class="title" style="font-size:14px">Fix and review</text>
+      <text x="482" y="1972" class="small">every case must still hold;</text>
+      <text x="482" y="1990" class="small">an AI reviewer reads it</text></g>
+    <g class="ours"><rect x="672" y="1928" width="178" height="74" rx="8"/>
+      <text x="686" y="1952" class="title" style="font-size:14px">Measure sealed</text>
+      <text x="686" y="1972" class="small">prompts never tuned on,</text>
+      <text x="686" y="1990" class="small">made once: the pass rate</text></g>
+    <path d="M238,1965 H260" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M442,1965 H464" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M646,1965 H668" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M761,2002 V2052 H149 V2006" class="dev" marker-end="url(#a-dev)"/>
+    <text x="455" y="2076" text-anchor="middle" class="label">the sealed prompts then join the development set, and a new sealed set is written</text>
+  </svg>
+  </div>
+
+  <div class="notes">
+    <section><h2>Why judge pictures first</h2>
+      <p>A picture try takes seconds; a shape and its paint take minutes. Most mistakes are already visible in the
+      picture (a shadow, the wrong thing, letters), so they are refused before any shape is built.</p></section>
+    <section><h2>Retries are bounded</h2>
+      <p>At most 8 picture tries, 2 shapes and 3 paintings of the six views. The touch-up paints a foreign fill again
+      from more seeds, then leaves what is still foreign out. Nothing loops without end, and every try is kept in the
+      report.</p></section>
+    <section><h2>A failure is still shown</h2>
+      <p>An object that fails a check is written with its report, marked failing, so you can see what went wrong.
+      Only a prompt that is refused, or has no picture that passes, makes nothing.</p></section>
+  </div>
+</main>
+</body></html>
