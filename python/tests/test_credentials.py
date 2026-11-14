@@ -409,9 +409,11 @@ class SignPictures(unittest.TestCase):
     def test_the_readme_pictures_list_names_every_picture_it_means(self):
         tool = sign_pictures_tool()
         folder = os.path.join(REPOSITORY, "docs", "images")
-        chosen = tool.chosen_for(tool.pictures_in(folder), tool.entries_of(os.path.join(folder, "made-by-ai.toml")))
-        self.assertNotIn("qualities/several-things.webp", chosen, "a terminal's text: no model made it")
-        self.assertEqual(len(chosen), len(tool.pictures_in(folder)) - 1)
+        pictures = tool.pictures_in(folder)
+        chosen = tool.chosen_for(pictures, tool.entries_of(os.path.join(folder, "made-by-ai.toml")))
+        # Every picture is named as AI-made but these, which no model made: a terminal's text, and the pipeline's
+        # diagram (drawn by our own page, docs/images/pipeline.html).
+        self.assertEqual(set(pictures) - set(chosen), {"qualities/several-things.webp", "pipeline.webp"})
 
 
 class MissingPackages(unittest.TestCase):

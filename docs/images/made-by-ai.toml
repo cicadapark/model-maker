@@ -1,6 +1,7 @@
 # Which pictures of docs/images show AI-made work, for tools/sign_pictures.py (content credentials, C2PA):
 #   .venv/bin/python tools/sign_pictures.py docs/images --list docs/images/made-by-ai.toml
-# A picture not named here is left alone. "ai": only the models' work; "composite": the models' work with our own
+# A picture not named here is left alone (no model made it: qualities/several-things.webp, a terminal's text, and
+# pipeline.webp, the diagram our own page pipeline.html draws). "ai": only the models' work; "composite": the models' work with our own
 # captions, marks or page around it. The version is the model-maker version whose pipeline made what the picture shows
 # (the pictures made while 0.2.0 was being made say 0.2.0).
 
