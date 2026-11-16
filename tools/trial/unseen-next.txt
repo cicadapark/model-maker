@@ -1,0 +1,52 @@
+# The prompts kept sealed for version 0.2.2: written before its work began; two fixes were later found on its objects (docs/results.md).
+# Each was made once with 0.2.1 and once with this version's code on two cards, the same seeds, for the table in docs/results.md; they are now part of the development set.
+a wooden wardrobe with two doors
+a low wooden coffee table
+a wooden high chair for a child
+a three-legged milking stool
+a wooden bunk bed
+a pine bookcase
+a wooden dresser
+a garden swing seat
+a wooden church pew
+a wicker armchair
+a copper frying pan
+a cast iron kettle
+a stoneware butter dish
+a glass decanter
+a wooden salad bowl
+a tin watering can
+a pewter jug
+a wooden spice rack
+a clay storage jar
+a wooden bread board
+a claw hammer
+a hand drill
+a pair of garden shears
+a wooden clothes horse
+a long-handled axe
+a bow saw
+a stone whetstone
+a metal file
+a longsword with a ruby pommel
+a round wooden shield
+a falchion
+a steel dagger with a curved guard
+a crossbow bolt
+an iron gauntlet
+a leather quiver
+a short spear
+a brass candelabra
+a wall clock
+an hourglass on a stand
+a ship in a bottle
+a wooden toy cart
+a brass compass
+a stone gargoyle
+a wooden chess board
+a ceramic flower vase
+a brass telescope on a tripod
+a stone sundial
+a wrought iron lantern
+a wooden birdhouse
+a carved wooden box

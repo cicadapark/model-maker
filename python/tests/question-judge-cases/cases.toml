@@ -1,0 +1,58 @@
+# The question judge's regression case (tests/test_question_judge_cases.py): finished objects' eight sides (their
+# reports' turntables, lossless), each with the verdict the judge must give at its limit. Every case scored at least
+# 0.15 from the limit with llama.cpp's b11600 release archive, so a verdict here never rests on a hair. Made by
+# model-maker 0.2.0 and 0.3.0 work on the 12 GB card (the sword: the first trial, 16 GB card), judged blind by eye (docs/objects.md, "Is it the thing asked
+# for?").
+
+[[case]]
+file = "garden-hoe-1.webp"
+prompt = "a garden hoe"
+passes = false
+why = "a digging fork: four tines, no flat blade across the haft"
+
+[[case]]
+file = "garden-hoe-2.webp"
+prompt = "a garden hoe"
+passes = false
+why = "a digging fork, made again"
+
+[[case]]
+file = "scythe.webp"
+prompt = "a scythe"
+passes = false
+why = "a short hooked blade on a straight pole, like a pick; no long curved blade, no grips"
+
+[[case]]
+file = "old-iron-sword.webp"
+prompt = "an old iron sword"
+passes = true
+why = "the regression set's good sword; asked the whole prompt it was refused (0.44: the paint does not look old), asked about the thing alone it is kept"
+
+[[case]]
+file = "wooden-dining-chair.webp"
+prompt = "a wooden dining chair"
+passes = true
+
+[[case]]
+file = "wooden-easel.webp"
+prompt = "a wooden easel"
+passes = true
+
+[[case]]
+file = "wooden-serving-tray.webp"
+prompt = "a wooden serving tray"
+passes = true
+
+[[case]]
+file = "globe-on-a-wooden-stand.webp"
+prompt = "a globe on a wooden stand"
+passes = true
+
+[[case]]
+file = "iron-birdcage.webp"
+prompt = "an iron birdcage"
+passes = true
+
+# Known, not asserted: good objects the judge refuses (a pitchfork, 0.17 and 0.19; a halberd, 0.34 and 0.39; an oak
+# wine barrel, 0.47 and 0.48, asked the whole prompt), and a bad one it keeps (a sickle's picture whose blade is a hook,
+# 0.81). The judge asks about the thing the words name (question_judge.asked_words); each case here holds either way.

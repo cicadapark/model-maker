@@ -107,6 +107,29 @@ def double_axe(cell=0.004, kink_deg=0.0, butt_cap=False):
     return surface_of(haft + [bits] + cap, cell)
 
 
+def shovel(cell=0.005):
+    """A shovel 1.2 m long: a flat blade 30 cm wide over its lower half, a haft 3.5 cm, and a D-handle on top whose two legs
+    split from the haft and spread to a crossbar 16 cm wide (an iron shovel of 13 Nov 2026 had one; following one leg
+    read as a kink), and a socket curving up from the blade."""
+    blade = ((-0.15, 0.0, -0.006), (0.15, 0.62, 0.006))
+    # Its steel socket rises from the blade's lift: thicker than the haft, narrowing and curving into it over 8 cm.
+    socket = []
+    for k in range(8):
+        y = 0.62 + 0.01 * k
+        half = 0.0275 - 0.0013 * k
+        x = -0.03 * (1 - k / 8) ** 2
+        socket.append(((x - half, y, -half), (x + half, y + 0.012, half)))
+    haft = ((-0.0175, 0.70, -0.0175), (0.0175, 1.06, 0.0175))
+    legs = []
+    for k in range(10):
+        y = 1.06 + 0.01 * k
+        spread = 0.012 + 0.0068 * k
+        legs.append(((-spread - 0.014, y, -0.014), (-spread + 0.014, y + 0.012, 0.014)))
+        legs.append(((spread - 0.014, y, -0.014), (spread + 0.014, y + 0.012, 0.014)))
+    bar = ((-0.08, 1.16, -0.014), (0.08, 1.19, 0.014))
+    return surface_of([blade, haft, bar] + legs + socket, cell)
+
+
 def bearded_axe(cell=0.004):
     """A bearded axe 0.9 m long: a haft 3 cm, one bit on +X at the top whose beard hangs 18 cm down beside the haft, 3
     cm off it: in the slices beside the beard, the beard (4 by 3 cm) is a larger piece than the haft, and narrow."""

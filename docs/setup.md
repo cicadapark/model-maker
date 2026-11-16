@@ -17,8 +17,8 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 | System | Linux on x86_64 |
 | Graphics card | NVIDIA, 12 GB or more (tried on 12 GB and 16 GB), a driver with CUDA 12 or newer |
 | Computer's memory | 24 GB or more (16 GB to try) |
-| Disk | about 60 GB used (models 54 GB, environment 6 GB); keep 75 GB free |
-| Setup | about 20 to 35 minutes (57 GB downloaded; clean PCs took 19 to 33 minutes) |
+| Disk | about 67 GB used (models 61 GB with the question judge's 7 GB, environment 6 GB); keep 82 GB free |
+| Setup | about 20 to 35 minutes (57 GB downloaded, 64 GB with the question judge; clean PCs took 19 to 33 minutes without it) |
 | One object | about 7.5 to 10 minutes on a 16 GB card; 8 to 13 minutes on a 12 GB card ("The chair and the sword on 12 GB", below) |
 | Also needed | git, curl, tar, a C and C++ compiler; `setup.sh` brings its own Python and, if needed, its own Rust |
 | Recommended | tesseract 5 or newer with its English data (`sudo apt install tesseract-ocr tesseract-ocr-eng` on Debian 12 or Ubuntu 24.04; Ubuntu 22.04's is version 4: below), to refuse picture tries with letters painted on the object |
@@ -30,7 +30,16 @@ One model, FLUX.1 [schnell], is gated ("A gated model", below).
 Linux on x86_64 with an NVIDIA card of 12 GB or more (tried on 16 GB and 12 GB, below), a driver with CUDA 12 or
 newer, 24 GB or more of the computer's memory (16 GB to try), git, curl, tar and a C/C++ compiler (`build-essential`
 on Debian and Ubuntu, for meshoptimizer). Nothing else: setup brings its own Python and, when the PC has none, its own
-Rust. It uses about 60 GB (models 54 GB, environment 6 GB); keep 75 GB free.
+Rust. It uses about 67 GB (models 61 GB, environment 6 GB); keep 82 GB free.
+
+Optional, installed by default: the question judge, which asks each finished object, shown from eight sides, whether
+it is the thing the prompt names (the check "it is the thing asked for", docs/objects.md, "Is it the thing asked
+for?"). Setup puts llama.cpp's own CPU release archive of tag b11600 (MIT, 17 MB, its sha256 checked) in
+`.tools/llama-b11600/` and downloads Qwen 3.5 9B with its vision part (Apache-2.0, 7.1 GB) after its licence question.
+It runs on the computer's processor, never on the card: about 20 to 40 s an object on a 16-thread laptop processor
+(a median of 22 s in the 0.2.2 sealed run), with about 7 GB of memory while it runs, more over a long batch.
+`./setup.sh --without-question-judge` leaves both out; then the check says "not judged" and counts as nothing
+(`--require-question-judge` counts such a job as failing it, as the measured run does).
 
 Optional, recommended: tesseract (Apache-2.0), version 5 or newer with its English data, which reads each picture try
 for letters painted on the object (the check "no painted lettering", docs/objects.md, "Painted lettering"). Setup
@@ -51,7 +60,7 @@ as a pass by the trial tools; `--require-lettering` makes such a job "not made")
 --verify` checks every model file against its sum. Nor does it see what else is using the card: on a 12 GB card,
 stop anything else that uses the card before a make (the release check's peak on a 12 GB card was 11.85 GB).
 
-Setup asks seven licence questions, one for each model, each just before that model downloads, so they come over
+Setup asks eight licence questions (seven without the question judge), one for each model, each just before that model downloads, so they come over
 about 20 minutes. To answer them all at once, read the licences first (`registry/models.toml` names each, with its
 terms; `NOTICE`) and run `./setup.sh --yes`: each licence is still shown, and the answer is recorded as `--yes`.
 

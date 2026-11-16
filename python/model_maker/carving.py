@@ -37,7 +37,7 @@ from . import mesh_repair
 from . import mesh_tools as M
 from . import object_checks as O
 from . import render
-from .cutout import for_shape
+from .cutout import LEAST_HOLE_PIXELS, for_shape
 from .picture_checks import Check
 
 # A piece of the shape in a hole of the picture is a web when it is thicker than this share of the height: the 95th
@@ -574,7 +574,7 @@ def holes_open(picture_mask, corners, triangles, picture_rgb=None, outline_view=
     holes, count = ndimage.label(ndimage.binary_fill_holes(painted) & ~painted)
     margin_px = MARGIN_SHARE * O.OUTLINE_SIDE
     backdrop = backdrop_lab(picture_rgb, picture_mask) if picture_rgb is not None else None
-    record = {"holes": [], "extra_holes": [], "judged": 0, "not_judged": 0}
+    record = {"holes": [], "extra_holes": [], "extra_holes_too_small": [], "judged": 0, "not_judged": 0}
     inner_all = np.zeros_like(painted)
     judged = []
     for k in range(1, count + 1):
@@ -609,10 +609,18 @@ def holes_open(picture_mask, corners, triangles, picture_rgb=None, outline_view=
         found["covered"] = round(float((made & inner).sum() / inner.sum()), 4)
         found["words"] = f"{found['covered']:.0%} of its inner part covered by the model"
     # The converse: the model's own holes with an inner part, and how much of that inner part the picture covers.
+    # A hole smaller, in the picture's own pixels, than the cut-out's pinholes is one the picture cannot show: the
+    # cut-out fills such holes before the shape is made (cutout.for_shape), so the picture covering it says nothing.
+    # A bread board's hanging hole, 10 pixels across in its picture, was refused as a hole the picture lacks.
+    picture_px_per_canvas_px = 1.0 / (placement[2] * placement[3])
     model_holes, model_count = ndimage.label(ndimage.binary_fill_holes(made) & ~made)
     for k in range(1, model_count + 1):
         inner = ndimage.distance_transform_edt(model_holes == k) > margin_px
-        if inner.sum() >= LEAST_HOLE_INNER_PX:
+        in_picture_px = float((model_holes == k).sum()) * picture_px_per_canvas_px
+        if inner.sum() >= LEAST_HOLE_INNER_PX and in_picture_px < LEAST_HOLE_PIXELS:
+            record["extra_holes_too_small"].append({"width": round(O.thickest(model_holes == k), 4),
+                                                    "picture_px": round(in_picture_px)})
+        elif inner.sum() >= LEAST_HOLE_INNER_PX:
             covered = float((picture_solid & inner).sum() / inner.sum())
             record["extra_holes"].append({"width": round(O.thickest(model_holes == k), 4),
                                           "inner_px": int(inner.sum()), "covered_by_picture": round(covered, 4)})
@@ -635,5 +643,9 @@ def holes_check(record):
     words += f"{record['not_judged']} not judged; "
     words += (f"the model's own holes: the most covered by the picture {extra:.0%} (at most "
               f"{MOST_EXTRA_HOLE_COVERED_SHARE:.0%})" if record["extra_holes"] else "the model has no hole of its own")
+    too_small = len(record.get("extra_holes_too_small", []))
+    if too_small:
+        words += (f"; {too_small} of the model's holes smaller in the picture than the cut-out's pinholes "
+                  f"({LEAST_HOLE_PIXELS} pixels): not judged")
     return Check("holes the picture shows are open", worst * 100, MOST_HOLE_COVERED_SHARE * 100, "%", passed, words,
                  counted=bool(judged or record["extra_holes"]))

@@ -65,7 +65,7 @@ svg .band { fill: var(--bg); stroke: var(--line); stroke-width: 1; stroke-dashar
   <h1>From one line of text to a checked 3-D object</h1>
   <p class="lede">What model-maker does with a prompt, step by step: which AI model makes each thing, which one judges it,
   what our own code measures, and where a failure sends the work back or stops it. The numbers are the pipeline's own
-  settings in version 0.2.1.</p>
+  settings in version 0.2.2.</p>
   <div class="legend" aria-label="Legend">
     <span><i class="k-gen"></i>AI model that makes</span>
     <span><i class="k-judge"></i>AI model that judges</span>
@@ -76,9 +76,9 @@ svg .band { fill: var(--bg); stroke: var(--line); stroke-width: 1; stroke-dashar
   </div>
 
   <div class="diagram">
-  <svg viewBox="0 0 900 2130" role="img" aria-labelledby="dt dd">
+  <svg viewBox="0 0 900 2226" role="img" aria-labelledby="dt dd">
     <title id="dt">The model-maker pipeline</title>
-    <desc id="dd">Text is read; picture tries are painted by FLUX and cut out by BiRefNet, judged by our checks, SigLIP 2 and tesseract, with a second round of tries if none passes; TripoSG builds the shape, our code prepares it (a hafted weapon turned upright, a book laid flat) and checks it, with a second shape if a check fails; MV-Adapter on SDXL paints six views, which must agree with their neighbours or are painted again; our code bakes them and SDXL inpainting touches up unseen places, with more seeds when the fill is foreign; a short leg is levelled and the paint checked; then the .glb, report and sidecar, every picture signed. Between releases, failures go into the regression set.</desc>
+    <desc id="dd">Text is read; picture tries are painted by FLUX and cut out by BiRefNet, judged by our checks, SigLIP 2 and tesseract, with a second round of tries if none passes; TripoSG builds the shape, our code prepares it (a hafted weapon turned upright, a book laid flat) and checks it, with a second shape if a check fails; MV-Adapter on SDXL paints six views, which must agree with their neighbours or are painted again; our code bakes them and SDXL inpainting touches up unseen places, with more seeds when the fill is foreign; a short leg is levelled and the paint checked; the question judge asks of its eight sides whether it is the thing the words name; then the .glb, report and sidecar, every picture signed. Between releases, failures go into the regression set.</desc>
     <defs>
       <marker id="a-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-flow"/></marker>
       <marker id="a-retry" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-retry"/></marker>
@@ -211,41 +211,47 @@ svg .band { fill: var(--bg); stroke: var(--line); stroke-width: 1; stroke-dashar
       <text x="160" y="1710">the paint covers the surface; the fill matches round it</text></g>
     <line x1="330" y1="1722" x2="330" y2="1744" class="flow" marker-end="url(#a-flow)"/>
 
-    <g class="ours"><rect x="140" y="1746" width="380" height="92" rx="8"/>
-      <text x="160" y="1768" class="who">OUR CODE</text>
-      <text x="160" y="1788" class="title">Write the .glb, its report and its sidecar</text>
-      <text x="160" y="1808" class="small">grip and tip marked; every model, licence and seed named;</text>
-      <text x="160" y="1826" class="small">every picture signed with content credentials (C2PA)</text></g>
-    <path d="M520,1770 H596" class="flow" marker-end="url(#a-flow)"/>
-    <path d="M520,1820 H596" class="flow" marker-end="url(#a-flow)"/>
-    <g class="pass"><rect x="600" y="1748" width="280" height="44" rx="8"/>
-      <text x="618" y="1775"><tspan class="who">MADE</tspan>  passes every check</text></g>
-    <g class="stop"><rect x="600" y="1798" width="280" height="44" rx="8"/>
-      <text x="618" y="1825"><tspan class="who">MADE</tspan>  marked failing, checks named</text></g>
+    <g class="judge"><rect x="140" y="1746" width="380" height="74" rx="8"/>
+      <text x="160" y="1768" class="who">Qwen 3.5 9B</text>
+      <text x="160" y="1788" class="title">Is it the thing asked for?</text>
+      <text x="160" y="1808">its eight sides: "Is it a sword?" yes from 50 %</text></g>
+    <line x1="330" y1="1820" x2="330" y2="1840" class="flow" marker-end="url(#a-flow)"/>
 
-    <rect x="40" y="1880" width="830" height="226" rx="10" class="band"/>
-    <text x="60" y="1908" class="title">Between releases: how a failure makes the next version better</text>
-    <g class="ours"><rect x="60" y="1928" width="178" height="74" rx="8"/>
-      <text x="74" y="1952" class="title" style="font-size:14px">Look by eye</text>
-      <text x="74" y="1972" class="small">every object, turned</text>
-      <text x="74" y="1990" class="small">all round and from below</text></g>
-    <g class="ours"><rect x="264" y="1928" width="178" height="74" rx="8"/>
-      <text x="278" y="1952" class="title" style="font-size:14px">Keep the case</text>
-      <text x="278" y="1972" class="small">each caught failure joins</text>
-      <text x="278" y="1990" class="small">the regression set</text></g>
-    <g class="ours"><rect x="468" y="1928" width="178" height="74" rx="8"/>
-      <text x="482" y="1952" class="title" style="font-size:14px">Fix and review</text>
-      <text x="482" y="1972" class="small">every case must still hold;</text>
-      <text x="482" y="1990" class="small">an AI reviewer reads it</text></g>
-    <g class="ours"><rect x="672" y="1928" width="178" height="74" rx="8"/>
-      <text x="686" y="1952" class="title" style="font-size:14px">Measure sealed</text>
-      <text x="686" y="1972" class="small">prompts never tuned on,</text>
-      <text x="686" y="1990" class="small">made once: the pass rate</text></g>
-    <path d="M238,1965 H260" class="dev" marker-end="url(#a-dev)"/>
-    <path d="M442,1965 H464" class="dev" marker-end="url(#a-dev)"/>
-    <path d="M646,1965 H668" class="dev" marker-end="url(#a-dev)"/>
-    <path d="M761,2002 V2052 H149 V2006" class="dev" marker-end="url(#a-dev)"/>
-    <text x="455" y="2076" text-anchor="middle" class="label">the sealed prompts then join the development set, and a new sealed set is written</text>
+    <g class="ours"><rect x="140" y="1842" width="380" height="92" rx="8"/>
+      <text x="160" y="1864" class="who">OUR CODE</text>
+      <text x="160" y="1884" class="title">Write the .glb, its report and its sidecar</text>
+      <text x="160" y="1904" class="small">grip and tip marked; every model, licence and seed named;</text>
+      <text x="160" y="1922" class="small">every picture signed with content credentials (C2PA)</text></g>
+    <path d="M520,1866 H596" class="flow" marker-end="url(#a-flow)"/>
+    <path d="M520,1916 H596" class="flow" marker-end="url(#a-flow)"/>
+    <g class="pass"><rect x="600" y="1844" width="280" height="44" rx="8"/>
+      <text x="618" y="1871"><tspan class="who">MADE</tspan>  passes every check</text></g>
+    <g class="stop"><rect x="600" y="1894" width="280" height="44" rx="8"/>
+      <text x="618" y="1921"><tspan class="who">MADE</tspan>  marked failing, checks named</text></g>
+
+    <rect x="40" y="1976" width="830" height="226" rx="10" class="band"/>
+    <text x="60" y="2004" class="title">Between releases: how a failure makes the next version better</text>
+    <g class="ours"><rect x="60" y="2024" width="178" height="74" rx="8"/>
+      <text x="74" y="2048" class="title" style="font-size:14px">Look by eye</text>
+      <text x="74" y="2068" class="small">every object, turned</text>
+      <text x="74" y="2086" class="small">all round and from below</text></g>
+    <g class="ours"><rect x="264" y="2024" width="178" height="74" rx="8"/>
+      <text x="278" y="2048" class="title" style="font-size:14px">Keep the case</text>
+      <text x="278" y="2068" class="small">each caught failure joins</text>
+      <text x="278" y="2086" class="small">the regression set</text></g>
+    <g class="ours"><rect x="468" y="2024" width="178" height="74" rx="8"/>
+      <text x="482" y="2048" class="title" style="font-size:14px">Fix and review</text>
+      <text x="482" y="2068" class="small">every case must still hold;</text>
+      <text x="482" y="2086" class="small">an AI reviewer reads it</text></g>
+    <g class="ours"><rect x="672" y="2024" width="178" height="74" rx="8"/>
+      <text x="686" y="2048" class="title" style="font-size:14px">Measure sealed</text>
+      <text x="686" y="2068" class="small">prompts never tuned on,</text>
+      <text x="686" y="2086" class="small">made once: the pass rate</text></g>
+    <path d="M238,2061 H260" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M442,2061 H464" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M646,2061 H668" class="dev" marker-end="url(#a-dev)"/>
+    <path d="M761,2098 V2148 H149 V2102" class="dev" marker-end="url(#a-dev)"/>
+    <text x="455" y="2172" text-anchor="middle" class="label">the sealed prompts then join the development set, and a new sealed set is written</text>
   </svg>
   </div>
 

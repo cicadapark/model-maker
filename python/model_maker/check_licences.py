@@ -13,8 +13,12 @@ It prints each problem and exits 1 if there is one. `--list` prints every bundle
 """
 
 import importlib.metadata
+import os
 import re
 import sys
+
+# The repository: this file is python/model_maker/check_licences.py.
+REPOSITORY = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 REFUSED_LICENCE = re.compile(r"GPL|General Public|non-?commercial|\bNC\b", re.IGNORECASE)
 # Longer than this, a License field is the whole text, not a name. Such texts are not searched: scipy's names
@@ -106,15 +110,49 @@ def problems_of(distribution):
 
 
 
+# The question judge's server (question_judge.py): llama.cpp's own release archive, unpacked whole into this folder of
+# the repository by setup.sh. Its shared libraries are llama.cpp's and ggml's own (MIT, its LICENSE kept beside them);
+# it links the system's libstdc++, libgomp, OpenSSL and zlib, which it does not bundle.
+JUDGE_FOLDER = os.path.join(".tools", "llama-b11600")
+JUDGE_LIBRARIES = {"libggml": "MIT (ggml, llama.cpp's LICENSE)", "libllama": "MIT (llama.cpp's LICENSE)",
+                   "libmtmd": "MIT (llama.cpp's LICENSE)"}
+
+
+def judge_libraries(folder):
+    """(file name, verdict, licence) for each shared library in the judge's folder, and the problems: an unknown
+    library, or no MIT LICENSE beside them. Nothing when the folder is not there (the judge is optional)."""
+    if not os.path.isdir(folder):
+        return [], []
+    rows, problems = [], []
+    for name in sorted(os.listdir(folder)):
+        if ".so" not in name:
+            continue
+        licence = next((text for start, text in JUDGE_LIBRARIES.items() if name.startswith(start)), "")
+        rows.append((name, "allowed" if licence else "unknown", licence))
+        if not licence:
+            problems.append(f"{JUDGE_FOLDER}: it holds {name}, which is not on the allow-list (read its licence first)")
+    try:
+        with open(os.path.join(folder, "LICENSE")) as file:
+            if not file.readline().startswith("MIT License"):
+                problems.append(f"{JUDGE_FOLDER}/LICENSE: not llama.cpp's MIT licence")
+    except OSError:
+        problems.append(f"{JUDGE_FOLDER}: its LICENSE is missing (unpack the release archive whole)")
+    return rows, problems
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     distributions = list(importlib.metadata.distributions())
+    judge_rows, judge_problems = judge_libraries(os.path.join(REPOSITORY, JUDGE_FOLDER))
     if "--list" in argv:
         for distribution in sorted(distributions, key=lambda d: d.metadata["Name"].lower()):
             for path, file_name in bundled_libraries(distribution):
                 verdict, licence = judged_library(path, file_name)
                 print(f"{distribution.metadata['Name']:28s} {file_name:52s} {verdict:9s} {licence}")
+        for file_name, verdict, licence in judge_rows:
+            print(f"{'llama.cpp (question judge)':28s} {file_name:52s} {verdict:9s} {licence}")
     problems = [problem for distribution in distributions for problem in problems_of(distribution)]
+    problems += judge_problems
     for problem in problems:
         print(problem)
     print(f"{sys.prefix}: {len(problems)} problems")

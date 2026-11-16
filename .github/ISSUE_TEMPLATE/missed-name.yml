@@ -1,0 +1,39 @@
+name: A name the picture model gets wrong
+description: An object's name that model-maker paints as something else, or a better description for one.
+title: "[Name]: "
+labels: ["names"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Every name is measured before it goes on the list in docs/names-the-picture-model-misses.md:
+        8 tries painted and labelled by eye, blind. One good or bad picture is not enough to change a row.
+  - type: input
+    id: name
+    attributes:
+      label: The prompt
+      description: Exactly as you gave it to model-maker, for example "a garden hoe".
+    validations:
+      required: true
+  - type: textarea
+    id: painted
+    attributes:
+      label: What it painted instead
+      description: For example "a digging fork with four prongs". Add the pictures from the job's pictures/ folder if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: A description that might work (optional)
+      description: The same thing in plain words, for example "a flat metal blade set across the end of a long wooden handle".
+  - type: input
+    id: version
+    attributes:
+      label: model-maker version
+      description: The "version" in the object's `<name>.provenance.json`, or what `git describe` prints in your model-maker folder.
+  - type: input
+    id: credit
+    attributes:
+      label: Name or handle for "Reported by" (optional)
+      description: Leave it empty if you do not want to be named on the list.

@@ -128,6 +128,35 @@ class Progress(OwnLedger):
         self.assertEqual(row["shape_first_seed"], 2)
         self.assertEqual(row["faults"], [("base level", 1)])
 
+    def test_a_stage_s_memory_is_kept_with_its_machine(self):
+        ledger.stage_memory("b", "paint", 8, 20190, 3100)
+        line = ledger.read()[-1]
+        self.assertEqual((line["event"], line["batch"], line["stage"], line["jobs"]), ("stage memory", "b", "paint", 8))
+        self.assertEqual((line["peak_ram_mb"], line["held_ram_mb"]), (20190, 3100))
+        self.assertIn("card", line["machine"])
+        rows = summary_tool().memory_rows(ledger.read() + [
+            {"event": "stage", "stage": "paint", "peak_card_mb": 14100, "machine": line["machine"]},
+            {"event": "job", "batch": "b", "machine": line["machine"], "question_judge_memory_mb": {"peak": 9740}}])
+        card = line["machine"].get("card") or "no card"
+        self.assertEqual((rows[(card, "paint")]["ram"], rows[(card, "paint")]["card"]), (20190, 14100))
+        self.assertEqual(rows[(card, "question judge (its server)")]["ram"], 9740)
+
+    def test_a_job_not_asked_by_the_question_judge_is_not_counted_as_a_pass(self):
+        tool = summary_tool()
+        machine = {"card": "a card"}
+
+        def end(job, judged):
+            line = {"event": "job", "job": job, "batch": "b", "prompt": job, "weapon": False, "passed": True,
+                    "failed": [], "seconds": {"finish": 60}, "version": "v1", "machine": machine,
+                    "lettering_judged": True, "first_tries": {"picture_rounds": 1, "shape_first_passed": True}}
+            return line if judged == "absent" else {**line, "question_judged": judged}
+
+        # Asked; never asked (no judge); made before the judge (counted as it was).
+        row = tool.batch_row([end("a", True), end("b", False), end("c", "absent")])
+        self.assertEqual((row["made"], row["passed"]), (3, 2))
+        self.assertTrue(tool.unread({"question_judge": {"judged": False}, "lettering": {"judged": True}}))
+        self.assertFalse(tool.unread({"question_judge": {"judged": True}, "lettering": {"judged": True}}))
+
     def test_the_whole_time_of_a_job_counts_its_loading_and_a_refinish_keeps_it(self):
         tool = summary_tool()
         machine = {"card": "a card"}

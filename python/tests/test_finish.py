@@ -302,6 +302,100 @@ class Finish(unittest.TestCase):
         finally:
             shutil.rmtree(folder)
 
+    def finish_judged(self, job, found, require=False, keep_going=True):
+        """`finish_stage` with the question judge `found` (lettering read as clean); what it reported."""
+        from unittest import mock
+
+        from model_maker import lettering, question_judge
+
+        said = []
+        ledger_folder = os.path.join(os.path.dirname(job.folder), "ledger")
+        with mock.patch.object(lettering, "reader", return_value=lettering.Reader(True, "5.3.0", "")), \
+                mock.patch.object(lettering, "every_reading", return_value=[]), \
+                mock.patch.object(question_judge, "found", return_value=found), \
+                mock.patch.dict(os.environ, {"MODEL_MAKER_LEDGER": ledger_folder}):
+            pipeline.finish_stage([job], pipeline.Settings(texture=256, verify=False,
+                                                           require_question_judge=require),
+                                  report=said.append, keep_going=keep_going)
+        return said
+
+    def test_without_the_question_judge_a_job_is_not_asked_and_its_ledger_line_says_so(self):
+        from model_maker import question_judge
+
+        folder = tempfile.mkdtemp()
+        try:
+            job = self.anvil_with_its_try(folder)
+            said = self.finish_judged(job, question_judge.Found(False, why="not judged (not installed)"))
+            self.assertTrue(any("not installed" in line for line in said), said)
+            self.assertIs(job.record["question_judge"]["judged"], False)
+            self.assertNotIn(question_judge.NAME, job.record["status"], "not counted when not required")
+            with open(os.path.join(folder, "ledger", "jobs.jsonl")) as file:
+                line = [json.loads(text) for text in file][-1]
+            self.assertIs(line["question_judged"], False)
+            # Required (a measured run's job finished again): it fails, counted.
+            job.record.setdefault("settings", {})["require_question_judge"] = True
+            self.finish_judged(job, question_judge.Found(False, why="not judged (not installed)"))
+            self.assertIn(question_judge.NAME, job.record["status"])
+        finally:
+            shutil.rmtree(folder)
+
+    def test_a_judge_that_cannot_start_is_said_once_and_the_jobs_still_finish(self):
+        from model_maker import question_judge
+
+        folder = tempfile.mkdtemp()
+        try:
+            job = self.anvil_with_its_try(folder)
+            broken = os.path.join(folder, "llama-server")
+            with open(broken, "w") as file:
+                file.write("#!/bin/sh\necho cannot load the model\nexit 1\n")
+            os.chmod(broken, 0o755)
+            said = self.finish_judged(job, question_judge.Found(True, broken, broken, broken))
+            self.assertEqual(sum("cannot load the model" in line for line in said), 1, said)
+            self.assertIn("did not start", job.record["question_judge"]["why"])
+            self.assertFalse(any("aborted" in line for line in said), said)
+            self.assertTrue(job.has(f"{job['slug']}.glb"))
+            self.assertIs(job.record["question_judge"]["judged"], False)
+        finally:
+            shutil.rmtree(folder)
+
+    def test_a_job_that_raises_under_the_judge_is_its_own_error_and_the_judge_is_stopped(self):
+        from unittest import mock
+
+        from model_maker import question_judge
+
+        folder = tempfile.mkdtemp()
+        started = []
+
+        class StandIn:
+            threads, restarted, process = 1, False, None
+
+            def __init__(self, where):
+                started.append(self)
+                self.stopped = False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                self.stopped = True
+
+        try:
+            job = self.anvil_with_its_try(folder)
+            with mock.patch.object(question_judge, "Judge", StandIn), \
+                    mock.patch.object(question_judge, "object_check", side_effect=ValueError("a broken turntable")):
+                said = self.finish_judged(job, question_judge.Found(True, "s", "m", "v"))
+            self.assertEqual(len(started), 1)
+            self.assertTrue(started[0].stopped)
+            self.assertTrue(any("aborted at finish: ValueError: a broken turntable" in line for line in said), said)
+            # Without keep_going (make): the error goes up, and the judge is stopped all the same.
+            with mock.patch.object(question_judge, "Judge", StandIn), \
+                    mock.patch.object(question_judge, "object_check", side_effect=ValueError("a broken turntable")):
+                with self.assertRaises(ValueError):
+                    self.finish_judged(job, question_judge.Found(True, "s", "m", "v"), keep_going=False)
+            self.assertTrue(started[1].stopped)
+        finally:
+            shutil.rmtree(folder)
+
     def test_a_web_in_a_mug_s_handle_is_carved_and_the_sidecar_says_so(self):
         folder = tempfile.mkdtemp()
         try:

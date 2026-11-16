@@ -38,6 +38,8 @@ MOST_PICTURE_ROUNDS = 2
 DEFAULT_SHAPE_TRIES = 2
 SHAPE_FIRST_SEED = 42
 PAINT_SEED = 0
+# model-maker's own folder (the checkout or the unpacked release): setup puts its tools under it (.tools/llama-*).
+MODEL_MAKER_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEFAULT_TRIANGLES = 60000
 # Every job's random generators start here (`same_random_state`).
 JOB_RANDOM_SEED = 20261110
@@ -48,7 +50,7 @@ class Settings:
     def __init__(self, models=None, sources=None, tries=DEFAULT_TRIES, shape_tries=DEFAULT_SHAPE_TRIES,
                  triangles=DEFAULT_TRIANGLES, texture=DEFAULT_TEXTURE, verify=True, lead=words.DEFAULT_LEAD,
                  paint_steps=None, picture_rounds=MOST_PICTURE_ROUNDS, touch_up_views=None, touch_up_strength=None,
-                 require_lettering=False):
+                 require_lettering=False, require_question_judge=False):
         from .paint import STEPS
         from .touch_up import MOST_VIEWS, STRENGTH
 
@@ -62,6 +64,11 @@ class Settings:
         # The measured run reads every picture for painted lettering: without a usable tesseract its jobs are not
         # made, and a try it could not read is not chosen (lettering.py).
         self.require_lettering = require_lettering
+        # The question judge (question_judge.py): optional; a run that requires it counts a job it could not judge
+        # as failing. `question_judge` is the running judge during a finish stage, else None, and
+        # `question_judge_unavailable` why there is none.
+        self.require_question_judge = require_question_judge
+        self.question_judge, self.question_judge_unavailable = None, ""
         self.checked = set()
 
     def folder(self, name):
@@ -560,7 +567,27 @@ def finish_stage(jobs, settings, report=print, keep_going=False):
         ledger.finished(job, settings, *result)
         report(f"{job['slug']}: {job.record['status']} ({job.path(job['slug'] + '.glb')})")
 
-    each_job(jobs, "finish", settings, work, report, keep_going, after)
+    from . import question_judge
+
+    where = question_judge.found(MODEL_MAKER_ROOT, settings.models)
+    judge, unavailable = None, ""
+    if not where.usable:
+        unavailable = where.why
+        report(f"{question_judge.NAME}: {where.why}")
+    else:
+        # Started on its own: a job's error later is the job's, never taken for a failed start.
+        try:
+            judge = question_judge.Judge(where).__enter__()
+        except (RuntimeError, OSError) as error:
+            unavailable = f"the question judge did not start: {error}"
+            report(f"{question_judge.NAME}: {question_judge.NOT_JUDGED} ({unavailable})")
+    settings.question_judge, settings.question_judge_unavailable = judge, unavailable
+    try:
+        each_job(jobs, "finish", settings, work, report, keep_going, after)
+    finally:
+        settings.question_judge, settings.question_judge_unavailable = None, ""
+        if judge is not None:
+            judge.__exit__(None, None, None)
 
 
 def judged_fill(folder, painted, touch_record, made_corners, made_triangles):
@@ -713,6 +740,33 @@ def finished(job, settings, report=print):
         elif "lettering" not in job.record:
             # Read when the picture was chosen, before the reading was recorded apart: its version not known.
             job.record["lettering"] = {"judged": True, "tesseract": None, "read_at": "pictures", "why": ""}
+    # The finished object, painted, from eight sides: shown in the report, and asked whether it is the thing named.
+    turntable = render.turntable(baked["corners"], baked["triangles"], painted_at)
+    from . import question_judge
+
+    # Required by this run or by the run that made the job (a measured job finished again stays required).
+    required_judge = settings.require_question_judge or bool(
+        (job.record.get("settings") or {}).get("require_question_judge"))
+    asked_check, job.record["question_judge"] = question_judge.object_check(
+        settings.question_judge, turntable, job["prompt"], required_judge,
+        getattr(settings, "question_judge_unavailable", ""))
+    # The pictures asked the same, as a note (asked here, where the judge runs, not beside the picture model).
+    tries = {}
+    for seed in job.record.get("picture", {}).get("tries", {}):
+        if os.path.exists(job.path("pictures", f"{seed}.png")):
+            with Image.open(job.path("pictures", f"{seed}.png")) as found:
+                tries[str(seed)] = found.convert("RGB")
+    chosen_seed = str(job.record.get("picture", {}).get("seed"))
+    if settings.question_judge is not None:
+        try:
+            note = question_judge.picture_note(settings.question_judge, tries, chosen_seed, job["prompt"])
+            job.record["question_judge"]["pictures"] = note
+            if note.get("none_reaches"):
+                report(f"{job['slug']}: note: to the question judge none of its pictures shows {job['prompt']}; if "
+                       f"the object is another thing, say what it looks like (\"{job['prompt']}, <its parts>\")")
+        except question_judge.ASK_ERRORS as error:
+            job.record["question_judge"]["pictures"] = {"judged": False, "why": f"{type(error).__name__}: {error}"}
+    paint_checks = [*paint_checks, asked_check]
     grouped = {"picture": [c.as_dict() for c in picture_result.checks], "shape": [c.as_dict() for c in checks],
                "paint": [c.as_dict() for c in paint_checks]}
     every = [c for group in grouped.values() for c in group]
@@ -750,6 +804,8 @@ def finished(job, settings, report=print):
         "lettering_judged": job.record["lettering"]["judged"],
         "tesseract_version": job.record["lettering"]["tesseract"],
         "lettering": job.record["lettering"],
+        # Whether the finished object was asked if it is the thing named, and its answer (question_judge.py).
+        "question_judge": job.record["question_judge"],
         "measures": json.loads(json.dumps(measures, default=float)),
     }
     pictures = {"picture.png": (pages.thumbnail(picture, 360), "the picture it was made from"),
@@ -761,8 +817,7 @@ def finished(job, settings, report=print):
             pictures[f"try-{seed}.png"] = (pages.thumbnail(Image.open(job.path("pictures", f"{seed}.png")), 180),
                                            f"try {seed}: {words_said}")
     pictures["outline.png"] = (overlay, "outlines: green both, red the picture's alone, blue the model's alone")
-    pictures["turntable.png"] = (render.turntable(baked["corners"], baked["triangles"], painted_at),
-                                 "painted, turned in steps of 45° from the front")
+    pictures["turntable.png"] = (turntable, "painted, turned in steps of 45° from the front")
     pictures["bare.png"] = (render.turntable(corners, triangles), "the bare shape, the same turns")
     pictures["coverage.png"] = (pages.thumbnail(baked["coverage_picture"], 360),
                                 "the texture: green painted by a view, red colour spread from neighbours")
@@ -822,6 +877,8 @@ NO_LETTERING_READER = ("tesseract cannot read the pictures for painted lettering
 # A run that requires the reader (`--require-lettering`, the measured run) makes no job without it.
 NEEDS_LETTERING_READER = ("the run requires tesseract to read the pictures for painted lettering "
                           "(--require-lettering), and it cannot")
+# A run that requires the question judge (`--require-question-judge`, the measured run) makes no job without it.
+NEEDS_QUESTION_JUDGE = "the run requires the question judge (--require-question-judge), and it is not here"
 
 
 def model_present(settings, name, model_id):
@@ -928,6 +985,22 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
                 if not job.set_aside and not job.has("picture.png"):
                     not_made(job, f"{NEEDS_LETTERING_READER}: {lettering.reader().why}", report)
                     job.set_aside = True
+    # A run that requires the question judge makes nothing it could not judge: without it, its jobs are not made
+    # (rather than shaped and painted, then failed).
+    if settings.require_question_judge:
+        from . import question_judge
+
+        where = question_judge.found(MODEL_MAKER_ROOT, settings.models)
+        why = where.why
+        if where.usable:
+            # Present is not enough: a server that cannot run here would fail every job after its card's work.
+            runs, said = question_judge.server_runs(where)
+            why = "" if runs else f"its llama-server does not run here ({said})"
+        if why:
+            for job in jobs:
+                if not job.set_aside and not job.has("picture.png"):
+                    not_made(job, f"{NEEDS_QUESTION_JUDGE}: {why}", report)
+                    job.set_aside = True
     # The batch's folder: where each stage's measured need of the computer's memory is kept (memory.py).
     out = os.path.dirname(os.path.abspath(jobs[0].folder)) if jobs else None
     for stage in stages:
@@ -954,3 +1027,5 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
         if peak is not None and out is not None:
             memory.record_need(out, stage, peak)
             report(f"memory: the {stage} stage's peak {peak / 1024:.1f} GB; {held / 1024:.1f} GB held after it")
+        if peak is not None:
+            ledger.stage_memory(os.path.basename(out) if out else None, stage, len(jobs), peak, held)

@@ -77,3 +77,10 @@ why = "the picture model's tries whose letters the check misses, our boxes and c
 
 # Not AI-made, left alone:
 #   qualities/several-things.webp: a terminal's text, what model-maker's own code answers to prompts; no model drew it
+
+[[picture]]
+path = "judge-caught-0.2.2.webp"
+kind = "composite"
+models = "object"
+version = "0.2.2"
+why = "turntables of four objects the sealed run made on the 12 GB card, which the question judge refuses; our prompts and the judge's answers beside them"

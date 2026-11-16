@@ -11,6 +11,9 @@
 #                               its terms once; see docs/setup.md). Also HF_TOKEN_FILE, or the hub's own token file.
 #   --skip-models               everything but the models (the checks, the bake and the report run without them)
 #   --skip-tests                not the self-test at the end
+#   --with-question-judge       the optional question judge (llama.cpp's server and Qwen 3.5 9B, 7 GB), which asks
+#                               each finished object whether it is the thing named (docs/objects.md); the default
+#   --without-question-judge    not the question judge; one installed before is switched off (its server removed)
 #
 # What it installs, all under this folder (delete the folder and it is gone):
 #   .tools/uv, .tools/python    uv (a pinned release, its sha256 checked) and the CPython 3.11 it installs
@@ -23,6 +26,8 @@
 #                               as new as Cargo.toml's rust-version
 #   target/release/             model-maker-simplify, built from this repository
 #   sources/                    the view painter's own code at the commit registry/models.toml names
+#   .tools/llama-b11600/        llama.cpp's server (MIT), its CPU release archive of tag b11600, its sha256 checked,
+#                               for the question judge (optional)
 #   models/                     each model after its licence is shown and accepted, from its hub at its pinned
 #                               revision, every file checked against the registry's sha256
 # A second run checks what is there and carries on where the first stopped. See docs/setup.md.
@@ -63,6 +68,7 @@ mode=setup
 yes=0
 skip_models=0
 skip_tests=0
+question_judge=1
 token_file=""
 
 row() { rows+=("$1|$2|$3"); }
@@ -201,6 +207,16 @@ check_tool() {
 # has no Sauvola threshold). setup.sh installs no system package.
 readonly TESSERACT_INSTALL="reads pictures for painted lettering: tesseract 5 or newer with English data (Debian 12, \
 Ubuntu 24.04: sudo apt install tesseract-ocr tesseract-ocr-eng; Ubuntu 22.04 ships 4: docs/setup.md)"
+# The question judge, optional: its server (.tools/llama-b11600) and its model's two files; not counted as missing.
+check_question_judge() {
+    local server="$tools/llama-$LLAMA_TAG/llama-server" model="$here/models/qwen3.5-9b-q4"
+    if [ -x "$server" ] && [ -f "$model/Qwen_Qwen3.5-9B-Q4_K_M.gguf" ] && [ -f "$model/mmproj-Qwen_Qwen3.5-9B-f16.gguf" ]; then
+        row "question judge" "llama.cpp $LLAMA_TAG, Qwen 3.5 9B" "ok"
+    else
+        row "question judge" "not installed" "optional: asks each finished object whether it is the thing named (./setup.sh installs it; --without-question-judge leaves it out)"
+    fi
+}
+
 check_tesseract() {
     local version major languages
     if ! command -v tesseract >/dev/null 2>&1; then
@@ -263,6 +279,7 @@ checked() {
     check_tool "curl" curl "curl"
     check_tool "tar" tar "tar"
     check_tesseract
+    check_question_judge
     print_table
 }
 
@@ -375,9 +392,51 @@ build_rust() {
     echo "model-maker-simplify: built in $((SECONDS - started)) s (target/release/model-maker-simplify)"
 }
 
+# The question judge's server: llama.cpp's own CPU release archive at the tag the judge was measured with (another
+# build answers differently: docs/objects.md, "Is it the thing asked for?"). Optional: a failed fetch does not fail
+# the setup; the check then says "not judged".
+readonly LLAMA_TAG=b11600
+readonly LLAMA_SHA256_X86_64=a5ce0dfd864e2acad5922e0d508fe56aaa18298e79327f511efa93b16dcbfbcc
+install_question_judge() {
+    local into="$tools/llama-$LLAMA_TAG"
+    if [ -x "$into/llama-server" ]; then
+        echo "llama.cpp $LLAMA_TAG: already in .tools/llama-$LLAMA_TAG"
+        return
+    fi
+    if [ "$(uname -m)" != x86_64 ]; then
+        echo "llama.cpp $LLAMA_TAG: optional, not used (no pinned archive for $(uname -m)): the question judge is off"
+        return
+    fi
+    if ! (fetched "https://github.com/ggml-org/llama.cpp/releases/download/$LLAMA_TAG/llama-$LLAMA_TAG-bin-ubuntu-x64.tar.gz" \
+            "$LLAMA_SHA256_X86_64" "$tools/llama.tar.gz"); then
+        echo "llama.cpp $LLAMA_TAG: optional, not used (the download failed): the question judge is off"
+        return
+    fi
+    rm -rf "$into.part" && mkdir -p "$into.part"
+    if ! tar -xzf "$tools/llama.tar.gz" -C "$into.part" --strip-components=1 || [ ! -x "$into.part/llama-server" ] \
+            || [ ! -f "$into.part/LICENSE" ]; then
+        rm -rf "$into.part" "$tools/llama.tar.gz"
+        echo "llama.cpp $LLAMA_TAG: optional, not used (the archive did not unpack): the question judge is off"
+        return
+    fi
+    rm -f "$tools/llama.tar.gz"
+    mv "$into.part" "$into"
+    echo "llama.cpp $LLAMA_TAG (MIT): installed in .tools/llama-$LLAMA_TAG"
+}
+
+# --without-question-judge after a setup with it: the server removed, so the pipeline finds no judge (its model's
+# files stay in models/; delete models/qwen3.5-9b-q4 for the 7 GB).
+remove_question_judge() {
+    if [ -d "$tools/llama-$LLAMA_TAG" ]; then
+        rm -rf "$tools/llama-$LLAMA_TAG"
+        echo "llama.cpp $LLAMA_TAG: removed; the question judge is off (its model stays in models/qwen3.5-9b-q4)"
+    fi
+}
+
 fetch_models() {
     local args=()
     [ "$yes" -eq 1 ] && args+=(--yes)
+    [ "$question_judge" -eq 0 ] && args+=(--without question-judge)
     [ -n "$token_file" ] && args+=(--hf-token-file "$token_file")
     "$venv/bin/python" -I setup/fetch_models.py --models "$here/models" --sources "$here/sources" "${args[@]}"
 }
@@ -419,6 +478,12 @@ setup() {
     step "Rust and model-maker-simplify"
     install_rust
     build_rust
+    if [ "$question_judge" -eq 1 ] && [ "$skip_models" -eq 0 ]; then
+        step "The question judge's server (optional)"
+        install_question_judge
+    elif [ "$question_judge" -eq 0 ]; then
+        remove_question_judge
+    fi
     if [ "$skip_models" -eq 0 ]; then
         step "The models and their code (each licence first)"
         fetch_models
@@ -441,7 +506,9 @@ while [ $# -gt 0 ]; do
         --hf-token-file=*) token_file="${1#*=}" ;;
         --skip-models) skip_models=1 ;;
         --skip-tests) skip_tests=1 ;;
-        -h | --help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        --with-question-judge) question_judge=1 ;;
+        --without-question-judge) question_judge=0 ;;
+        -h | --help) sed -n '2,33p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "setup: unknown option $1 (see ./setup.sh --help)" >&2; exit 2 ;;
     esac
     shift

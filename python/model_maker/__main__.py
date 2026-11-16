@@ -67,6 +67,9 @@ def common(parser):
     parser.add_argument("--require-lettering", action="store_true",
                         help="read every picture for painted lettering: without tesseract 5 or newer and its English "
                         "data a job is not made (the measured run uses it)")
+    parser.add_argument("--require-question-judge", action="store_true",
+                        help="ask every finished object whether it is the thing named: without the question judge "
+                        "(./setup.sh --with-question-judge) a job counts as failing that check (the measured run uses it)")
     signing_options(parser)
 
 
@@ -105,7 +108,8 @@ def settings_of(args):
                              triangles=args.triangles, texture=args.texture, verify=not args.no_verify,
                              lead=args.lead, paint_steps=args.paint_steps, picture_rounds=args.picture_rounds,
                              touch_up_views=args.touch_up_views, touch_up_strength=args.touch_up_strength,
-                             require_lettering=args.require_lettering)
+                             require_lettering=args.require_lettering,
+                             require_question_judge=args.require_question_judge)
 
 
 def report(line):

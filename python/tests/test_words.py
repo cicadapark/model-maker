@@ -29,6 +29,15 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
         for prompt, noun in cases.items():
             self.assertEqual(words.subject_of(prompt).noun, noun, prompt)
 
+    def test_a_chess_board_is_the_board_not_a_piece(self):
+        # The noun question asked "Is it a chess?" of two chess boards on the sealed run of 14 Nov: the board is its
+        # own thing, about 45 cm across, lying flat; a chess knight is still a piece.
+        for prompt in ("a wooden chess board", "a chessboard"):
+            subject = words.subject_of(prompt)
+            self.assertIn(subject.noun, ("chess board", "chessboard"), prompt)
+        self.assertEqual(words.subject_of("a chess knight").noun, "chess")
+        self.assertIn("chess board", words.LYING)
+
     def test_things_that_stand_are_checked_standing_and_a_broom_is_not(self):
         for prompt in TEN_OBJECTS[:-1]:
             self.assertTrue(words.subject_of(prompt).stands, prompt)

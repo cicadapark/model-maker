@@ -1,5 +1,40 @@
 # Results, limits and what is not here yet
 
+## 0.2.2 against 0.2.1
+
+Fifty new prompts were written and sealed before this work began (`tools/trial/unseen-next.txt`). Each was made once
+with 0.2.1 and once with this version's making code, frozen on 14 Nov, the same seeds, on a 12 GB RTX 3060 and on a 16
+GB RTX 3080 laptop card, and every object was judged by eye, blind, from all round and from below. The 0.2.2 column is
+the objects made by this version's making code (94 of 96 identical to 0.2.1's) judged by 0.2.2's checks: the question
+judge counted (its question, limit and bar written down before the verdicts were opened), and the holes check that no
+longer judges a hole too small for the picture's cut-out to keep.
+
+Two fixes were made after the list was opened, on objects of this list: the holes check (found on its bread board,
+the one more right object that passes on each card: without it, 15 and 13) and the reading of "a chess board" (no
+number changes: the board is still refused; 0.2.2 would make it larger and lying flat, which was not measured).
+
+| Of 50 | 0.2.1, RTX 3060 | 0.2.2, RTX 3060 | 0.2.1, RTX 3080 | 0.2.2, RTX 3080 |
+|---|---|---|---|---|
+| pass every check and right | 15 | 16 | 15 | 14 |
+| pass every check but wrong | 16 | 9 | 14 | 9 |
+| right but refused by a check | 9 | 8 | 8 | 9 |
+| wrong and refused | 8 | 15 | 11 | 16 |
+| not made | 2 | 2 | 2 | 2 |
+
+**Fewer wrong objects get through; no more right ones are made.** The question judge looks at each finished object
+from eight sides and is asked about the thing the words name ("Is it a crossbow bolt?"); below 50 % yes, the object
+is refused. It stopped 7 wrong objects on the 12 GB card and 5 on the 16 GB card: a crossbow made for a crossbow
+bolt, a plain disc for a round shield with a boss, a sabre for a falchion. On the 16 GB card it also refused 2 right
+ones (a narrow coffee table, asked about as "a table", and a stone gargoyle). A wooden bread board, refused before
+for a hole its picture could not show, now passes on both cards.
+
+![Four wrong objects the question judge now refuses, each with what was asked and how often it said yes](images/judge-caught-0.2.2.webp)
+
+Most wrong objects that still pass are another thing drawn, or paint faults. Two prompts are not made at all, read as
+something model-maker does not make yet: "a clothes horse" (an animal) and "a bow saw" (a bow); the next version reads
+names better. The measured objects, both versions, are kept with their verdicts; 0.2.2's code is the code of this
+release.
+
 ## 0.2.1 against 0.2.0
 
 Fifty new prompts were written and sealed before this work began (`tools/trial/unseen-0.2.1.txt`); nothing was tuned

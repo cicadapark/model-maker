@@ -1,17 +1,18 @@
 # model-maker
 
 Make a 3-D object from a written description. A picture model paints it, a shape model builds it, a
-view model paints it from six sides to fit its shape, and our own tools check it, bake its texture
-and write a standard `.glb` file you can open in any 3-D tool. It makes furniture, containers, tools, decor, and
-things held in the hand such as swords, axes, spears and shields; every object comes with a report of every check and
-a sidecar naming every model used and its licence.
+view model paints it from six sides to fit its shape, and our own tools check it (an optional question judge asks
+whether it is the thing named), bake its texture and write a standard `.glb` file you can open in any 3-D tool. It
+makes furniture, containers, tools, decor, and things held in the hand such as swords, axes, spears and shields; every
+object comes with a report of every check and a sidecar naming every model used and its licence.
 
 See them in 3-D, turned round in your browser: **[Model Maker Studio](https://cicadapark.com/model-maker-studio/)** (cicadapark.com).
 
 ![Eight 3-D objects made by model-maker, each from the line of text under it: a chair, a barrel, a lantern, a clay jug, a shield, a sword, an axe and a spear](docs/images/examples.webp)
 
-**Pass rate: 22 of 50 pass every check and are right** (0.2.0 on the same prompts: 18), on 50 sealed prompts made once
-on a 12 GB card; on the 16 GB card 21 of 50 (0.2.0: 20) ([every number, and the known limits](docs/results.md)).
+**On 50 new sealed prompts, 16 of 50 pass every check and are right** on a 12 GB card, 14 on a 16 GB card (0.2.1: 15
+and 15); **wrong objects let through fell from 16 and 14 to 9** on each, since a question judge now asks of each
+finished object "Is it the thing named?" ([every number, and the known limits](docs/results.md)).
 
 ## Start
 

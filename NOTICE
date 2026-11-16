@@ -36,6 +36,10 @@ shown. Each object's sidecar says which models made it.
     https://huggingface.co/madebyollin/sdxl-vae-fp16-fix
   SigLIP 2 So400m (Google)                      Apache-2.0 (the check that a picture shows what was asked for)
     https://huggingface.co/google/siglip2-so400m-patch14-384
+  Qwen 3.5 9B (Qwen), quantised by bartowski    Apache-2.0 (optional: the question judge, which asks the
+    https://huggingface.co/Qwen/Qwen3.5-9B        finished object whether it is the thing named)
+    https://huggingface.co/bartowski/Qwen_Qwen3.5-9B-GGUF (its Q4_K_M weights and vision part)
+    Its licence's text is the Apache License 2.0, the same as this product's (LICENSE).
 
 Code written after other projects' designs
 ------------------------------------------
@@ -80,3 +84,12 @@ Programs it runs when they are installed
     each picture try for painted lettering. Neither setup.sh nor this repository installs or ships it;
     a system's package brings it (Debian and Ubuntu: tesseract-ocr), with the Leptonica image library it
     is built on (BSD-2-Clause).
+
+  llama.cpp (MIT; https://github.com/ggml-org/llama.cpp), its own CPU release archive of tag b11600:
+    optional. setup.sh downloads it into .tools/llama-b11600/ (its sha256 checked) unless
+    --without-question-judge is given, and python/model_maker/question_judge.py runs its llama-server as its
+    own program, on this computer only (127.0.0.1). It bundles: cpp-httplib (MIT), nlohmann/json (MIT),
+    stb_image (MIT or public domain), miniaudio (public domain or MIT-0), sheredom/subprocess.h (public
+    domain), xxHash (BSD-2-Clause), sha1 and sha256 (public domain), rotate-bits (MIT).
+    The archive is kept whole, with its LICENSE (.tools/llama-b11600/LICENSE); its shared libraries are
+    llama.cpp's and ggml's own (python/model_maker/check_licences.py lists them).

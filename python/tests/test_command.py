@@ -96,7 +96,7 @@ class Batch(unittest.TestCase):
             self.assertTrue(rows["an old iron sword"].startswith("aborted at finish: FileNotFoundError"), rows)
             self.assertFalse(rows["a double-bitted battle axe"].startswith("aborted"), rows)
             events = [line["event"] for line in ledger.read()]
-            self.assertEqual(sorted(events), ["aborted", "job", "run", "stage"])
+            self.assertEqual(sorted(events), ["aborted", "job", "run", "stage", "stage memory"])
         finally:
             os.environ["MODEL_MAKER_LEDGER"] = kept
             shutil.rmtree(folder)

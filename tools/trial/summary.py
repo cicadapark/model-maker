@@ -9,10 +9,14 @@
                                                                  ledger (MODEL_MAKER_LEDGER or metrics/)
     python3 -I tools/trial/summary.py backfill DIR [DIR ...]     once: trial folders made before the ledger into it,
                                                                  each line marked backfilled
+    python3 -I tools/trial/summary.py memory                     each stage's peak memory per machine and card (the
+                                                                 computer's, per batch; the card's, per job), and the
+                                                                 question judge's server's
 
 A job whose chosen picture was not read for painted lettering (its record's and its ledger line's `lettering_judged`
-false: no usable tesseract) is never counted as a pass: it is shown apart ("not read"). A job made before the check
-(no `lettering_judged`) is counted as it was.
+false: no usable tesseract), or whose finished object was not asked by the question judge (`question_judged` false),
+is never counted as a pass: it is shown apart ("not read"). A job made before either check (no field) is counted as it
+was.
 """
 
 import datetime
@@ -76,10 +80,11 @@ def paint(folders):
 
 
 def unread(job):
-    """Whether a job's record or ledger line says its chosen picture was not read for painted lettering."""
-    if "lettering_judged" in job:
-        return job["lettering_judged"] is False
-    return (job.get("lettering") or {}).get("judged") is False
+    """Whether a job's record or ledger line says its chosen picture was not read for painted lettering, or its
+    finished object was not asked by the question judge."""
+    if "lettering_judged" in job or "question_judged" in job:
+        return job.get("lettering_judged") is False or job.get("question_judged") is False
+    return (job.get("lettering") or {}).get("judged") is False or (job.get("question_judge") or {}).get("judged") is False
 
 
 def checks(folder):
@@ -87,12 +92,13 @@ def checks(folder):
     for name, job in jobs(folder):
         if job["status"] == "passes every check" and unread(job):
             not_read += 1
-            print(f"{name:30} {job['status']}, but NOT READ for painted lettering: not counted as a pass")
+            print(f"{name:30} {job['status']}, but NOT READ for painted lettering or NOT ASKED by the question judge: "
+                  "not counted as a pass")
             continue
         passing += job["status"] == "passes every check"
         print(f"{name:30} {job['status']}")
     print(f"{passing} pass every check" + (f"; {not_read} more pass the rest but were not read for painted lettering "
-                                           "(not counted)" if not_read else ""))
+                                           "or not asked by the question judge (not counted)" if not_read else ""))
 
 
 def backfill(folders):
@@ -251,9 +257,42 @@ def progress(write=None):
             file.write(text)
 
 
+def memory_rows(lines):
+    """Per (card, stage): the batches, the highest computer memory a stage reached (MB) and the highest card memory a
+    job's stage reached (MB); the question judge's server as its own stage."""
+    rows = defaultdict(lambda: {"batches": set(), "ram": 0, "card": 0})
+    for line in lines:
+        card = (line.get("machine") or {}).get("card") or "no card"
+        if line.get("event") == "stage memory":
+            row = rows[(card, line["stage"])]
+            row["batches"].add(line.get("batch"))
+            row["ram"] = max(row["ram"], line.get("peak_ram_mb") or 0)
+        elif line.get("event") == "stage" and line.get("peak_card_mb"):
+            row = rows[(card, line["stage"])]
+            row["card"] = max(row["card"], line["peak_card_mb"])
+        elif line.get("event") == "job":
+            server = ((line.get("question_judge_memory_mb")) or {})
+            if server.get("peak"):
+                row = rows[(card, "question judge (its server)")]
+                row["batches"].add(line.get("batch"))
+                row["ram"] = max(row["ram"], server["peak"])
+    return rows
+
+
+def memory():
+    from model_maker import ledger
+
+    print(f"{'card':38} {'stage':28} {'batches':>7} {'computer GB':>11} {'card GB':>8}")
+    for (card, stage), row in sorted(memory_rows(ledger.read()).items()):
+        print(f"{card:38} {stage:28} {len(row['batches']):>7} {row['ram'] / 1024:>11.1f} "
+              f"{(row['card'] / 1024 if row['card'] else float('nan')):>8.1f}")
+
+
 if __name__ == "__main__":
     what, rest = sys.argv[1], sys.argv[2:]
     if what == "progress":
         progress(rest[1] if rest[:1] == ["--write"] else None)
+    elif what == "memory":
+        memory()
     else:
         {"pictures": pictures, "paint": paint, "checks": lambda f: checks(f[0]), "backfill": backfill}[what](rest)
