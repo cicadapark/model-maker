@@ -185,6 +185,42 @@ class BundledLibraries(unittest.TestCase):
         self.assertIsNone(C.EXTENSION_MODULE.search("libtorch.so"))
         self.assertIsNotNone(C.EXTENSION_MODULE.search("_ckdtree.cpython-311-x86_64-linux-gnu.so"))
 
+    def test_the_question_judges_libraries_are_llama_cpps_own_beside_its_licence(self):
+        from model_maker import check_licences as C
+
+        folder = tempfile.mkdtemp()
+        try:
+            self.assertEqual(C.judge_libraries(os.path.join(folder, "absent")), ([], []))
+            for name in ("libggml-cpu-haswell.so", "libllama.so.0", "libmtmd.so", "llama-server"):
+                open(os.path.join(folder, name), "w").close()
+            rows, problems = C.judge_libraries(folder)
+            self.assertEqual([r[1] for r in rows], ["allowed"] * 3)
+            self.assertEqual(len(problems), 1, problems)
+            self.assertIn("LICENSE is missing", problems[0])
+            with open(os.path.join(folder, "LICENSE"), "w") as file:
+                file.write("MIT License\n")
+            open(os.path.join(folder, "libcurl.so.4"), "w").close()
+            rows, problems = C.judge_libraries(folder)
+            self.assertEqual(problems, [f"{C.JUDGE_FOLDER}: it holds libcurl.so.4, which is not on the allow-list "
+                                        "(read its licence first)"])
+        finally:
+            shutil.rmtree(folder)
+
+
+class OptionalParts(unittest.TestCase):
+    def test_an_optional_parts_problems_are_said_and_set_aside(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "fetch_models", os.path.join(os.path.dirname(__file__), "..", "..", "setup", "fetch_models.py"))
+        fetch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fetch)
+        problems = []
+        fetch.optional_or_not({"id": "judge", "optional": "question-judge"}, ["a.gguf: missing"], problems)
+        self.assertEqual(problems, [])
+        fetch.optional_or_not({"id": "flux"}, ["b.safetensors: missing"], problems)
+        self.assertEqual(problems, ["b.safetensors: missing"])
+
 
 if __name__ == "__main__":
     unittest.main()

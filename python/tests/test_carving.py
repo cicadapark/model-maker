@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from model_maker import carving, inspection, mesh_tools as M, object_checks as O, render, words
+from model_maker import carving, cutout, inspection, mesh_tools as M, object_checks as O, render, words
 
 from . import shapes
 
@@ -144,6 +144,24 @@ class HolesOpen(unittest.TestCase):
         check = carving.holes_check(extra)
         self.assertTrue(check.counted)
         self.assertFalse(check.passed, extra)
+
+    def test_a_hole_the_picture_is_too_small_to_show_is_not_judged(self):
+        # A bread board's hanging hole, about 10 pixels across in its picture: the cut-out fills holes under
+        # LEAST_HOLE_PIXELS, so the picture covering the model's hole says nothing. The same ringed box, drawn small
+        # in its picture (its ring's hole about 6 pixels across), is not judged; drawn large, it still fails.
+        corners, triangles = shapes.ringed_box()
+        small = np.zeros((1024, 1024), dtype=bool)
+        small[400:496, 400:496] = render.silhouette(*shapes.ringed_box(web=True), 0, 96)
+        found = carving.holes_open(small, corners, triangles, coloured(small))
+        self.assertEqual(found["extra_holes"], [], found)
+        self.assertEqual(len(found["extra_holes_too_small"]), 1, found)
+        self.assertLess(found["extra_holes_too_small"][0]["picture_px"], cutout.LEAST_HOLE_PIXELS)
+        check = carving.holes_check(found)
+        self.assertTrue(check.passed, check.words)
+        self.assertIn("not judged", check.words)
+        large = holes(shapes.ringed_box(web=True), shapes.ringed_box())
+        self.assertEqual(large["extra_holes_too_small"], [], large)
+        self.assertFalse(carving.holes_check(large).passed, large)
 
     def test_a_hole_too_small_is_not_judged_and_not_passed(self):
         # A box with a loop on its side whose hole is 6 mm high (2.4 % of the height): no inner part.

@@ -217,6 +217,16 @@ class Verified:
             os.replace(self.path + ".new", self.path)
 
 
+def optional_or_not(entry, found, problems):
+    """An optional part's problems are said and set aside ("optional, not used"): the setup goes on without it.
+    Anything else's are `problems`."""
+    if entry.get("optional"):
+        for problem in found:
+            say(f"  optional, not used: {problem}")
+    else:
+        problems += found
+
+
 def checked_or_fetched(parts, token, verified, verify_only=False):
     """Every part present and matching its sum. Returns the problems (empty when all is well)."""
     todo, problems = [], []
@@ -408,10 +418,13 @@ def main():
     parser.add_argument("--hf-token-file", help="a file holding a Hugging Face access token (for a gated model)")
     parser.add_argument("--only", nargs="*", help="these model ids only")
     parser.add_argument("--verify", action="store_true", help="only check the files there against the sums")
+    parser.add_argument("--without", nargs="*", default=[],
+                        help="leave out these optional parts (registry `optional`; question-judge)")
     options = parser.parse_args()
     options.models, options.sources = os.path.abspath(options.models), os.path.abspath(options.sources)
 
-    entries = [m for m in models() if not options.only or m["id"] in options.only]
+    entries = [m for m in models() if (not options.only or m["id"] in options.only)
+               and m.get("optional") not in options.without]
     os.makedirs(options.models, exist_ok=True)
     os.makedirs(options.sources, exist_ok=True)
     verified = Verified(options.models)
@@ -431,7 +444,10 @@ def main():
         parts = fetched_parts(entry, options.models)
         size = sum(p[3] for p in parts)
         if options.verify:
-            problems += checked_or_fetched(parts, None, verified, verify_only=True)
+            if entry.get("optional") and not any(os.path.exists(path) for _, path, *_ in parts):
+                say(f"{entry['name']}: optional, not installed")
+                continue
+            optional_or_not(entry, checked_or_fetched(parts, None, verified, verify_only=True), problems)
             continue
         if entry.get("gated") and not token:
             say(f"\n{entry['name']}: the hub needs a signed-in account for it and no token was given "
@@ -458,9 +474,9 @@ def main():
             try:
                 say(f"  its code: {checked_out(entry['source'], options.sources)}")
             except Failed as error:
-                problems.append(str(error))
+                optional_or_not(entry, [str(error)], problems)
         found = checked_or_fetched(parts, token, verified)
-        problems += found
+        optional_or_not(entry, found, problems)
         if not found:
             done.append(entry["id"])
             say(f"  {entry['name']}: every file there and its sha256 the registry's")
@@ -475,6 +491,9 @@ def main():
     if "siglip2-so400m" in declined:
         say("SigLIP 2 declined: the pictures are not checked to show the thing asked for, and a thing with a lid, a "
             "cover or doors cannot be judged shut or open, so it cannot be made (the rest can)")
+    if "qwen3.5-9b-question" in declined:
+        say("The question judge's model declined: optional; finished objects are not asked whether they are the thing "
+            "named (their check says \"not judged\")")
     say(f"models took {time.time() - started:.0f} s")
     return 1 if problems or (missing and not options.verify and not options.only) else 0
 

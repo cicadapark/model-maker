@@ -155,7 +155,7 @@ STANDING = {
     "urn": 0.5, "bottle": 0.3, "flask": 0.2, "mug": 0.12, "cup": 0.1, "goblet": 0.2, "tankard": 0.18, "bowl": 0.2,
     "bucket": 0.35, "basket": 0.4, "lantern": 0.35, "lamp": 0.4, "candle": 0.25, "candlestick": 0.3,
     "candelabra": 0.5, "book": 0.25, "anvil": 0.5, "cauldron": 0.6, "statue": 1.2, "bust": 0.5, "clock": 0.4,
-    "globe": 0.5, "pedestal": 1.0, "chess": 0.1, "coin": 0.03, "plate": 0.25, "tray": 0.45, "teapot": 0.2,
+    "globe": 0.5, "pedestal": 1.0, "chess": 0.1, "chess board": 0.45, "chessboard": 0.45, "coin": 0.03, "plate": 0.25, "tray": 0.45, "teapot": 0.2,
     "kettle": 0.25, "stump": 0.5, "rock": 0.6,
     "boulder": 1.2, "mushroom": 0.3, "well": 1.6, "fountain": 1.5, "signpost": 2.2, "mailbox": 1.2,
 }
@@ -163,7 +163,7 @@ STANDING = {
 # the shape model, which makes a thing as its picture shows it, may make one standing on an edge (the fix-check's book,
 # painted from well above, came out tilted toward the viewer and settled 54.8 degrees). The finish lays such a thing on
 # its likeliest resting face (lying.py); a thing that stands on a base of its own (a chair) is never laid down.
-LYING = {"book", "coin", "plate", "tray"}
+LYING = {"book", "coin", "plate", "tray", "chess board", "chessboard"}
 # Words that stand a thing that lies on its edge or end on purpose ("a book standing upright"): it is left as made.
 UPRIGHT_WORDS = ("standing", "upright", "on its edge", "on edge", "on its end", "on end", "on its spine")
 # Words that make "plate" not a dish ("plate armour").

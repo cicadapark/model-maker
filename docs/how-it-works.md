@@ -4,10 +4,10 @@ One line of text goes in; a checked 3-D object comes out. This page shows the wh
 says each step in words. The details of every check, with its limit and what it was measured on, are in
 [`objects.md`](objects.md).
 
-![The model-maker pipeline as a diagram: the text is read; FLUX.1 [schnell] paints 4 picture tries, BiRefNet cuts them out, and our checks, SigLIP 2 and tesseract judge them, with 4 more tries if none passes and "not made" after 8; TripoSG builds the shape from the best picture, our code repairs and checks it, with a second shape if a check fails; MV-Adapter on SDXL paints six views, which must agree or are painted again; the views are baked into one texture and SDXL inpainting touches up places no view reached; the shape is levelled and checked again, the paint is checked, and the .glb, its report and its sidecar are written, every picture signed. Below, the loop between releases: look by eye, keep the case, fix and review, measure on sealed prompts.](images/pipeline.webp)
+![The model-maker pipeline as a diagram: the text is read; FLUX.1 [schnell] paints 4 picture tries, BiRefNet cuts them out, and our checks, SigLIP 2 and tesseract judge them, with 4 more tries if none passes and "not made" after 8; TripoSG builds the shape from the best picture, our code repairs and checks it, with a second shape if a check fails; MV-Adapter on SDXL paints six views, which must agree or are painted again; the views are baked into one texture and SDXL inpainting touches up places no view reached; the shape is levelled and checked again, the paint is checked, the question judge (Qwen 3.5 9B) asks of the eight sides whether it is the thing the words name, and the .glb, its report and its sidecar are written, every picture signed. Below, the loop between releases: look by eye, keep the case, fix and review, measure on sealed prompts.](images/pipeline.webp)
 
 Colours: orange boxes are AI models that make something, green ones AI models that judge, blue ones our own code.
-A dashed line means "try again"; a red box means nothing is made. The numbers are the settings of version 0.2.1.
+A dashed line means "try again"; a red box means nothing is made. The numbers are the settings of version 0.2.2.
 The diagram's source is [`images/pipeline.html`](images/pipeline.html).
 
 ## The steps in words
@@ -34,7 +34,11 @@ The diagram's source is [`images/pipeline.html`](images/pipeline.html).
     seed, and left out if it is still foreign.
 11. **Finish and check** (our code): a leg a little short levelled, the shape checked again, the paint's coverage and
     fill checked.
-12. **Write the result** (our code): the `.glb` with its grip and tip marks, the report, and the sidecar naming every
+12. **Ask whether it is the thing asked for** (Qwen 3.5 9B, optional: setup installs it unless told not to). The
+    object's eight sides are shown together and the model is asked "Is it a sword?": the thing the words name, not
+    every word of them. Below 50 % yes, the object is marked failing, and its report says what was asked and how to say
+    more in the words.
+13. **Write the result** (our code): the `.glb` with its grip and tip marks, the report, and the sidecar naming every
     model, licence and seed; every picture signed with content credentials. An object that fails a check is still
     written, marked failing, with the checks it failed.
 

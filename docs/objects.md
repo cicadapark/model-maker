@@ -1423,6 +1423,13 @@ backdrop through a pane of glass between two bars, a hole 4.7 % wide whose inner
 glass covers it, rightly: under 50 pixels an inner part is not judged (its cover is as much an edge's misfit as a web;
 the made-up ring's is 108). Its colour tells nothing there: through clear glass it is the backdrop's (2.2 delta E).
 
+**A model's hole too small for the picture's cut-out (15 November 2026).** The cut-out fills every hole under 200
+pixels of the 1024-pixel picture as a speck (`cutout.for_shape`), so a picture covering a smaller hole of the model says
+nothing about it. A wooden bread board's hanging hole, about 10 pixels across in its picture, was refused on both cards
+as "a hole the picture does not have" (100 % covered). A model's own hole whose area, taken back into the picture's
+pixels, is under 200 is listed in `measures.holes.extra_holes_too_small` and said "not judged". Judged again on 14
+stored runs (342 jobs) and the regression set (54 held), only the bread board's verdict changed.
+
 **Before carving, the hole's colour.** A hole whose colour in the picture (the median over the hole, CIE76 delta E in Lab)
 lies more than 10 from the backdrop's just outside the object (12 to 48 pixels out) is a part the cut-out missed (a
 mirror, a framed canvas), not a hole: it is never carved, and never judged open. On the trials every hole read at most
@@ -2227,3 +2234,54 @@ Then the whole pipeline: the six objects (an armchair, a chair, a kettle, a teap
 the same seeds under Pillow 12.3 and under 13 on the 12 GB card. Each chose the same picture seed, shape seed and
 paint seed; the chosen pictures are identical to the pixel; and all 134 checks have the same verdict and the same
 value. Both runs took 67 minutes.
+
+## A haft that forks, and its socket (14 November 2026)
+
+An iron shovel was refused for "haft straight" (4.2 %) and "no kink" (38.6°) though its haft is straight: the haft
+was followed up one leg of its D-handle, and the blade and the handle, more than half its length, set the width the
+haft was told from. A haft now ends where its line forks round the point it was heading for (the slice is measured
+whole), a haft's usual width is its lower quartile's, and a socket or a collar tapering into it (thicker than the
+haft's middle girth by 10 %) is trimmed off its ends: the shovel passes (3.1°, 0.58 %). Rejudged on 53 stored handled
+objects: only the shovel's verdicts change, and one knotted club's "haft straight" (its kink still refuses it); the
+regression set holds whole. A woodcutter's axe whose haft is S-curved, as such axes are made, is still refused (1.8 %,
+5.3°): a known false refusal, since loosening straightness would pass bent hafts.
+
+## Is it the thing asked for? (14 November 2026)
+
+The checks measure how an object is made, not what it is: on 50 prompts sealed before the work, 8 objects were
+another thing made well (a digging fork for "a garden hoe", a pick on a pole for "a scythe"), and most passed every
+check. The question judge (`question_judge.py`, optional) shows the finished object's eight sides, laid out four by
+two, to a vision-language model, Qwen 3.5 9B with its vision part, run on the processor by llama.cpp's server, and
+asks "These are eight views of one object, seen from all round. Is it <prompt>? Answer yes or no." The check "it is
+the thing asked for" is the probability of "yes" against "no" in the first word of its answer (VQAScore's way: Lin et
+al. 2024); it passes from 0.5.
+
+**What it is asked.** Asked the whole prompt ("Is it an old iron sword?"), it judged every word: it kept 16 of the
+regression set's 17 good objects and refused a good longsword (0.44; "an iron sword" 0.59, "a sword" 0.78), its paint
+not looking old. So it is asked about the thing the words name, with its article ("a sword", "a hoe", "a chess
+board"; the whole prompt when the words name no thing model-maker knows), and it counts. That question, its limit 0.5
+and the bar it had to meet were written down before it was measured (on the next sealed 50 of 0.2.1's successor,
+judged blind, both cards): among the objects that pass every other check it caught 7 of 16 bad and refused none of
+15 good on the 12 GB card, and caught 5 of 14 bad and refused 2 of 15 good on the 16 GB card (a narrow coffee table
+asked "a table", a gargoyle); it refused none of the regression set's 17 good objects. A refused object's report says
+what was asked and how to say more in the words. A run that requires it (`--require-question-judge`) fails a job it
+could not ask: missing, not starting, or with model files that are not the registry's.
+
+Measured on the sealed 50 of 0.2.1 on the 12 GB card, the limit fixed before the run: the objects that pass every check
+while bad went from 11 to 5 (the hoe 0.09, the scythe 0.33, a bronze sword painted iron 0.37, the telescope 0.40, the
+bellows 0.42 to 0.48, the hand mirror 0.44); 3 good ones were refused (a pitchfork, a halberd, a barrel). Asking about
+its eight sides is what works: about the first picture alone, the same model is only a little better than the picture
+check. Asking whether the object is "whole and well made" sees nothing (a split head, an open base, blotches pass).
+
+The pictures are asked the same question, as a note: the chosen try first, the others only when it is under 0.5.
+Nothing is chosen or refused by it: over 400 tries of 50 names, the try either judge ranks first was right as often as
+the first try (38 of 50), and refusing a name when none of its 4 tries reaches 0.5 lost two right names.
+
+Builds of llama.cpp answer differently (its own release archive of the same tag moved scores by up to 0.14 against a
+local build; 8 of 96 verdicts flip at 0.5, both ways, all within 0.06 of it), and the archive picks a library for the
+processor it runs on. model-maker uses only the archive setup puts in `.tools/llama-b11600/`, never one on the PATH;
+an object near 0.5 may still be judged differently on another processor.
+
+Known limits: long thin things (a pitchfork, a halberd) are tiny in the views and can be refused while right; names
+the model does not know pass whatever is made (a sickle painted as a scythe scored 0.90); shape and paint faults are
+not its question.

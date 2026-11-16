@@ -19,4 +19,7 @@ Thank you for helping. A few rules keep the project safe to use and to share:
    `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. One line for each AI that helped. Naming the model is
    required: we want to know which AI helped with what. You stay responsible for what you send, AI-written or not.
 
+**Names the picture model gets wrong** are welcome too, without any code: see
+[`docs/names-the-picture-model-misses.md`](docs/names-the-picture-model-misses.md) and its issue form.
+
 By sending a pull request you agree that your work is licensed under Apache-2.0.

@@ -8,6 +8,7 @@ are written like the rest. See docs/metrics.md.
     a stage failed   {"event": "aborted", "stage": .., "error": ..}
     a thing refused  {"event": "not made", "why": ..}
     a warm job's end {"event": "warm", "jobs_before": .., "card_allocated_mb": .., "rss_mb": .., ..}
+    a stage's memory {"event": "stage memory", "batch": .., "stage": .., "jobs": .., "peak_ram_mb": .., "held_ram_mb": ..}
 
 A job's line also says how its run went ("run": warm or cold, its whole seconds, the seconds spent loading models in
 it), so its real time is known whether the models were loaded for it or kept loaded between jobs; a batch writes
@@ -101,7 +102,8 @@ def settings_of(settings):
             "texture": settings.texture, "lead": settings.lead, "paint_steps": settings.paint_steps,
             "picture_rounds": settings.picture_rounds, "touch_up_views": settings.touch_up_views,
             "touch_up_strength": settings.touch_up_strength,
-            "require_lettering": getattr(settings, "require_lettering", False)}
+            "require_lettering": getattr(settings, "require_lettering", False),
+            "require_question_judge": getattr(settings, "require_question_judge", False)}
 
 
 def _card_peak_reset():
@@ -141,6 +143,13 @@ def aborted(job, stage_name, error, settings=None, seconds=0.0):
     """A job's stage ended by an error (its models' loading too): an "aborted" line with the error."""
     append({**about(job, settings), "event": "aborted", "stage": stage_name, "seconds": round(seconds, 1),
             "error": f"{type(error).__name__}: {error}"[:2000]})
+
+
+def stage_memory(batch, stage_name, jobs, peak_ram_mb, held_ram_mb):
+    """A batch's stage done for all its jobs: the computer's memory it peaked at and still held after it (this
+    process; MB), kept with the machine it ran on. (The card's peak is on each job's stage line.)"""
+    append({"event": "stage memory", "batch": batch, "stage": stage_name, "jobs": jobs, "peak_ram_mb": peak_ram_mb,
+            "held_ram_mb": held_ram_mb, "machine": machine()})
 
 
 def loaded(stage_name, seconds):
@@ -194,6 +203,10 @@ def finished(job, settings, grouped, measures):
             # is not counted as a pass by tools/trial/summary.py.
             "lettering_judged": (job.record.get("lettering") or {}).get("judged"),
             "tesseract_version": (job.record.get("lettering") or {}).get("tesseract"),
+            # Whether the finished object was asked if it is the thing named (None: made before the judge): a job not
+            # asked is not counted as a pass by tools/trial/summary.py.
+            "question_judged": (job.record.get("question_judge") or {}).get("judged"),
+            "question_judge_memory_mb": (job.record.get("question_judge") or {}).get("server_memory_mb"),
             "checks": [{"name": c["name"], "value": c.get("value"), "limit": c.get("limit"), "passed": c["passed"]}
                        for c in every],
             "levelled_mm": round(1000 * measures["levelling"]["trimmed_m"], 1) if measures.get("levelling") else 0.0,

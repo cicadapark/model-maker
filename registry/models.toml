@@ -174,3 +174,19 @@ parts = [
   { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/tokenizer.model", sha256 = "61a7b147390c64585d6c3543dd6fc636906c9af3865a5548f27f31aee1d4c8e2", size_mb = 4 },
   { url = "https://huggingface.co/google/siglip2-so400m-patch14-384/resolve/e8e487298228002f3d8a82e0cd5c8ea9c567f57f/tokenizer_config.json", sha256 = "14afe629fe4959b9e0d51e1852b8d9f7ad074f90a1a7125a4fcdd17f06e78fc8", size_mb = 1 },
 ]
+
+[[model]]
+id = "qwen3.5-9b-question"
+name = "Qwen 3.5 9B (quantised by bartowski, with its vision part)"
+role = "object check"
+job = "Asked of the finished object's eight sides whether it is the thing the prompt names (optional: the question judge)."
+version = "hub revision 182be2fd6c7b"
+licence = "Apache-2.0"
+licence_url = "https://huggingface.co/Qwen/Qwen3.5-9B"
+conditions = "Weights Apache-2.0 (Qwen); the GGUF quantisation and the vision part's conversion by bartowski, under the same licence. Run on the CPU by llama.cpp's server (MIT, the release archive setup.sh puts in .tools/). It makes nothing that goes into the model, only a verdict on its pictures."
+optional = "question-judge"
+folders = { "bartowski/Qwen_Qwen3.5-9B-GGUF" = "qwen3.5-9b-q4" }
+parts = [
+  { url = "https://huggingface.co/bartowski/Qwen_Qwen3.5-9B-GGUF/resolve/182be2fd6c7bc44887d88a91cb03ff009cc9f549/Qwen_Qwen3.5-9B-Q4_K_M.gguf", sha256 = "d784ce9eda1a5a7b51e8f705a9e6310844bf4f173654d115823c775fdea56d43", size_mb = 6170 },
+  { url = "https://huggingface.co/bartowski/Qwen_Qwen3.5-9B-GGUF/resolve/182be2fd6c7bc44887d88a91cb03ff009cc9f549/mmproj-Qwen_Qwen3.5-9B-f16.gguf", sha256 = "97f420245a85ce129bb764e86a5e21e27d782fe6d6056c6839b9c5fdb8f38289", size_mb = 919 },
+]

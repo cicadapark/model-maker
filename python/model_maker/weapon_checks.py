@@ -29,6 +29,7 @@ END_SHARE = 0.03
 PART_GAP_M = 0.012
 # The shaft or blade: slices whose part is at most this many times the slices' middle width.
 SHAFT_WIDTH_RATIO = 1.5
+HAFT_USUAL_PERCENTILE = 25
 # The line: the shaft's middles at most this share of the length off their straight line, and its direction turning
 # at most this much between neighbouring stretches of `KINK_STRETCH_SHARE` of the length.
 MOST_BEND_SHARE = 0.01
@@ -151,6 +152,16 @@ def parts_of(points):
 TRACK_SLICES = 5
 
 
+def forks_here(candidates, nearest, expected):
+    """Whether the line splits at this slice: the part nearest where the line points does not hold that point across
+    (its middle is off it by more than half its own width), and another part lies on the far side of the point. Seen
+    on an iron shovel: at its D-handle the haft became two legs, and following one of them read as a 41° kink."""
+    off = expected - nearest.middle
+    if float(np.linalg.norm(off)) <= nearest.width / 2:
+        return False
+    return any(other is not nearest and float(np.dot(other.middle - expected, off)) > 0 for other in candidates)
+
+
 def tracked_slices(local, length, count=SLICES):
     """Each slice measured on the part on the weapon's line, followed by continuity from the middle of its length
     outward: the part nearest the line the narrow slices before it point to (a guard or a head, where the line runs
@@ -183,6 +194,10 @@ def tracked_slices(local, length, count=SLICES):
                 expected = recent[-1].middle
             candidates = [measured_part(s, part) for part in parts]
             nearest = min(candidates, key=lambda x: float(np.linalg.norm(x.middle - expected)))
+            if forks_here(candidates, nearest, expected):
+                # The line splits round where it points (a shovel's D-handle, a fork's tines): the haft ends here;
+                # the slice is measured whole, as wide as its parts span, and is not followed.
+                nearest = measured_part(s, np.concatenate(parts))
             chosen[k] = nearest
             if nearest.width <= SHAFT_WIDTH_RATIO * usual:
                 followed.append(nearest)
@@ -197,7 +212,9 @@ def shaft_slices(slices, length, one_stretch=False):
     if not slices:
         return []
     s0, s1 = min(x.s for x in slices), max(x.s for x in slices)
-    usual = np.median([x.width for x in slices])
+    # A haft is the thinnest long part, but its head may take more than half the length (a shovel's blade and its
+    # D-handle: their median width was 3.5 times the haft's), so a haft's usual width is the lower quartile's.
+    usual = np.percentile([x.width for x in slices], HAFT_USUAL_PERCENTILE if one_stretch else 50)
     good = [s0 + END_SHARE * length <= x.s <= s1 - END_SHARE * length and x.width <= SHAFT_WIDTH_RATIO * usual
             for x in slices]
     if not one_stretch:
@@ -206,6 +223,14 @@ def shaft_slices(slices, length, one_stretch=False):
     if not runs:
         return []
     first, last = max(runs, key=lambda r: slices[r[1]].s - slices[r[0]].s)
+    # The haft proper: a socket or a collar tapering into it at either end is the head's or the butt's, not haft (an
+    # iron shovel's steel socket narrowed 5.5 to 4.2 cm over 8 cm as it curved up from the blade's lift: 15° of kink
+    # on a straight haft). Its ends are trimmed while thicker than the run's middle girth by `HAFT_EVEN_SHARE`.
+    middle_girth = np.median([x.girth for x in slices[first:last + 1]])
+    while last - first > 6 and slices[first].girth > (1 + HAFT_EVEN_SHARE) * middle_girth:
+        first += 1
+    while last - first > 6 and slices[last].girth > (1 + HAFT_EVEN_SHARE) * middle_girth:
+        last -= 1
     return slices[first:last + 1]
 
 

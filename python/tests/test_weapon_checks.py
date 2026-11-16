@@ -127,6 +127,12 @@ class Axe(unittest.TestCase):
         self.assertTrue(found["grip found"].passed, found["grip found"].words)
         self.assertLess(abs(measures["grip"]["hold"][0]), 0.005, "the grip is on the haft's line")
 
+    def test_a_haft_that_splits_into_a_d_handle_ends_where_it_splits(self):
+        # An iron shovel (13 Nov 2026): its haft was followed up one leg of its D-handle, a 41° kink on a straight haft.
+        found = named(W.measured(*shapes.shovel(), words.subject_of("an iron shovel"))[1])
+        self.assertTrue(found["haft straight"].passed, found["haft straight"].words)
+        self.assertTrue(found["no kink"].passed, found["no kink"].words)
+
     def test_the_grip_is_on_the_haft_above_a_butt_cap(self):
         # A remade axe: the grip mark sat 14 cm from the end on the butt piece's neck, thin enough to hold.
         measures, checks = W.measured(*shapes.double_axe(butt_cap=True), AXE)
