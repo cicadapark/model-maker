@@ -45,8 +45,48 @@ def repaired(corners, triangles):
     triangles, hollows = without_hollows(corners, triangles)
     done["hollows_removed"] = len(hollows)
     done["hollows"] = hollows
+    corners, done["pieces_joined"] = close_pieces_joined(corners, triangles, size)
     corners, triangles = M.compacted(corners, triangles)
     return corners, triangles, done
+
+
+# A piece whose nearest corner lies this close to the main piece is meant to be on it, and is moved by the gap so the
+# two touch (a brass candelabra's four drip pans, 1.3-2.5 mm off its arms on the 16 GB card: real, invisible, and
+# refused by "one main piece"; false refusals traced 15 Nov 2026). At most this many metres, and at most this share of
+# the object's size, so a small thing's parts are not pulled together across a gap that shows.
+JOIN_GAP_M = 0.003
+JOIN_GAP_SHARE = 0.01
+
+
+def close_pieces_joined(corners, triangles, size):
+    """Every piece other than the main one (by area) that comes within the join gap of the main piece moved by that
+    gap, so its nearest corner meets the main piece's (the shift is at most a few millimetres). Returns (corners, the
+    pieces moved: each one's shift in mm and its middle)."""
+    from scipy.spatial import cKDTree
+
+    piece, count = M.pieces(corners, triangles)
+    if count < 2:
+        return corners, []
+    _, areas = M.face_normals_and_areas(corners, triangles)
+    main = int(np.bincount(piece, weights=areas).argmax())
+    main_corners = np.unique(triangles[piece == main])
+    tree = cKDTree(corners[main_corners])
+    most = min(JOIN_GAP_M, JOIN_GAP_SHARE * size)
+    corners = corners.copy()
+    joined = []
+    for p in range(count):
+        if p == main:
+            continue
+        mine = np.unique(triangles[piece == p])
+        distances, nearest = tree.query(corners[mine])
+        k = int(np.argmin(distances))
+        if distances[k] > most or distances[k] == 0:
+            continue
+        shift = corners[main_corners[nearest[k]]] - corners[mine[k]]
+        corners[mine] += shift
+        joined.append({"moved_mm": round(float(np.linalg.norm(shift)) * 1000, 2),
+                       "at": [round(float(x), 3) for x in corners[mine].mean(0)]})
+    return corners, joined
 
 
 def without_hollows(corners, triangles):

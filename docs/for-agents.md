@@ -14,8 +14,9 @@ assistant working for someone. The details are in [`objects.md`](objects.md); th
 
 ## Do not use it for
 
-- Animals, people or fantasy creatures (refused: they come in later releases); bows; "a pair of …" or several things
-  at once (refused: ask for one thing).
+- Animals, people or fantasy creatures (refused: they come in later releases); bows; three or more things, a set, or
+  two different things at once (refused: ask for one thing). Two of one thing ("a pair of boots") is made: one, and its
+  mirror image or copy beside it.
 - Rigged or animated models, or a model to match a given photograph.
 - A machine without an NVIDIA card, or macOS or Windows.
 
@@ -28,6 +29,7 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 ./model-maker make "an old looking chair"       # one object, into made/<name>-<id>/
 ./model-maker make "an old iron sword" --size 0.9
 ./model-maker batch prompts.txt --out DIR       # one prompt a line; run again with the same --out to resume
+./model-maker make "a wooden stool" --attempt 1 # a refused object made again, from new seeds
 ./model-maker words "a wooden chess board"      # how a prompt is read, as JSON (no card needed)
 ```
 

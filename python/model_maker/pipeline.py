@@ -50,7 +50,7 @@ class Settings:
     def __init__(self, models=None, sources=None, tries=DEFAULT_TRIES, shape_tries=DEFAULT_SHAPE_TRIES,
                  triangles=DEFAULT_TRIANGLES, texture=DEFAULT_TEXTURE, verify=True, lead=words.DEFAULT_LEAD,
                  paint_steps=None, picture_rounds=MOST_PICTURE_ROUNDS, touch_up_views=None, touch_up_strength=None,
-                 require_lettering=False, require_question_judge=False):
+                 require_lettering=False, require_question_judge=False, attempt=0):
         from .paint import STEPS
         from .touch_up import MOST_VIEWS, STRENGTH
 
@@ -69,6 +69,9 @@ class Settings:
         # `question_judge_unavailable` why there is none.
         self.require_question_judge = require_question_judge
         self.question_judge, self.question_judge_unavailable = None, ""
+        # Which attempt at the object this run is (0 the first): each later attempt's pictures, shapes and views are
+        # painted from seeds after every seed the attempts before it used, so a refused object made again is new.
+        self.attempt = attempt
         self.checked = set()
 
     def folder(self, name):
@@ -87,12 +90,15 @@ class JobMismatch(Exception):
     """A job folder that holds another prompt's job, or the same prompt's made with other options."""
 
 
-def job_folder(out, prompt, size_m=None, stands=None, symmetric=None):
+def job_folder(out, prompt, size_m=None, stands=None, symmetric=None, attempt=0):
     """A job's folder under `out`: its prompt's slug and a short hash of the prompt as read and the options given, so
     two prompts or two sizes never share a folder (by the slug alone, "a long wooden dining table, dark oak" and "...,
     pale pine" would share one, and every prompt with no Latin letters would be "object": the second `make` would
     return the first's model as its own)."""
     key = json.dumps([words.cleaned(prompt), size_m, stands, symmetric])
+    if attempt:
+        # A later attempt is its own job (the same folder would hand back the first attempt's object).
+        key = json.dumps([words.cleaned(prompt), size_m, stands, symmetric, attempt])
     return os.path.join(out, f"{words.slug_of(prompt)}-{hashlib.sha256(key.encode()).hexdigest()[:8]}")
 
 
@@ -119,7 +125,10 @@ class Job:
             subject.symmetric = (subject.symmetric or ("across" if subject.is_weapon else "mirror")) if symmetric \
                 else ""
             subject.why["symmetric"] = f"{'checked' if symmetric else 'not checked'}: set by --symmetric"
-        self.record = {"prompt": subject.prompt, "slug": subject.slug, "subject": subject.__dict__,
+        # The prompt as asked (cleaned): for a pair the subject holds the words for one ("a boot"), the job keeps
+        # "a pair of boots" (its name, the folder's check, the judge's reading).
+        asked = words.cleaned(prompt)
+        self.record = {"prompt": asked, "slug": words.slug_of(asked), "subject": subject.__dict__,
                        "size_m": float(size_m or subject.size_m), "seconds": {}, "status": "started",
                        "made_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                        "options": {"size_m": size_m, "stands": stands, "symmetric": symmetric}}
@@ -306,7 +315,7 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
     # Each try's cut-out is read for letters the words do not ask for (11 November 2026: release 1's unseen "an iron
     # anvil" was chosen with made-up words painted on its side; docs/objects.md, "Painted lettering").
     lettering_asked = words.lettering_asked(subject.prompt)
-    first = painter.seed_of(prompt)
+    first = painter.seed_of(prompt) + settings.attempt * settings.picture_rounds * settings.tries
     os.makedirs(job.path("pictures"), exist_ok=True)
     # Each try is judged to show the thing asked for, and any quality its words name, and one that does not is not
     # chosen (10 November 2026: every war hammer chosen had an axe-like head, which this check refuses; docs/objects.md,
@@ -401,7 +410,7 @@ def shape_job(job, settings, shape_net, found, report):
     subject = job.subject
     tries = []
     for k in range(settings.shape_tries):
-        seed = SHAPE_FIRST_SEED + k
+        seed = SHAPE_FIRST_SEED + settings.attempt * settings.shape_tries + k
         dense_corners, dense_triangles, specks = shape_net.make(rgb, cutout.for_shape(mask), seed=seed)
         corners, triangles, _, simplifier = simplify.simplified(dense_corners, dense_triangles, settings.triangles)
         corners = object_checks.set_down(corners.astype(np.float64), job["size_m"], along_length=subject.is_weapon)
@@ -515,7 +524,7 @@ def painted_views(job, painter, shape, rgb, mask, settings, report):
         if job.subject.weapon_kind == "hafted" else None
     tries, made = [], []
     for repaint in range(view_agreement.MOST_REPAINTS + 1):
-        seed = PAINT_SEED + repaint
+        seed = PAINT_SEED + settings.attempt * (view_agreement.MOST_REPAINTS + 1) + repaint
         found = paint.painted(painter, shape["corners"], shape["triangles"], rgb, mask, words.paint_prompt(job.subject),
                               seed=seed, views_out=job.path("views", f"seed-{seed}"), report=report,
                               steps=settings.paint_steps, with_views=True, turn=turn)
@@ -747,8 +756,9 @@ def finished(job, settings, report=print):
     # Required by this run or by the run that made the job (a measured job finished again stays required).
     required_judge = settings.require_question_judge or bool(
         (job.record.get("settings") or {}).get("require_question_judge"))
+    # The turntable shows the one made: a pair's ("a pair of iron gauntlets") is asked about one ("an iron gauntlet").
     asked_check, job.record["question_judge"] = question_judge.object_check(
-        settings.question_judge, turntable, job["prompt"], required_judge,
+        settings.question_judge, turntable, job.subject.prompt, required_judge,
         getattr(settings, "question_judge_unavailable", ""))
     # The pictures asked the same, as a note (asked here, where the judge runs, not beside the picture model).
     tries = {}
@@ -759,11 +769,13 @@ def finished(job, settings, report=print):
     chosen_seed = str(job.record.get("picture", {}).get("seed"))
     if settings.question_judge is not None:
         try:
-            note = question_judge.picture_note(settings.question_judge, tries, chosen_seed, job["prompt"])
+            # The pictures show one: a pair's ("two iron candlesticks") are painted from the words for one.
+            painted = job.subject.prompt
+            note = question_judge.picture_note(settings.question_judge, tries, chosen_seed, painted)
             job.record["question_judge"]["pictures"] = note
             if note.get("none_reaches"):
-                report(f"{job['slug']}: note: to the question judge none of its pictures shows {job['prompt']}; if "
-                       f"the object is another thing, say what it looks like (\"{job['prompt']}, <its parts>\")")
+                report(f"{job['slug']}: note: to the question judge none of its pictures shows {painted}; if "
+                       f"the object is another thing, say what it looks like (\"{painted}, <its parts>\")")
         except question_judge.ASK_ERRORS as error:
             job.record["question_judge"]["pictures"] = {"judged": False, "why": f"{type(error).__name__}: {error}"}
     paint_checks = [*paint_checks, asked_check]
@@ -844,7 +856,10 @@ def finished(job, settings, report=print):
     written(job.path(f"{slug}.provenance.json"), lambda path: _json_to(path, provenance))
     # The .glb's texture is a picture the models painted: signed too. The .glb itself says plainly what made it.
     data = glb.glb_bytes(slug, baked["corners"], baked["triangles"], normals, baked["uvs"], baked["texture"],
-                         marks=marks, parts=parts, extras={"made_by": "model-maker", "prompt": job["prompt"],
+                         marks=marks, parts=parts, pair=job.subject.pair,
+                         pair_footwear=job.subject.noun in glb.FOOTWEAR or any(
+                             f in job.subject.prompt.lower().split() for f in glb.FOOTWEAR),
+                         extras={"made_by": "model-maker", "prompt": job["prompt"], "pair": job.subject.pair,
                                               "provenance": f"{slug}.provenance.json",
                                               "status": job.record["status"],
                                               "made_with_ai": MADE_WITH_AI_NOTE,

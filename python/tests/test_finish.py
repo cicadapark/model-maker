@@ -56,6 +56,14 @@ class BlackViews(unittest.TestCase):
         failed = inspection.views_check([inspection.black_share(good)] * 5 + [inspection.black_share(black)])
         self.assertFalse(failed.passed, failed.words)
 
+    def test_a_black_thing_on_its_grey_backdrop_is_not_a_broken_view(self):
+        # A smartphone's black screen filled 37 % of a view and was refused as broken (16 Nov 2026).
+        from model_maker import inspection
+
+        phone = np.full((64, 64, 3), 0.5)
+        phone[8:56, 12:52] = 0.0
+        self.assertTrue(inspection.views_check([inspection.black_share(phone)] * 6).passed)
+
 
 class SeenCoverage(unittest.TestCase):
     def test_the_inside_of_a_deep_narrow_well_counts_little(self):
@@ -89,6 +97,70 @@ class Export(unittest.TestCase):
         self.assertEqual(len(indices), 3 * len(triangles))
         self.assertEqual(document["asset"]["extras"]["prompt"], "an old iron sword")
 
+    def test_a_pair_is_the_one_mesh_placed_twice_mirrored_or_copied_beside_it(self):
+        # 16 Nov 2026: a pair (boots) is one object made and its mirror image, an exact match.
+        corners, triangles = shapes.sword()
+        made = bake.baked(corners, triangles, np.full((len(corners), 3), 0.6), None, side=128)
+        normals = M.corner_normals(corners, triangles)[made["original"]]
+        widths = np.ptp(made["corners"][:, [0, 2]], axis=0)
+        axis = 0 if widths[0] <= widths[1] * 1.1 else 2  # across the narrower width: side by side, not end to end
+        other = 2 - axis
+        if widths[axis // 2] < glb.FLAT_SHARE * min(widths[other // 2], float(np.ptp(made["corners"][:, 1]))):
+            axis = other  # a flat thing (this sword) stands beside its pair in its own plane
+        low, high = float(made["corners"][:, axis].min()), float(made["corners"][:, axis].max())
+        for pair in ("mirror", "copy"):
+            data = glb.glb_bytes("boot", made["corners"], made["triangles"], normals, made["uvs"], made["texture"],
+                                 pair=pair)
+            document, _ = glb.read_document(data)
+            self.assertEqual(len(document["meshes"]), 1)
+            roots = document["scenes"][0]["nodes"]
+            self.assertEqual(len(roots), 2)
+            second = document["nodes"][roots[1]]
+            self.assertEqual(second["mesh"], 0)
+            scale = second.get("scale", [1.0, 1.0, 1.0])
+            self.assertEqual(scale[axis], -1.0 if pair == "mirror" else 1.0)
+            self.assertEqual([v for k, v in enumerate(scale) if k != axis], [1.0, 1.0])
+            # The second's span across that width starts past the first's far side: they do not overlap.
+            ends = sorted(scale[axis] * x + second["translation"][axis] for x in (low, high))
+            self.assertGreater(ends[0], high)
+        single, _ = glb.read_document(glb.glb_bytes("boot", made["corners"], made["triangles"], normals, made["uvs"],
+                                                    made["texture"]))
+        self.assertEqual(single["scenes"][0]["nodes"], [0])
+
+    def test_a_shoe_s_mirror_stands_on_its_arch_side(self):
+        # Wooden clogs were placed a left on the right (16 Nov 2026): the mirror goes to the side the arch faces.
+        from model_maker import glb as G
+        for arch in (1, -1):
+            # A flat sole 30 cm long and 10 cm wide along z, its arch cut 2 cm into one side along the middle third.
+            xs, zs = np.meshgrid(np.linspace(0, 0.30, 61), np.linspace(-0.05, 0.05, 21))
+            sole = np.stack([xs.ravel(), np.zeros(xs.size), zs.ravel()], 1)
+            middle = (sole[:, 0] > 0.08) & (sole[:, 0] < 0.22)  # the arch's cut reaches past the middle third
+            sole = sole[~(middle & (arch * sole[:, 2] > 0.03))]
+            top = sole + [0, 0.08, 0]
+            corners = np.concatenate([sole, top])
+            node = G.pair_node("clog", corners, "mirror", footwear=True)
+            self.assertEqual(G.pair_node("glove", corners, "mirror")["translation"][2] > 0, True)  # not footwear
+            self.assertEqual(node["scale"], [1.0, 1.0, -1.0])
+            self.assertEqual(np.sign(node["translation"][2]), arch)
+
+    def test_a_flat_thing_s_pair_stands_beside_it_in_its_own_plane(self):
+        # Two daggers placed flat against flat 2 cm apart read as one from the front (review, 16 Nov 2026).
+        from model_maker import glb as G
+        blade = np.array([[x, y, z] for x in (-0.02, 0.02) for y in (0.0, 0.3) for z in (-0.003, 0.003)], dtype=float)
+        node = G.pair_node("dagger", blade, "copy")
+        self.assertGreater(node["translation"][0], 0.04)
+        self.assertEqual(node["translation"][2], 0.0)
+
+    def test_the_second_of_a_pair_has_the_first_s_marks(self):
+        corners, triangles = shapes.sword()
+        made = bake.baked(corners, triangles, np.full((len(corners), 3), 0.6), None, side=128)
+        normals = M.corner_normals(corners, triangles)[made["original"]]
+        marks = {"grip": ([0.0, 0.1, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0])}
+        document, _ = glb.read_document(glb.glb_bytes("dagger", made["corners"], made["triangles"], normals,
+                                                      made["uvs"], made["texture"], marks=marks, pair="copy"))
+        second = document["nodes"][document["scenes"][0]["nodes"][1]]
+        self.assertEqual([document["nodes"][c]["name"] for c in second["children"]], ["grip (pair)"])
+
     def test_a_part_our_code_adds_is_its_own_mesh_in_its_own_colour(self):
         corners, triangles = shapes.bow()
         made = bake.baked(corners, triangles, np.full((len(corners), 3), 0.6), None, side=256)
@@ -111,6 +183,16 @@ class Export(unittest.TestCase):
         # The quaternion's rotation of +Y.
         turned = np.array([2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x)])
         self.assertTrue(np.allclose(turned, [1.0, 0.0, 0.0], atol=1e-6))
+
+
+class RepairWords(unittest.TestCase):
+    def test_a_loose_piece_moved_to_touch_is_said_in_the_report(self):
+        from model_maker import report
+        words = report.repair_words({"holes_filled": 2, "pieces_joined": [{"moved_mm": 1.4, "at": [0, 0, 0]},
+                                                                         {"moved_mm": 2.6, "at": [0, 1, 0]}]})
+        self.assertIn("2 small holes filled", words)
+        self.assertIn("2 loose pieces within 3 mm moved to touch the main piece (at most 2.6 mm)", words)
+        self.assertNotIn("moved", report.repair_words({"holes_filled": 1, "pieces_joined": []}))
 
 
 class Simplify(unittest.TestCase):

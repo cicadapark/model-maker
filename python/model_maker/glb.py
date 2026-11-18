@@ -98,12 +98,76 @@ def png_bytes(texture):
     return out.getvalue()
 
 
+# The gap between the two of a pair: this share of the object's width, at least this many metres.
+PAIR_GAP_SHARE = 0.15
+PAIR_GAP_M = 0.02
+
+
+# A footprint's arch: the inner side of a shoe curves in along the middle third of its length, the outer side
+# barely. A difference of at least this share of the length tells the inner side.
+ARCH_SHARE = 0.005
+
+
+def arch_side(corners, axis):
+    """Which side (+1 or -1 along `axis`) a shoe's inner side, its arch, faces: the footprint (its lowest 8 %) inset
+    more along the middle third of its length on that side; 0 when the footprint does not tell (a glove, a gauntlet)."""
+    length = 2 if axis == 0 else 0
+    height = float(np.ptp(corners[:, 1]))
+    bottom = corners[corners[:, 1] <= corners[:, 1].min() + 0.08 * height]
+    low, high = float(bottom[:, length].min()), float(bottom[:, length].max())
+    middle = bottom[(bottom[:, length] > low + (high - low) / 3) & (bottom[:, length] < high - (high - low) / 3)]
+    if len(middle) < 3:
+        return 0
+    # The middle's edges by its 5th and 95th percentiles, so a few stray points do not decide.
+    inset_low = float(np.percentile(middle[:, axis], 5) - bottom[:, axis].min())
+    inset_high = float(bottom[:, axis].max() - np.percentile(middle[:, axis], 95))
+    if abs(inset_high - inset_low) < ARCH_SHARE * (high - low):
+        return 0
+    return 1 if inset_high > inset_low else -1
+
+
+# A thing this flat (its thinner floor width under this share of its other sizes, a dagger standing on its point) is
+# placed beside its pair in its own plane, not face to face: two daggers 2 cm apart flat against flat read as one.
+FLAT_SHARE = 1 / 3
+# Things a footprint tells left from right by its arch.
+FOOTWEAR = ("boot", "shoe", "clog", "sandal", "slipper", "sabaton", "sneaker")
+
+
+def pair_node(name, corners, pair, footwear=False):
+    """The second of a pair (`pair`: "mirror" or "copy"): the same mesh placed again beside the first, a gap between
+    them. Side by side across the object's narrower width on the floor (x or z): a boot's pair stands beside it, toes
+    the same way, not heel to heel (the first pair made, 16 Nov 2026, was placed along the boot's length); a round
+    thing's along x. A mirror is the mesh scaled by -1 across that same axis (glTF turns a mirrored node's faces
+    itself), so the two are a left and a right; it stands on the side the made one's arch faces, so the two inner
+    sides face each other (wooden clogs were placed the other way round, a left on the right, 16 Nov 2026)."""
+    widths = np.ptp(corners[:, [0, 2]], axis=0)
+    axis = 0 if widths[0] <= widths[1] * 1.1 else 2
+    other = 2 if axis == 0 else 0
+    if widths[[0, 2].index(axis)] < FLAT_SHARE * min(widths[[0, 2].index(other)], float(np.ptp(corners[:, 1]))):
+        axis = other
+    low, high = float(np.min(corners[:, axis])), float(np.max(corners[:, axis]))
+    gap = max(PAIR_GAP_SHARE * (high - low), PAIR_GAP_M)
+    scale, shift = [1.0, 1.0, 1.0], [0.0, 0.0, 0.0]
+    if pair == "mirror":
+        scale[axis] = -1.0
+        if footwear and arch_side(corners, axis) < 0:
+            # v -> -v + shift: the mirror's far side (-low + shift) lies the gap before the first's near side.
+            shift[axis] = 2 * low - gap
+        else:
+            # v -> -v + shift: the mirror's near side (-high + shift) lies the gap past the first's far side.
+            shift[axis] = 2 * high + gap
+        return {"name": f"{name} (its mirror image)", "mesh": 0, "scale": scale, "translation": shift}
+    shift[axis] = high - low + gap
+    return {"name": f"{name} (a copy)", "mesh": 0, "translation": shift}
+
+
 def glb_bytes(name, corners, triangles, normals, uvs, texture, marks=None, extras=None, parts=None,
-              texture_signed=None):
+              texture_signed=None, pair="", pair_footwear=False):
     """The .glb's bytes. `marks`: {name: (position, up, facing)} empty nodes under the object's node. `parts`: meshes
     our own code adds (a bow's string), each {"name", "corners", "triangles", "colour"} in one plain colour, a node
     under the object's node. `texture_signed`: the texture's PNG bytes with its content credentials in them, from its
-    plain ones (credentials.signed_bytes)."""
+    plain ones (credentials.signed_bytes). `pair`: "mirror" or "copy" puts the object in the scene twice
+    (`pair_node`): one made and checked, the second the same mesh placed again."""
     from .mesh_tools import corner_normals
 
     buffer = _Buffer()
@@ -134,7 +198,7 @@ def glb_bytes(name, corners, triangles, normals, uvs, texture, marks=None, extra
     document = {
         "asset": {"version": "2.0", "generator": "model-maker"},
         "scene": 0,
-        "scenes": [{"nodes": [0]}],
+        "scenes": [{"nodes": [0] + ([len(nodes)] if pair else [])}],
         "nodes": nodes,
         "meshes": meshes,
         "materials": materials,
@@ -146,6 +210,16 @@ def glb_bytes(name, corners, triangles, normals, uvs, texture, marks=None, extra
         "accessors": buffer.accessors,
         "buffers": [{"byteLength": len(buffer.data)}],
     }
+    if pair:
+        second = pair_node(name, np.asarray(corners), pair, pair_footwear)
+        # The second has the first's marks and parts too (a dagger's grip, a bow's string), as its own children.
+        copies = [{k: v for k, v in nodes[child].items()} for child in nodes[0].get("children", [])]
+        nodes.append(second)
+        if copies:
+            second["children"] = list(range(len(nodes), len(nodes) + len(copies)))
+            for copy in copies:
+                copy["name"] = f"{copy['name']} (pair)"
+                nodes.append(copy)
     if extras:
         document["asset"]["extras"] = extras
     text = json.dumps(document, separators=(",", ":")).encode()

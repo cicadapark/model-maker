@@ -6,6 +6,8 @@ not (the report says which word decided it), and `model-maker make --stands no` 
 """
 
 import functools
+import json
+import os
 import re
 from dataclasses import dataclass, field
 
@@ -135,6 +137,16 @@ THING_PICTURE_WORDS = {
     "water wheel": ("the big wheel of a water mill: its rim lined all round with many flat wooden paddles standing "
                     "out from it, on a thick axle"),
 }
+# More of them, kept as data with their measurements (picture_words.json; docs/names-the-picture-model-misses.md).
+PICTURE_WORDS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "picture_words.json")
+
+
+def _measured_picture_words():
+    with open(PICTURE_WORDS_FILE, encoding="utf-8") as file:
+        return {entry["name"]: entry["words"] for entry in json.load(file)["entries"]}
+
+
+THING_PICTURE_WORDS = {**THING_PICTURE_WORDS, **_measured_picture_words()}
 HEAD_KINDS = {"war hammer": "hammer", "warhammer": "hammer", "hammer": "hammer", "maul": "hammer",
               "mallet": "hammer", "sledgehammer": "hammer", "sledge hammer": "hammer", "mace": "mace", "club": "club"}
 # Kinds of thing not made yet, and why, said to whoever asks for one. Bows (the second trial, 2026-11-09): painted
@@ -151,19 +163,31 @@ NOT_WEAPON = ("bow tie", "ship", "violin", "cello", "rainbow", "elbow", "bowl")
 STANDING = {
     "chair": 0.95, "armchair": 1.0, "throne": 1.5, "stool": 0.5, "bench": 0.5, "table": 0.75, "desk": 0.8,
     "barrel": 0.9, "keg": 0.5, "cask": 0.7, "crate": 0.6, "chest": 0.8, "trunk": 0.8, "box": 0.4, "cabinet": 1.6,
-    "wardrobe": 1.9, "bookshelf": 1.8, "shelf": 1.5, "bed": 2.0, "jug": 0.3, "jar": 0.25, "pot": 0.3, "vase": 0.4,
+    "wardrobe": 1.9, "bookshelf": 1.8, "shelf": 1.5, "bed": 2.0, "bed frame": 2.0, "jug": 0.3, "jar": 0.25, "pot": 0.3, "vase": 0.4,
     "urn": 0.5, "bottle": 0.3, "flask": 0.2, "mug": 0.12, "cup": 0.1, "goblet": 0.2, "tankard": 0.18, "bowl": 0.2,
     "bucket": 0.35, "basket": 0.4, "lantern": 0.35, "lamp": 0.4, "candle": 0.25, "candlestick": 0.3,
     "candelabra": 0.5, "book": 0.25, "anvil": 0.5, "cauldron": 0.6, "statue": 1.2, "bust": 0.5, "clock": 0.4,
     "globe": 0.5, "pedestal": 1.0, "chess": 0.1, "chess board": 0.45, "chessboard": 0.45, "coin": 0.03, "plate": 0.25, "tray": 0.45, "teapot": 0.2,
-    "kettle": 0.25, "stump": 0.5, "rock": 0.6,
+    "kettle": 0.25, "stump": 0.5, "rock": 0.6, "sandal": 0.27,
     "boulder": 1.2, "mushroom": 0.3, "well": 1.6, "fountain": 1.5, "signpost": 2.2, "mailbox": 1.2,
+    # Things of today (16 Nov 2026: model-maker is not only for old things; these were all made 0.5 m and unchecked).
+    "sofa": 2.0, "couch": 2.0, "office chair": 1.1, "floor lamp": 1.6, "desk lamp": 0.45, "toaster": 0.3,
+    "microwave": 0.5, "microwave oven": 0.5, "oven": 0.6, "espresso machine": 0.4, "coffee machine": 0.4,
+    "coffee maker": 0.35, "blender": 0.4, "fridge": 1.8, "refrigerator": 1.8, "washing machine": 0.85,
+    "vending machine": 1.8, "television": 0.8, "tv": 0.8, "monitor": 0.6, "computer": 0.45, "laptop": 0.35,
+    "laptop computer": 0.35, "printer": 0.45, "speaker": 0.3, "radio": 0.3, "traffic cone": 0.7,
+    "fire extinguisher": 0.6, "water cooler": 1.1, "trash can": 0.7, "bin": 0.6, "robot vacuum": 0.35,
+    "robot vacuum cleaner": 0.35, "bread bin": 0.35,
+    "suitcase": 0.7, "phone booth": 2.3,
 }
 # Things among those that stand that lie on their broad face: set down, they rest on whichever face they fall on, and
 # the shape model, which makes a thing as its picture shows it, may make one standing on an edge (the fix-check's book,
 # painted from well above, came out tilted toward the viewer and settled 54.8 degrees). The finish lays such a thing on
 # its likeliest resting face (lying.py); a thing that stands on a base of its own (a chair) is never laid down.
-LYING = {"book", "coin", "plate", "tray", "chess board", "chessboard"}
+# A sandal lies on its sole (the pair trial of 16 Nov 2026: made standing on its heel on both cards).
+# A robot vacuum lies on its broad face (things of today, 16 Nov 2026: made standing on its edge on both cards).
+LYING = {"book", "coin", "plate", "tray", "chess board", "chessboard", "sandal", "smartphone", "phone", "mobile phone",
+         "tablet", "keyboard", "remote control", "robot vacuum", "robot vacuum cleaner"}
 # Words that stand a thing that lies on its edge or end on purpose ("a book standing upright"): it is left as made.
 UPRIGHT_WORDS = ("standing", "upright", "on its edge", "on edge", "on its end", "on end", "on its spine")
 # Words that make "plate" not a dish ("plate armour").
@@ -175,6 +199,12 @@ NOT_STANDING = {
     "carpet": 2.0, "painting": 0.8, "mirror": 0.8, "wreath": 0.5, "necklace": 0.4, "ring": 0.03, "crown": 0.2,
     "hat": 0.35, "helmet": 0.3, "boot": 0.3, "glove": 0.25, "bag": 0.4, "sack": 0.6, "scroll": 0.3, "map": 0.5,
     "wand": 0.35, "torch": 0.5, "pipe": 0.25, "feather": 0.3, "bone": 0.4, "skull": 0.2, "horn": 0.4,
+    # Things of today (see STANDING).
+    "smartphone": 0.15, "phone": 0.15, "mobile phone": 0.15, "tablet": 0.25, "headphones": 0.2, "controller": 0.16,
+    "game controller": 0.16, "remote control": 0.2, "computer mouse": 0.12, "keyboard": 0.45, "camera": 0.15,
+    "drone": 0.4, "bicycle": 1.7, "bike": 1.7, "skateboard": 0.8, "scooter": 1.1, "guitar": 1.0,
+    "electric guitar": 1.0, "umbrella": 0.9, "backpack": 0.5, "sunglasses": 0.15, "shoe": 0.3, "sneaker": 0.3,
+    "running shoe": 0.3, "vacuum cleaner": 1.1,
 }
 # Long-handled tools have a shaft and a grip as a hafted weapon does: those checks apply.
 HANDLED_TOOLS = {"broom", "shovel", "spade", "rake", "pitchfork", "hoe", "scythe"}
@@ -189,6 +219,8 @@ NOT_SYMMETRIC_THINGS = {
     "saw", "wrench", "key", "pipe", "boot", "glove", "bag", "sack", "scroll", "map", "torch", "teapot", "kettle",
     "pick", "sickle", "hatchet", "axe", "battle axe", "battleaxe", "war hammer", "warhammer", "hammer", "flail",
     "halberd", "glaive", "poleaxe", "club", "statue", "bust", "mushroom", "signpost",
+    "guitar", "electric guitar", "bicycle", "bike", "scooter", "camera", "coffee machine", "espresso machine",
+    "coffee maker", "vacuum cleaner", "shoe", "sneaker", "running shoe",
 }
 # Two-sided heads make a hafted weapon mirror-symmetric across its haft.
 TWO_SIDED_WORDS = ("double-bitted", "double bitted", "double-headed", "double headed", "double-bladed",
@@ -244,7 +276,7 @@ ONE_THING_IN_PAIRS = (
     "scissors", "shears", "tongs", "pliers", "pincers", "tweezers", "snips", "clippers", "secateurs", "nutcrackers",
     "glasses", "spectacles", "goggles", "binoculars", "trousers", "pants", "breeches", "shorts", "jeans", "tights",
     "bellows", "compasses", "calipers", "callipers", "dividers", "handcuffs", "manacles", "shackles", "drawers",
-    "shelves", "stairs", "steps", "scales", "bagpipes", "gallows", "antlers",
+    "shelves", "stairs", "steps", "scales", "bagpipes", "gallows", "antlers", "headphones", "sunglasses", "earmuffs",
 )
 # Plurals after a count that measure, not count: "a 100 years old chest".
 MEASURES = ("years", "days", "weeks", "months", "hours", "centuries", "decades", "inches", "feet", "metres", "meters",
@@ -345,7 +377,7 @@ CARRIED_ON_WORDS = ("on",)
 NOT_A_CHARACTER_WORDS = ("statue", "statuette", "figurine", "sculpture", "carving", "carved", "toy", "chess",
                          "rocking", "plush", "stuffed", "puppet", "ornament", "weathervane", "hand guard", "arm guard",
                          "shin guard", "knee guard", "neck guard", "mouth guard", "finger guard", "fire guard",
-                         "cross guard")
+                         "cross guard", "teddy", "hobby horse", "garden gnome")
 # What the picture-against-prompt judge (subject_judge) compares a picture with: the prompt itself, against every other
 # kind of thing release 1 makes and a few things a picture might show instead of the one asked for. Each kind is its
 # words (any of them in a prompt makes it the prompt's own kind, not a contrast) and one description of its look that
@@ -360,7 +392,7 @@ SUBJECT_KINDS = (
     (("barrel", "keg", "cask"), "a barrel, a round wooden cask bound with hoops"),
     (("chest", "trunk", "box", "crate", "coffer"), "a chest, a box with a lid"),
     (("cabinet", "wardrobe", "cupboard", "bookshelf", "shelf", "dresser"), "a cabinet, tall furniture with doors"),
-    (("bed",), "a bed, a frame with a mattress to sleep on"),
+    (("bed", "bed frame"), "a bed, a frame with a mattress to sleep on"),
     (("jug", "pitcher", "jar", "pot", "vase", "urn", "amphora"), "a jug, a round vessel with a handle and a spout"),
     (("bottle", "flask", "potion", "vial"), "a bottle, a narrow-necked vessel with a stopper"),
     (("mug", "cup", "goblet", "tankard", "chalice"), "a cup, a small vessel to drink from"),
@@ -479,6 +511,7 @@ class Subject:
     state: str = ""  # "closed" or "open" for a thing with a lid, cover or doors ("" for others)
     lies: bool = False  # it rests on its broad face (a book, a coin, a plate): laid on its likeliest resting face
     several: str = ""  # the words that ask for more than one thing ("" for one): not made (SEVERAL_THINGS)
+    pair: str = ""  # a pair of one thing, made once and placed twice: "mirror" (a left and a right) or "copy"
     qualities: list = field(default_factory=list)  # the qualities the words name ("curved", "round"), judged
     why: dict = field(default_factory=dict)
 
@@ -536,6 +569,28 @@ def _said(text, word):
     return False
 
 
+# A known thing's word followed by another noun is not the thing asked for: the last noun of a name is (English puts
+# the head noun last: "a coin purse" is a purse, "a lamp post" a post, "a copper bed warmer" a warmer). These words
+# may follow the thing's word and leave it the head noun: the words that join or end a phrase, and words that say its
+# size or what it is ("a sword about a metre long", "a flail weapon"); a participle may too ("a rug rolled up").
+AFTER_THE_HEAD_NOUN = ("in", "with", "of", "on", "under", "holding", "filled", "by", "for", "from", "like", "and", "or",
+                       "but", "nor", "to", "at", "as", "than", "that", "which", "whose", "where", "is", "are", "was",
+                       "has", "have", "its", "about", "around", "through", "along", "across", "between", "behind",
+                       "beside", "upon", "onto", "into", "within", "without", "near", "next", "against", "over",
+                       "above", "below", "beneath", "inside", "outside", "long", "tall", "wide", "high", "deep",
+                       "thick", "thin", "weapon", "tool", "made", "cast", "sewn", "woven", "hewn", "worn",
+                       "held", "hung", "set", "full", "half", "both", "each", "ready", "open", "shut", "closed",
+                       # A size, a degree or a way it lies after the thing ("a sword one metre long", "a sword very
+                       # old", "a chest slightly open", "a mug upside down": review of 16 Nov 2026).
+                       "a", "an", "the", "one", "two", "three", "four", "five", "very", "slightly", "quite", "rather",
+                       "fairly", "almost", "nearly", "just", "so", "too", "barely", "partly", "fully", "still",
+                       "upside", "standing", "lying", "leaning", "old", "new", "small", "large", "big")
+# Known words that name their thing before another word: "a chess knight" is a chess piece.
+NAMED_BEFORE_ITS_NOUN = ("chess",)
+# Names of two or more words, each word a different thing: the judge is asked the whole name ("a lobster pot" is a
+# trap, not a pot; "a chest of drawers" not a chest).
+COMPOUND_NAMES = ("lobster pot", "chest of drawers", "jack-in-the-box")
+
 # The words that end a prompt's head phrase (with a comma).
 HEAD_PHRASE_WORDS = ("in", "with", "of", "on", "under", "holding", "filled")
 HEAD_PHRASE_END = re.compile(rf"\b(?:{'|'.join(HEAD_PHRASE_WORDS)})\b|,")
@@ -560,11 +615,31 @@ def _named(text, table):
     """The table's word that is the text's head noun: within the head phrase if any is (else anywhere), the one
     ending last (the noun after its adjectives: "a wooden treasure chest"), the longer of two ending together
     ("battle axe" over "axe")."""
+    if any(_found(text, name) for name in COMPOUND_NAMES):
+        return ""
     for part in (_head_phrase(text), text):
-        found = [w for w in table if _found(part, w)]
+        found = [w for w in table if _found(part, w) and _ends_a_name(part, w)]
         if found:
             return max(found, key=lambda w: (part.rfind(w) + len(w), len(w)))
     return ""
+
+
+def _ends_a_name(part, word):
+    """Whether `word` is found in `part` at least once not followed by another noun (`AFTER_THE_HEAD_NOUN`): "a coin
+    purse" names no coin, "a sword about a metre long" a sword."""
+    if word in NAMED_BEFORE_ITS_NOUN:
+        return True
+    for match in re.finditer(rf"(?<![a-z]){re.escape(word)}(?:e?s)?(?![a-z])", part):
+        rest = part[match.end():]
+        if rest.startswith(("'", "\u2019", "-")):
+            continue
+        after = re.match(r"\s*([a-z]+)", rest)
+        if after is None:
+            return True
+        following = after.group(1)
+        if following in AFTER_THE_HEAD_NOUN or PARTICIPLE.fullmatch(following) or following in IRREGULAR_PARTICIPLES:
+            return True
+    return False
 
 
 def known_things():
@@ -627,7 +702,7 @@ def _one_of(text, things):
     if kept and _last_thing(" ".join(kept), things) is None:
         # No known thing: the last word made one by the plain rules, so the user is still shown what to ask; when it
         # is no plural by them ("a set of armour"), nothing is suggested.
-        one = re.sub(r"(?:(?<=[sxz])|(?<=[cs]h))es$|(?<![su])s$", "", re.sub(r"ies$", "y", kept[-1]))
+        one = one_by_plain_rules(kept[-1])
         if len(kept[-1]) <= 3 or one == kept[-1]:
             return ""
         kept[-1] = one
@@ -636,6 +711,69 @@ def _one_of(text, things):
     one = " ".join(kept)
     rest = rest.strip()
     return _article(one) + ("" if not rest else rest if rest.startswith(",") else " " + rest)
+
+
+def one_by_plain_rules(word):
+    """A plural that is no known thing made one by the plain rules: "horses" a horse (after a single s only the s
+    goes), "wolves" a wolf, "thieves" a thief, "heroes" a hero, "boxes" a box, "berries" a berry. 0.3.0's review: the
+    rules before ("hors", "wolve", "heroe") hid the creature from its check, and a pair of horses was made."""
+    if re.search(r"(?<![s])ses$", word):
+        return word[:-1]
+    if re.search(r"(?:(?<=[lr])|(?<=ie)|(?<=ea)|(?<=oa))ves$", word):
+        return word[:-3] + "f"
+    if re.search(r"(?<=[rt])oes$", word):
+        return word[:-2]
+    return re.sub(r"(?:(?<=[sxz])|(?<=[cs]h))es$|(?<![su])s$", "", re.sub(r"ies$", "y", word))
+
+
+# Plurals the plain rules cannot be sure of ("knives" a knife, "sleeves" a sleeve, "canoes" a canoe): a pair named by
+# one that is no known thing is not made, but answered as more than one thing.
+UNSURE_PLURAL = re.compile(r"(?:ves|oes)$")
+
+
+# Things whose pair is a left and a right: the second of the pair is the first's mirror image (16 Nov 2026: a mirror is
+# an exact match, better than a second one made). Others ("a pair of candlesticks") are copied.
+LEFT_AND_RIGHT = ("boot", "shoe", "glove", "gauntlet", "sandal", "slipper", "clog", "mitten", "greave", "vambrace",
+                  "bracer", "sabaton", "spur", "sneaker", "running shoe")
+PAIR = re.compile(r"^(?:an?\s+|the\s+)?(?:[a-z]+\s+)?(?:pair|couple)\s+of\s+(?!(?:[a-z]+\s+)*?(?:pairs|sets)\b)"
+                  r"|^(?:two|2)\s+(?!(?:pairs|couples|sets|groups)\b)")
+# Words that say how the two stand or differ: such a prompt asks for more than two copies of one thing.
+PAIR_ARRANGEMENT = ("crossed", "facing", "each", "other", "one", "left", "right", "matching", "different", "opposite",
+                    "side", "together", "apart", "stacked", "leaning", "hanging", "dozen", "hundred", "thousand", "score")
+
+
+def pair_kind(text, one, prompt=""):
+    """For words asking for two of one thing and nothing more ("a pair of boots", "two candlesticks", "a pair of boots
+    with brass buckles"): "mirror" when the two are a left and a right (LEFT_AND_RIGHT), else "copy"; "" for anything
+    else, answered as before (one object at a time): a set or three, a second thing ("a pair of boots and a hat"), a
+    count ("two dozen eggs"), where they stand or how they differ ("two chairs at a table", "two swords crossed",
+    "one red and one blue"), lettering (a mirror would turn letters round, and the words for one lose their quotes),
+    or a name whose one cannot be said ("a pair of boot racks"). `prompt`: the words as written."""
+    match = PAIR.match(text)
+    if not one or not match or lettering_asked(prompt or text):
+        return ""
+    rest = text[match.end():]
+    if JOINED.search(rest) or "," in rest or "&" in rest:
+        return ""
+    words_of_rest = re.findall(r"[a-z0-9'\-]+", rest)
+    if any(w in PAIR_ARRANGEMENT or w in COUNT_WORDS or w in GROUP_WORDS or w.isdigit() for w in words_of_rest):
+        return ""
+    # After the thing, only "with ..." may describe it ("two chairs at a table" says where they stand).
+    tail = re.search(rf"\b(?:{'|'.join(COUNT_PHRASE_WORDS)})\b", rest)
+    if tail and tail.group(0) != "with":
+        return ""
+    # The words for one must name the thing in the singular ("a boot racks" is no one thing).
+    thing = COUNT_PHRASE_END.split(rest, maxsplit=1)[0].split()
+    single = _head_phrase(one).split()
+    if not thing or not single or thing[-1] == single[-1]:
+        return ""
+    named = _last_thing(_head_phrase(one), set(known_things()) | set(LEFT_AND_RIGHT))
+    if not named and UNSURE_PLURAL.search(thing[-1]):
+        return ""
+    # A pair of creatures is answered as two creatures were before pairs ("a pair of horses").
+    if character_of(rest) or character_of(one):
+        return ""
+    return "mirror" if named and named[1] in LEFT_AND_RIGHT else "copy"
 
 
 def several_of(text):
@@ -837,6 +975,14 @@ def subject_of(prompt):
         why["kind"] = f"a character: the word '{word}'{with_animal}; characters come after the animals"
         return Subject(prompt=cleaned(prompt), kind="character", noun=word, why=why, not_yet=CHARACTERS_LATER)
     several, one = several_of(text)
+    paired = pair_kind(text, one, prompt) if several else ""
+    if paired:
+        single = subject_of(one)
+        if not single.not_yet and not single.several:
+            single.pair = paired
+            single.why["pair"] = (f"a pair: made once as '{one}', the second "
+                                  + ("its mirror image (a left and a right)" if paired == "mirror" else "an exact copy"))
+            return single
     if several:
         if one and (several_of(one)[0] or character_of(one)):
             one = ""
@@ -943,6 +1089,28 @@ def state_texts(subject):
     return (shut, opened) if subject.state == "closed" else (opened, shut)
 
 
+# Words before a name that make it a small copy, not the thing a description shows ("a toy catapult").
+COPY_WORDS = ("toy", "model", "miniature")
+
+
+def names_the_thing(prompt, name):
+    """Whether the prompt asks for the thing `name` itself: the name stands in the head phrase, not followed by another
+    noun and not after a word that makes it a copy. "a gothic font" asks for a font; "a sign painted in a gothic font",
+    "a canvas stretcher frame", "a toy catapult" do not (a description said for them paints the wrong thing)."""
+    text = cleaned(prompt).lower()
+    head = _head_phrase(text)
+    if HEAD_PHRASE_END.search(name):
+        # A name with "of", "in", ... in it ("a pair of boots"): it starts in the head phrase, read in the whole text.
+        start = re.search(rf"(?<![a-z]){re.escape(name)}(?![a-z])", text)
+        if start is None or start.start() > len(head) or not _ends_a_name(text, name):
+            return False
+        head = text[:start.end()]
+    elif not _found(head, name) or not _ends_a_name(head, name):
+        return False
+    before = re.findall(rf"([a-z-]+)\s+{re.escape(name)}(?![a-z])", head)
+    return not any(word in COPY_WORDS for word in before)
+
+
 def picture_prompt(subject, lead=DEFAULT_LEAD):
     """The words the picture model is given: the light first, then the user's words, then the view and style."""
     if subject.weapon_kind == "shield":
@@ -961,7 +1129,7 @@ def picture_prompt(subject, lead=DEFAULT_LEAD):
         view = OBJECT_VIEW
     state = f", {STATE_PICTURE_WORDS[OPENING_PARTS[subject.noun]][subject.state]}" if subject.state else ""
     head = f", {HEAD_PICTURE_WORDS[HEAD_KINDS[subject.noun]]}" if subject.noun in HEAD_KINDS else ""
-    head += "".join(f", {said}" for name, said in THING_PICTURE_WORDS.items() if _found(subject.prompt.lower(), name))
+    head += "".join(f", {said}" for name, said in THING_PICTURE_WORDS.items() if names_the_thing(subject.prompt, name))
     curve = f", {CURVED_BLADE_WORDS}" if subject.weapon_kind == "curved blade" else ""
     style = LETTERED_STYLE if lettering_asked(subject.prompt) else STYLE
     return f"{LEADS[lead]} {subject.prompt}{state}{head}{curve}, {view}, {style}"

@@ -33,7 +33,9 @@ is given here.
 Before a shape is checked (in step 2 and again in step 4) it is cleaned up the standard way, each
 step counted in the report: corners at the same place joined; triangles with no area, folds of no
 thickness and doubled triangles dropped; corners split where two sheets touch; holes filled when
-small (at most 24 edges and 5 % of the object's size round); hollows sealed inside it dropped. On
+small (at most 24 edges and 5 % of the object's size round); hollows sealed inside it dropped; a loose piece that
+comes within 3 mm (and 1 % of the object's size) of the main piece moved by that gap to touch it (a candelabra's arm
+the shape model left a hair apart was refused by "one main piece"; a gap that shows is left). On
 the first trial every hole was a seam of unjoined corners and every torn edge a doubled triangle
 left by the cut to the triangle budget; the one hole left after joining was 8 edges and 2.5 % of
 the barrel's size round.
@@ -41,7 +43,9 @@ the barrel's size round.
 Settings worth knowing: `--lead` (the words about light and backdrop the picture model is given
 first), `--paint-steps` (the view painter's steps, 20 by default: on the second trial 20 painted as
 well as 50 by coverage and likeness in under half the time, about 4 minutes, not 8 to 9),
-`--shape-tries`, `--tries`, `--picture-rounds`, `--require-lettering` (every picture must be read for painted
+`--shape-tries`, `--tries`, `--picture-rounds`, `--attempt N` (a refused object made again: its pictures, shapes
+and views from seeds after every seed the attempts before it used; 0, the default, draws the same seeds as before),
+`--require-lettering` (every picture must be read for painted
 lettering: without a usable tesseract no job is made; the measured runs use it).
 
 `./model-maker batch PROMPTS.txt --out DIR` runs many prompts stage by stage, so each model is
@@ -65,14 +69,19 @@ word decided each choice:
   stand as made, and one that tips fails;
 * whether it is mirror-symmetric (a chest, a sword, a spear, a double-bitted axe are; a war hammer
   with a spike, a broom, anything "broken" or "open" are not; "never opened" or "cannot be opened" opens nothing);
-* its usual size: the largest side of an object, the length of one held in the hand. `--size` sets it;
+* its usual size: the largest side of an object, the length of one held in the hand. `--size` sets it. Since 0.3.0
+  about 60 names of things of today are known as well (a smartphone, a laptop, a sofa, a fridge, a bicycle,
+  sneakers), each with its usual size, whether it stands or lies (a robot vacuum lies on its broad face) and whether
+  it is mirror-symmetric; sneakers and running shoes are a left and a right, and "a pair of headphones" is one thing;
 * for a thing with a lid, a cover or doors (a chest, trunk, box, crate, book, cabinet, wardrobe),
   whether it is shut or open: shut unless the words say "open", "opened" or "ajar" (and not "never opened", "not
   open", "cannot be opened": a negation up to three words before the word denies it). The picture model
   is told so after the prompt ("its lid shut"; a book "lying shut, only its cover showing").
 
-* whether it asks for more than one thing: a pair ("a pair of boots"), a count ("two chairs", "3 swords"), a group
-  ("a set of knives"), a known thing in the plural ("leather boots") or two known things joined ("a sword and a
+* whether it asks for two of one thing ("a pair of boots", "two candlesticks"): such a pair is made once, as "a boot",
+  and placed twice in the .glb, the second the first's mirror image when the two are a left and a right (boots,
+  shoes, gloves, gauntlets) and an exact copy otherwise (below, "Pairs");
+* whether it asks for more than one thing otherwise: a count ("three chairs", "3 swords"), a group ("a set of knives"), a known thing in the plural ("leather boots") or two known things joined ("a sword and a
   shield"). model-maker makes one object at a time, so such a prompt is answered before anything is painted, with the
   one thing to ask for instead: `model-maker makes one object at a time, and these words ask for more than one. Try
   one: "a leather boot".` A thing that is one object though named as a pair or a set is made ("a pair of scissors",
@@ -113,16 +122,22 @@ Objects:
 
 | Check | Passes when |
 |---|---|
-| outline matches the picture | judged against the cut-out the shape model was given (its largest piece, its pinholes filled), from the view that matches best (its turn, its tilt and the camera's distance: straight on, or through a lens 6, 4 or 3 times the object's size away, as the picture is a photograph; the views compared by the edges' mean distance, each camera distance refined; the tilts tried from level to 24° closer together for a deep, low thing, see "False refusals"), on a canvas as wide as the picture needs (a model wider still from that view fails), the outlines' edges lie at most 1.9 % of the height apart on average and 4 % at the 95th percentile (a compact shape offset all round by 1.9 % overlaps its picture 85 %), and no piece one outline has in a gap of the other (a web between legs) is thicker than 8 %; the overlap itself is shown, as it is unfair to thin parts: a chair leg a pixel off counts wholly against it |
+| outline matches the picture | judged against the cut-out the shape model was given (its largest piece, its pinholes filled), from the view that matches best (its turn, its tilt and the camera's distance: straight on, or through a lens 6, 4 or 3 times the object's size away, as the picture is a photograph; the views compared by the edges' mean distance, each camera distance refined; the tilts tried from level to 24° closer together for a deep, low thing, see "False refusals"), on a canvas as wide as the picture needs (a model wider still from that view fails), the outlines' edges lie at most 1.9 % of its size apart on average and 4 % at the 95th percentile (its size: its height, or for a thing wider than high the square root of its height times its width, so a long, low bed frame or rolling pin is not refused for a few pixels at its ends) (a compact shape offset all round by 1.9 % overlaps its picture 85 %), and no piece one outline has in a gap of the other (a web between legs) is thicker than 8 %; the overlap itself is shown, as it is unfair to thin parts: a chair leg a pixel off counts wholly against it |
 | holes the picture shows are open | each hole of the cut-out with an inner part (1.9 % of the height in from its edge) of at least 50 canvas pixels, showing the backdrop's colour (within 10, delta E), is covered by the model's outline at most a third, seen from the camera found with those inner parts left out; and no hole of the model's own outline is covered by the picture more than a third. Counted only when a hole was judged; holes too small say "not judged" (see "Holes the picture shows") |
 | no holes | no edge is used by one triangle only |
 | one main piece | the main piece is 98 % of the surface; loose pieces (touching nothing) are listed |
 | every foot on the ground | no foot (a low point of the underside, lower than all round it, well outside where the others touch) stops short of the ground by more than 0.5 % of the height |
 | base level | set down, it settles at most 2° onto the face of its hull under its centre of mass |
 | centre over the base | its centre of mass lies 15 % of the base's radius inside where it touches the ground |
+| closed underneath | (a thing that stands on its own base) seen from straight below, at most 40 % of what is seen is a hollow closed in all round by the base; the space under a table, which reaches the outline, does not count (see "Open underneath") |
 | left-right symmetry | mirrored across its best upright plane, it lies at most 2 % of its size from itself on average, and at most 5 % at the 98th percentile (measured to its triangles: a leg missing, out of place or on one side) |
 | paint covers the surface | the painted views coloured 90 % of the surface as it is seen: each texel counted by the share of 32 directions round the object it is in view from (the inside of a jug's neck counts little); the plain share of texels is shown beside it |
-| fill matches the paint round it | (when the paint was touched up) judged on what the finished model shows. The fill kept: in no touch-up view is more than 10 % of it a colour found nowhere in the paint round it (each filled point against the 32 painted points nearest it on the same surface, foreign when more than 20, delta E, from every one of them), and no joined foreign place is larger than 3 % of the object's size. The places left unpainted (the fill the touch-up left out, which shows the colour spread from round it): none larger than 3 % is a smear, where neither the paint round it nor the colour it shows is one colour (less than 90 % of each within 20 of its median). The fill as the inpainter painted it, before what was foreign was left out, is shown, not counted |
+| fill matches the paint round it | a note, not a refusal, since 0.3.0: it is shown in the report with its measures and the picture of the touch-up view where the fill fits worst, and counts toward nothing (alone it had refused 3 right objects of 50 on the 12 GB card and 4 on the 16 GB card, judged blind). It would pass when (the paint was touched up) judged on what the finished model shows, the fill kept: in no touch-up view is more than 10 % of it a colour found nowhere in the paint round it (each filled point against the 32 painted points nearest it on the same surface, foreign when more than 20, delta E, from every one of them), and no joined foreign place is larger than 3 % of the object's size. The places left unpainted (the fill the touch-up left out, which shows the colour spread from round it): none larger than 3 % is a smear, where neither the paint round it nor the colour it shows is one colour (less than 90 % of each within 20 of its median). The fill as the inpainter painted it, before what was foreign was left out, is shown, not counted |
+
+The outline is measured against its own size since 0.3.0, so a long, low thing is not refused for a few pixels at its
+ends. A known limit came with it: a wooden rolling pin with lettering stamped on its roller (a paint fault) had been
+refused by the outline only by chance, and now passes every check, the question judge saying yes (0.80). No check reads
+lettering painted on the finished model (the lettering check reads the picture); one is later work.
 
 Also measured, not checked: likeness, the painted object seen from its picture's view against the
 picture (the mean colour difference, delta E). It compares ways of painting the same shape; its
@@ -153,6 +168,63 @@ handle found it fails, saying so, and the grip is put on the back's middle by co
 the front, so a strap behind may not be made). The sidecar's `measures.weapon.handles` (the sidecar's key for the
 measures of a thing held in the hand) lists each handle, and
 `not_handles` what else stood off the back and why it is no handle.
+
+## Open underneath
+
+Since 0.3.0 a thing that stands on its own base (a chest, a chair, a table, a cabinet: the words decide, see "How a
+prompt is read") is refused when it is open underneath: a box made with no bottom, its hollow seen from below.
+
+What it measures (`object_checks.ringed_hollow`): the object is drawn from straight below on a grid of 200 by 200
+cells over its footprint, each cell keeping how high the lowest surface above it is. A cell more than 15 % of the
+object's height above its lowest point is part of a hollow. A hollow that reaches the outline of what is seen from
+below is the space under a table or between a chair's legs, and does not count. The largest hollow closed in all round
+by the base, as a share of all that is seen from below, is the measure; over 0.4 (40 %) the check "closed underneath"
+fails, with "it is open underneath" in the report.
+
+The limit was measured on 309 stored objects made on both cards (the objects of two development lists, the things of
+today, and chests, boxes and bins made for other trials), every one of them measured, whatever its kind. Two came over
+0.2. A wooden jewellery chest made open underneath (0.69 and 0.78 on the two cards) is caught: it is the case the check
+was written for. Its stored shape is refused; made again, the chest gets a second shape try, which was never made or
+judged. A wooden toy horse on wheels, which is right, measured about 0.26 on each card, under the limit (and
+it is not of a kind that stands, so the check does not run for it). No object judged right came over 0.4.
+
+The check also takes part in choosing between shape tries: a try open underneath loses to one that is not.
+
+Known limits:
+
+* a right thing whose base is closed all round, with its underside more than 15 % of its height up, is refused: it
+  looks from below like a box with no bottom. Measured on plain test shapes: a chair or a stool with low stretchers on
+  all four sides (0.76 and 0.69), a chest on a deep skirt, its bottom 12 cm up of 60 (0.80, the same as no bottom at
+  all), a platform bed with rails to the floor (0.92), a sofa with a skirt to the floor (0.90), a cot with low rails
+  all round (0.85). None of the 309 stored objects was such a thing. `--stands no` leaves the check out. The tests keep
+  these shapes as the check measures them now;
+* a bowl-like open side that reaches the outline is not caught, as it looks the same from below as the space under a
+  table: a stone pestle made as a mortar passes it;
+* it runs only for things that stand on their own base, so a thing of another kind or of no known kind (a toolbox, a
+  mortar, a step ladder) is not checked;
+* it was chosen after the 0.3.0 measurement's list was opened (`results.md`): on that list it is a recount, not a
+  measurement.
+
+## Pairs
+
+Words that ask for two of one thing and nothing more ("a pair of boots", "two iron candlesticks", "a pair of boots
+with brass buckles") make the one ("a boot") and place it twice. It is checked, judged and painted as one object; the
+question judge is asked about the one ("Is it a boot?"), as the pictures show one. The `.glb` holds its mesh once
+and two nodes:
+
+* a left and a right (boots, shoes, gloves, gauntlets, sandals, slippers, clogs, mittens, greaves, vambraces,
+  bracers, sabatons, spurs): the second is the first's mirror image, an exact match. For footwear it stands on the
+  side the first's arch faces (the footprint's middle third is inset more there), so the inner sides face each other;
+* anything else: an exact copy.
+
+The two stand side by side across the object's narrower width on the floor, a small gap between them, toes the same
+way; a flat thing (a dagger standing on its point) stands beside its pair in its own plane, not face to face. The
+second carries the first's marks and parts (a dagger's grip) as its own children.
+
+Anything more is answered as before, one object at a time: a set or three, a second thing ("a pair of boots and a
+hat"), a count ("two dozen eggs"), where the two stand or how they differ ("two chairs at a table", "two swords
+crossed", "one red and one blue"), lettering (a mirror would turn the letters round), or a name whose one cannot be
+said ("a pair of boot racks").
 
 ## The marks
 
@@ -531,7 +603,7 @@ least 0.55, as the colour cloud keeps): the six, 84.9 % of the surface as seen; 
 at 30°, 94.0 %; at 45°, 96.6 %.
 
 The paint stage now touches the paint up (`touch_up.py`, at most 4 views, `--touch-up-views`, 0 for none): candidate
-views every 45° round and 20°, 35° and 50° above are ranked by the unpainted surface each sees squarely, weighted as
+views every 45° round, level and 20°, 35° and 50° above and below, are ranked by the unpainted surface each sees squarely, weighted as
 the coverage check weights it; the best is taken, the object drawn from it in its colours so far, the unpainted pixels
 in it (grown by 3 pixels so the fill meets the paint round it) painted by SDXL's base model through diffusers' SDXL
 inpainting pipeline (the base weights, already in the registry; no new model), and only the unpainted pixels' new
@@ -1364,7 +1436,7 @@ drew 180, each compared by its edges, and a picture with a hole to judge adds th
 |---|---|
 | Carving a real thin panel | Confirmed and fixed for an opaque panel: a hole whose colour in the picture lies more than 10 (delta E) from the backdrop's is a part the cut-out missed, never carved and never judged open (the made-up mirror, its glass the cut-out missed, reads 63, every real hole of the trials at most 2.2). A clear pane shows the backdrop through it and cannot be told from a hole by colour; the lanterns' small panes are too small to be judged (see "Holes the picture shows") |
 | Length of a sword or spear | Confirmed (a box's largest side was scaled to the length: a spear at 45 degrees came out 1.41 times too long) and fixed: a thing whose size is its length is set to it along its principal axis. Test: a spear made at 45 degrees is 2.0 m |
-| Wrong paint passes | Confirmed for a black view (the coverage counts a texel painted whatever its colour): a new check, "painted views not black", fails a view more than 25 % black; on the trials' 654 views the most was 1.7 %. A view of near-uniform colour is not judged: the end views of a spear are near-uniform by right |
+| Wrong paint passes | Confirmed for a black view (the coverage counts a texel painted whatever its colour): a new check, "painted views not black", fails a view more than 25 % black; on the trials' 654 views the most was 1.7 %. Since 0.3.0 only the view's backdrop (a band round its edge) is counted: a broken decode paints the backdrop black too, while a black thing is black only where it is (a smartphone and a laptop, 37-40 % of a view, were refused as broken; of 470 stored objects none had a black backdrop). A view of near-uniform colour is not judged: the end views of a spear are near-uniform by right |
 | Parent-death signal | Does not apply to the pipeline: Linux sends the signal when the thread that started the process ends, so a program that starts `make` (and names itself in `MODEL_MAKER_WORKER_PID`, parent.py) must start it from a thread that lives as long as the program |
 | State verdicts near the limit | Fixed: SigLIP 2 judges in 32-bit floats on the card too, as the regression does on the CPU (1.6 GB on the card, a few pictures a job) |
 | Memory with every model kept | Confirmed: a process that kept every model loaded between jobs measured 44.1 GB at its peak; a run that loads each stage's models alone (`make`, `batch`) needs the memory in `docs/setup.md` |
@@ -1582,10 +1654,20 @@ It asks for several when its head phrase (the words before "of", "with", "in", "
 
 | asks for several | example | suggested |
 |---|---|---|
-| groups things | "a pair of boots", "a set of three knives", "a couple of mugs", "a collection of bottles" | "a boot", "a knife", "a mug", "a bottle" |
-| counts them | "two wooden chairs", "2 lanterns", "a few goblets", "three iron swords with gold hilts" | "a wooden chair", "a lantern", "a goblet", "an iron sword with gold hilts" |
+| groups things | "a set of three knives", "a collection of bottles" | "a knife", "a bottle" |
+| counts them | "three wooden chairs", "5 lanterns", "a few goblets", "three iron swords with gold hilts" | "a wooden chair", "a lantern", "a goblet", "an iron sword with gold hilts" |
 | names a known thing in the plural | "boots", "leather boots, brown", "knives", "bookshelves" | "a boot", "a leather boot, brown", "a knife", "a bookshelf" |
 | joins two known things | "a sword and a shield", "a table and chairs" | "a sword", "a table" |
+
+### Pairs
+
+Two of one known thing ("a pair of boots", "a couple of mugs", "two iron candlesticks", "2 swords") is made once, from
+the words for one ("a boot"), checked and painted as one object, and placed twice in the .glb: the same mesh a second
+time, beside the first with a gap of 15 % of its width (at least 2 cm). When the two are a left and a right (boots,
+shoes, sandals, slippers, gloves, mittens, gauntlets, greaves, bracers, spurs) the second is the first's mirror
+image; otherwise an exact copy. A mirror image is an exact match, where a second one made would differ in every
+detail. Lettering asked for on them is copied, not mirrored (a mirror would turn the letters round). The .glb's
+`extras` say `"pair": "mirror"` or `"copy"`; the report shows the one made.
 
 What is made as before, each a case in the shared prompt cases:
 
@@ -2259,7 +2341,11 @@ al. 2024); it passes from 0.5.
 **What it is asked.** Asked the whole prompt ("Is it an old iron sword?"), it judged every word: it kept 16 of the
 regression set's 17 good objects and refused a good longsword (0.44; "an iron sword" 0.59, "a sword" 0.78), its paint
 not looking old. So it is asked about the thing the words name, with its article ("a sword", "a hoe", "a chess
-board"; the whole prompt when the words name no thing model-maker knows), and it counts. That question, its limit 0.5
+board"; the whole prompt when the words name no thing model-maker knows), and it counts. Since 0.3.0 a name of two
+words is asked whole ("Is it a bow saw?", not "a saw", which refused a right bow saw); a word that names a material as
+well as a thing (bone, rock, horn, rope, chain, log, feather, as stone was before) is read as the material when another
+noun follows, so "a bone knife" is asked as "a knife"; and of a pair, the one made is asked about ("a pair of
+boots": "Is it a boot?"). That question, its limit 0.5
 and the bar it had to meet were written down before it was measured (on the next sealed 50 of 0.2.1's successor,
 judged blind, both cards): among the objects that pass every other check it caught 7 of 16 bad and refused none of
 15 good on the 12 GB card, and caught 5 of 14 bad and refused 2 of 15 good on the 16 GB card (a narrow coffee table

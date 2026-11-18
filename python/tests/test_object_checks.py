@@ -274,3 +274,88 @@ class AllTogether(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpenUnderneath(unittest.TestCase):
+    """Closed underneath (0.3.0): a hollow seen from below and closed in all round by the base is refused; the space
+    under a table or a stool, which reaches the outline, is not."""
+
+    BOX = ((-0.2, 0.0, -0.15), (0.2, 0.3, 0.15))
+
+    def test_a_closed_box_has_no_ringed_hollow(self):
+        corners, triangles = shapes.surface_of([self.BOX], 0.01)
+        self.assertEqual(O.ringed_hollow(corners, triangles), 0.0)
+        self.assertTrue(O.underside_check(0.0).passed)
+
+    def test_a_box_open_underneath_is_refused(self):
+        corners, triangles = shapes.surface_of([self.BOX], 0.01, cut=[((-0.17, -0.1, -0.12), (0.17, 0.26, 0.12))])
+        share = O.ringed_hollow(corners, triangles)
+        self.assertGreater(share, 0.4)
+        self.assertFalse(O.underside_check(share).passed)
+
+    def test_the_space_under_a_table_does_not_count(self):
+        corners, triangles = shapes.three_legged_table()
+        self.assertLess(O.ringed_hollow(corners, triangles), 0.05)
+
+
+def _box(x0, x1, y0, y1, z0, z1):
+    corners = np.array([[x, y, z] for x in (x0, x1) for y in (y0, y1) for z in (z0, z1)], dtype=float)
+    triangles = np.array([[0, 1, 3], [0, 3, 2], [4, 6, 7], [4, 7, 5], [0, 4, 5], [0, 5, 1], [2, 3, 7], [2, 7, 6],
+                          [0, 2, 6], [0, 6, 4], [1, 5, 7], [1, 7, 3]])
+    return corners, triangles
+
+
+def _joined(parts):
+    corners, triangles, count = [], [], 0
+    for c, t in parts:
+        corners.append(c)
+        triangles.append(t + count)
+        count += len(c)
+    return np.concatenate(corners), np.concatenate(triangles)
+
+
+def _legs(width, depth, height, thick=0.04):
+    return [_box(x, x + thick, 0, height, z, z + thick) for x in (0, width - thick) for z in (0, depth - thick)]
+
+
+def _ring(width, depth, low, high, thick=0.03):
+    return [_box(0, width, low, high, 0, thick), _box(0, width, low, high, depth - thick, depth),
+            _box(0, thick, low, high, 0, depth), _box(width - thick, width, low, high, 0, depth)]
+
+
+class OpenUnderneathKnownLimit(unittest.TestCase):
+    """What "closed underneath" does with a right thing whose base is closed all round and whose underside is more than
+    15 % of its height up: it is refused (docs/objects.md, "Open underneath", known limits). These cases say what the
+    check does now, measured on plain shapes (0.3.0's review); they are not what it should do, and the check is not
+    changed for them in 0.3.0."""
+
+    SEAT_AND_BACK = [_box(0, 0.45, 0.45, 0.5, 0, 0.45), _box(0, 0.45, 0.5, 0.95, 0.42, 0.45)]
+
+    def share(self, parts):
+        return O.ringed_hollow(*_joined(parts))
+
+    def test_right_things_closed_all_round_low_are_refused(self):
+        refused = {
+            "a chair with stretchers on all four sides 8-11 cm up": _legs(0.45, 0.45, 0.45)
+            + _ring(0.45, 0.45, 0.08, 0.11) + self.SEAT_AND_BACK,
+            "a stool with stretchers on all four sides 5-8 cm up": _legs(0.35, 0.35, 0.47)
+            + _ring(0.35, 0.35, 0.05, 0.08) + [_box(0, 0.35, 0.47, 0.5, 0, 0.35)],
+            "a chest on a skirt, its bottom 12 cm up of 60": _ring(0.8, 0.5, 0, 0.12)
+            + [_box(0, 0.8, 0.12, 0.6, 0, 0.5)],
+            "a platform bed, rails to the floor, slats 25 cm up of 40": _ring(2.0, 1.5, 0, 0.3, 0.04)
+            + [_box(0, 2.0, 0.25, 0.28, 0, 1.5), _box(0, 0.04, 0, 0.9, 0, 1.5)],
+        }
+        for name, parts in refused.items():
+            share = self.share(parts)
+            self.assertGreater(share, O.MOST_RINGED_HOLLOW_SHARE, name)
+            self.assertFalse(O.underside_check(share).passed, name)
+
+    def test_their_neighbours_pass(self):
+        passing = {
+            "a plain chair": _legs(0.45, 0.45, 0.45) + self.SEAT_AND_BACK,
+            "a chest on a 5 cm plinth": _ring(0.8, 0.5, 0, 0.05) + [_box(0, 0.8, 0.05, 0.6, 0, 0.5)],
+            "a bar stool with a foot ring 25 cm up of 75": _legs(0.35, 0.35, 0.72) + _ring(0.35, 0.35, 0.25, 0.28)
+            + [_box(0, 0.35, 0.72, 0.75, 0, 0.35)],
+        }
+        for name, parts in passing.items():
+            self.assertTrue(O.underside_check(self.share(parts)).passed, name)

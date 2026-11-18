@@ -45,6 +45,8 @@ def shape_checks(subject, picture_mask, corners, triangles, laid=None, picture=N
         base = O.base_measures(corners, triangles)
         measures["base"] = base
         checks += O.base_checks(base)
+        measures["ringed_hollow"] = round(O.ringed_hollow(corners, triangles), 3)
+        checks.append(O.underside_check(measures["ringed_hollow"]))
     if subject.symmetric == "mirror":
         share, mirror_turn, offset, far = O.mirror_measure(corners, triangles)
         measures["mirror"] = {"share": share, "turn_deg": mirror_turn, "offset_m": offset, "far_share": far}
@@ -121,25 +123,32 @@ def coverage_check(coverage, all_texels=None):
                  "colour spread from its neighbours")
 
 
-# A painted view is black where its colour's brightest channel is under this (10 of 255); a view more than this share
-# black came back broken (a half-precision decode that overflowed paints black). On the trials (654 views) the most
-# black was 1.7 %, a view seeing a thin thing's end on its grey backdrop (the coverage alone counts a black view as
-# painted).
+# A painted view is black where its colour's brightest channel is under this (10 of 255); a view whose backdrop is more
+# than this share black came back broken (a half-precision decode that overflowed paints the whole view black,
+# backdrop and all). Only the backdrop is counted: a black thing is black where it is (a smartphone's screen, a
+# laptop's: 37-40 % of one view, on its mid-grey backdrop; refused as broken on 16 Nov 2026, both cards). The
+# backdrop: a band round the view's edge, where the object never reaches (the six views frame it with a margin).
 BLACK_LEVEL = 0.04
 MOST_BLACK_VIEW_SHARE = 0.25
+BACKDROP_BAND_SHARE = 1 / 40
 
 
 def black_share(view):
-    """The share of a painted view's pixels (H x W x 3, 0-1) that are black."""
-    return float((np.asarray(view).max(-1) < BLACK_LEVEL).mean())
+    """The share of a painted view's backdrop (H x W x 3, 0-1: the band round its edge) that is black."""
+    view = np.asarray(view)
+    band = max(1, int(round(min(view.shape[:2]) * BACKDROP_BAND_SHARE)))
+    edge = np.concatenate([view[:band].reshape(-1, 3), view[-band:].reshape(-1, 3),
+                           view[:, :band].reshape(-1, 3), view[:, -band:].reshape(-1, 3)])
+    return float((edge.max(-1) < BLACK_LEVEL).mean())
 
 
 def views_check(shares):
-    """The six painted views, each as it came back: none mostly black. `shares`: each view's `black_share`."""
+    """The six painted views, each as it came back: none with its backdrop mostly black. `shares`: each view's
+    `black_share`."""
     worst = max(shares)
     return Check("painted views not black", worst * 100, MOST_BLACK_VIEW_SHARE * 100, "%",
                  worst <= MOST_BLACK_VIEW_SHARE,
-                 f"the blackest of the {len(shares)} painted views is {worst:.1%} black (each "
+                 f"the blackest of the {len(shares)} painted views' backdrops is {worst:.1%} black (each "
                  + ", ".join(f"{s:.1%}" for s in shares) + f"; at most {MOST_BLACK_VIEW_SHARE:.0%})")
 
 
@@ -188,7 +197,10 @@ def fill_check(fit):
                  f"nowhere in the paint round it (delta E over {fit['delta_e']:.0f}; each view {shares}; at most "
                  f"{MOST_FOREIGN:.0%}); its largest foreign place is {patch:.1%} of the object's size across (at most "
                  f"{LARGEST_FOREIGN_PATCH:.0%}); {fit['filled_points']} filled points kept. Places left unpainted, "
-                 f"the largest {left['largest_place']:.1%} across: {smears}{shown}")
+                 f"the largest {left['largest_place']:.1%} across: {smears}{shown}",
+                 # A note, not a refusal (0.3.0, 17 Nov 2026): on the 14 Nov blind measurement it alone refused
+                 # 3 good objects of 50 on the 12 GB card and 4 on the 16 GB card; the report still shows the patch.
+                 counted=False)
 
 
 def score(checks, measures):

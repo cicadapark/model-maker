@@ -84,3 +84,45 @@ kind = "composite"
 models = "object"
 version = "0.2.2"
 why = "turntables of four objects the sealed run made on the 12 GB card, which the question judge refuses; our prompts and the judge's answers beside them"
+
+[[picture]]
+path = "0.3.0/pairs.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "turntables of four pairs model-maker made while 0.3.0 was being made, each one object and its mirror image or copy; our labels"
+
+[[picture]]
+path = "0.3.0/pair-clogs-mirrored.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "a pair of clogs model-maker made, all round and from below, the second the first's mirror image"
+
+[[picture]]
+path = "0.3.0/things-of-today.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "turntables of five things of today model-maker made while 0.3.0 was being made, each passing every check"
+
+[[picture]]
+path = "0.3.0/black-screens-not-broken.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "a smartphone and a laptop model-maker made, whose black screens had been taken for broken views"
+
+[[picture]]
+path = "0.3.0/fill-note-office-chair*.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "an office chair model-maker made, its touch-up views and its report's picture of the fill, our colours on it"
+
+[[picture]]
+path = "0.3.0/closed-underneath-jewellery-chest.webp"
+kind = "composite"
+models = "object"
+version = "0.3.0"
+why = "a jewellery chest model-maker made open underneath, all round and from below, which the check closed underneath refuses"

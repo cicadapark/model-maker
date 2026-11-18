@@ -39,12 +39,12 @@ class ThePipelineReadsTheSharedCases(unittest.TestCase):
                          {"make", "not yet", "animal", "character", "several", "refused"})
 
     def test_several_things_are_answered_with_one_to_ask_for(self):
-        for prompt, one in {"a pair of leather boots": "a leather boot", "an old pair of boots": "an old boot",
-                            "two wooden chairs": "a wooden chair", "boots": "a boot", "knives": "a knife",
+        # Two of one thing is made as a pair since 0.3.0 (test_words, "a pair of one thing"); more, a set, a plural
+        # or two different things are answered with one to ask for.
+        for prompt, one in {"three wooden chairs": "a wooden chair", "boots": "a boot", "knives": "a knife",
                             "three iron swords with gold hilts": "an iron sword with gold hilts",
                             "a set of three knives": "a knife", "a sword and a shield": "a sword",
-                            "leather boots, brown": "a leather boot, brown", "two boxes": "a box",
-                            "a pair of earrings": "an earring"}.items():
+                            "leather boots, brown": "a leather boot, brown", "five boxes": "a box"}.items():
             subject = words.subject_of(prompt)
             self.assertEqual(subject.not_yet, words.SEVERAL_THINGS.format(one=one), prompt)
             self.assertIn("one object at a time", subject.not_yet)
@@ -57,7 +57,7 @@ class ThePipelineReadsTheSharedCases(unittest.TestCase):
         self.assertEqual(subject.not_yet, words.SEVERAL_THINGS_NO_ONE)
 
     def test_why_several_names_the_words(self):
-        expected = {"a pair of boots": "'pair of'", "two wooden chairs": "the count 'two'",
+        expected = {"two pairs of boots": "'pairs of'", "three wooden chairs": "the count 'three'",
                     "leather boots": "the plural 'boots'", "a sword and a shield": "'sword' and 'shield'"}
         for prompt, why in expected.items():
             self.assertEqual(words.subject_of(prompt).several, why, prompt)

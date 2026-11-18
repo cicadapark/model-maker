@@ -91,6 +91,21 @@ class Repair(unittest.TestCase):
         self.assertEqual(done["hollows_removed"], 1)
         self.assertEqual(M.pieces(fixed_corners, fixed_triangles)[1], 2)
 
+    def test_a_part_a_few_millimetres_off_is_joined_and_one_further_off_is_not(self):
+        # A candelabra's drip pans 1.3-2.5 mm off its arms (15 Nov 2026): joined; a part a centimetre off stays loose.
+        body = shapes.surface_of([((0.0, 0.0, 0.0), (0.4, 0.4, 0.4))], 0.02)
+        for gap, one_piece in ((0.002, True), (0.010, False)):
+            # The voxel surface reaches half a voxel past each box: the part's surface starts `gap` past the body's.
+            part = shapes.surface_of([((0.42 + gap, 0.1, 0.1), (0.52 + gap, 0.2, 0.2))], 0.02)
+            corners = np.concatenate([body[0], part[0]])
+            triangles = np.concatenate([body[1], part[1] + len(body[0])])
+            fixed_corners, fixed_triangles, done = R.repaired(corners, triangles)
+            self.assertEqual(len(done["pieces_joined"]) == 1, one_piece, gap)
+            measures = O.wholeness(fixed_corners, fixed_triangles)
+            self.assertEqual(measures["main_share"] > 0.98, one_piece, (gap, measures["main_share"]))
+            if one_piece:
+                self.assertLess(done["pieces_joined"][0]["moved_mm"], gap * 1000 * 1.8)
+
 
 if __name__ == "__main__":
     unittest.main()
