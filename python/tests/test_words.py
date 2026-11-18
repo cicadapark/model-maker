@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 
@@ -37,6 +38,24 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
             self.assertIn(subject.noun, ("chess board", "chessboard"), prompt)
         self.assertEqual(words.subject_of("a chess knight").noun, "chess")
         self.assertIn("chess board", words.LYING)
+
+    def test_a_known_word_before_another_noun_is_not_the_thing(self):
+        # Counted over 353 object names on 15 Nov: "a coin purse" was read as a coin (made 3 cm across, lying), "a
+        # lamp post" as a lamp, "a chest of drawers" as a chest. English puts the head noun last.
+        for prompt in ("a coin purse", "a lamp post", "a copper bed warmer", "a scroll case", "a book stand",
+                       "a hat stand", "a wooden barrel cart", "a bone whistle", "a lobster pot", "a chest of drawers",
+                       "a jack-in-the-box"):
+            subject = words.subject_of(prompt)
+            self.assertEqual((subject.kind, subject.noun), ("object", ""), prompt)
+        cases = {"a sword about a metre long": "sword", "a rug rolled up": "rug", "a flail weapon": "flail",
+                 "a table lamp": "lamp", "a sword, iron": "sword", "an oak chest with brass corners": "chest",
+                 "a lantern on a pole": "lantern", "two swords": "sword", "a coin": "coin"}
+        for prompt, noun in cases.items():
+            self.assertEqual(words.subject_of(prompt).noun, noun, prompt)
+
+    def test_a_toy_or_ornament_named_after_a_creature_is_an_object(self):
+        for prompt in ("a teddy bear", "a hobby horse", "a garden gnome"):
+            self.assertEqual(words.subject_of(prompt).kind, "object", prompt)
 
     def test_things_that_stand_are_checked_standing_and_a_broom_is_not(self):
         for prompt in TEN_OBJECTS[:-1]:
@@ -121,6 +140,120 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
                        "a stone water wheelhouse"):
             said = words.picture_prompt(words.subject_of(prompt))
             self.assertFalse(any(described in said for described in words.THING_PICTURE_WORDS.values()), prompt)
+
+    def test_the_measured_picture_words_are_kept_only_with_their_measurement(self):
+        # picture_words.json (15 Nov 2026): a description is said only for a name it was measured on, and only one
+        # that added at least 4 right pictures of 8 (docs/names-the-picture-model-misses.md).
+        with open(words.PICTURE_WORDS_FILE, encoding="utf-8") as file:
+            entries = json.load(file)["entries"]
+        self.assertGreater(len(entries), 0)
+        names = [entry["name"] for entry in entries]
+        self.assertEqual(len(names), len(set(names)))
+        for entry in entries:
+            name, measured = entry["name"], entry["measured"]
+            self.assertEqual(name, name.lower().strip(), name)
+            self.assertFalse(name.startswith(("a ", "an ", "the ")), name)
+            self.assertIn(entry["written_by"], ("hand", "model"), name)
+            self.assertGreaterEqual(measured["right_of_8_with_words"] - measured["right_of_8_name_alone"], 4, name)
+            said = words.picture_prompt(words.subject_of(f"a {name}"))
+            self.assertIn(entry["words"], said, name)
+        for prompt in ("a wooden chair", "an old iron sword", "a clay jug", "a wooden barrel with iron hoops"):
+            said = words.picture_prompt(words.subject_of(prompt))
+            self.assertFalse(any(entry["words"] in said for entry in entries), prompt)
+
+    def test_a_description_is_said_only_for_the_thing_asked_for(self):
+        # Review of v0.3.0 (16 Nov 2026): a name anywhere in the prompt fired its description ("a sign painted in a
+        # gothic font" got the baptismal font's words). Said only when the name is the thing asked for.
+        with open(words.PICTURE_WORDS_FILE, encoding="utf-8") as file:
+            said_for = {entry["name"]: entry["words"] for entry in json.load(file)["entries"]}
+        not_the_thing = {"a sign painted in a gothic font": "font", "a box of chisels": "chisel",
+                         "a milestone birthday cake": "milestone", "a canvas stretcher frame": "stretcher",
+                         "a sundial pedestal": "sundial", "a harpoon gun": "harpoon", "a toy catapult": "catapult"}
+        for prompt, name in not_the_thing.items():
+            self.assertNotIn(said_for[name], words.picture_prompt(words.subject_of(prompt)), prompt)
+        for prompt, name in {"an old stone font": "font", "a steel chisel": "chisel",
+                             "a wooden catapult with a sling": "catapult", "a bronze sundial, weathered": "sundial"}.items():
+            self.assertIn(said_for[name], words.picture_prompt(words.subject_of(prompt)), prompt)
+
+    def test_a_thing_followed_by_a_size_or_a_degree_is_still_the_thing(self):
+        for prompt, noun in {"a sword one metre long": "sword", "a sword very old": "sword",
+                             "a chest slightly open": "chest", "a mug upside down": "mug"}.items():
+            self.assertEqual(words.subject_of(prompt).noun, noun, prompt)
+
+    def test_things_of_today_are_known_by_their_size(self):
+        # 16 Nov 2026: model-maker is not only for old things; these were made 0.5 m, unchecked for base or symmetry.
+        expected = {"a smartphone": ("smartphone", 0.15), "a modern grey sofa": ("sofa", 2.0),
+                    "a laptop computer": ("laptop computer", 0.35), "a vending machine": ("vending machine", 1.8),
+                    "a robot vacuum cleaner": ("robot vacuum cleaner", 0.35), "a road bicycle": ("bicycle", 1.7),
+                    "a computer mouse": ("computer mouse", 0.12), "an espresso machine": ("espresso machine", 0.4)}
+        for prompt, (noun, size) in expected.items():
+            subject = words.subject_of(prompt)
+            self.assertEqual((subject.noun, subject.size_m), (noun, size), prompt)
+            self.assertFalse(subject.not_yet, prompt)
+        self.assertEqual(words.subject_of("a pair of sneakers").pair, "mirror")
+        self.assertTrue(words.subject_of("a smartphone").lies)
+        self.assertTrue(words.subject_of("a robot vacuum cleaner").lies)
+        self.assertEqual(words.subject_of("a pair of wireless headphones").pair, "")  # one object
+
+    def test_a_sandal_lies_on_its_sole(self):
+        subject = words.subject_of("a leather sandal")
+        self.assertEqual((subject.noun, subject.lies), ("sandal", True))
+        self.assertEqual(words.subject_of("a pair of leather sandals").pair, "mirror")
+
+    def test_a_bed_frame_stands_and_is_mirrored_as_a_bed(self):
+        # The noun reading (a known word before another noun is not the thing) left "a wooden bed frame" unknown; the
+        # regression set's bed frame then went unchecked for base and symmetry (16 Nov 2026). Known as itself now.
+        subject = words.subject_of("a wooden bed frame")
+        self.assertEqual((subject.noun, subject.stands, subject.symmetric), ("bed frame", True, "mirror"))
+
+    def test_a_pair_of_one_thing_is_made_once_and_placed_twice(self):
+        # 16 Nov 2026: a pair is one object made and its mirror image (a left and a right) or its copy.
+        expected = {"a pair of boots": ("a boot", "mirror"), "a pair of leather gloves": ("a leather glove", "mirror"),
+                    "two iron candlesticks": ("an iron candlestick", "copy"), "a pair of daggers": ("a dagger", "copy"),
+                    "a pair of boots with brass buckles": ("a boot with brass buckles", "mirror"),
+                    "a pair of wooden clogs": ("a wooden clog", "mirror"),
+                    "a pair of iron gauntlets": ("an iron gauntlet", "mirror"),
+                    "a pair of leather sandals": ("a leather sandal", "mirror"),
+                    "a pair of soft wool slippers": ("a soft wool slipper", "mirror"),
+                    "two wooden bowls": ("a wooden bowl", "copy")}
+        for prompt, (one, pair) in expected.items():
+            subject = words.subject_of(prompt)
+            self.assertEqual(subject.pair, pair, prompt)
+            self.assertFalse(subject.not_yet, prompt)
+            if one:
+                self.assertEqual(subject.prompt, one, prompt)
+        for prompt in ("three swords", "a set of brass weights", "a sword and a shield", "two cats",
+                       "a pair of garden shears"):
+            self.assertEqual(words.subject_of(prompt).pair, "", prompt)
+        # Only two of one thing and nothing more: the rest is answered as before, one at a time (review, 16 Nov 2026).
+        for prompt in ("a pair of boots and a hat", "two dozen eggs", "two chairs at a table", "two swords crossed",
+                       "two swords facing each other", "two left boots", "a pair of boot racks",
+                       'a pair of boots with "LEFT" painted on them'):
+            subject = words.subject_of(prompt)
+            self.assertEqual(subject.pair, "", prompt)
+            self.assertIn("one object at a time", subject.not_yet, prompt)
+        self.assertTrue(words.subject_of("three swords").not_yet)
+
+    def test_a_pair_of_creatures_is_not_made(self):
+        # 0.3.0's review: the plain rules made "horses" "a hors", which no creature check knew, and the pair was made.
+        for prompt in ("a pair of horses", "a pair of wolves", "a pair of thieves", "two heroes", "two calves",
+                       "a pair of mosquitoes", "a pair of dogs"):
+            subject = words.subject_of(prompt)
+            self.assertEqual(subject.pair, "", prompt)
+            self.assertTrue(subject.not_yet, prompt)
+        # A plural in -ves or -oes that is no known thing is not paired: its one is not sure ("two leaves").
+        for prompt, one in {"two leaves": "a leaf", "two loaves": "a loaf", "two calves": "a calf"}.items():
+            subject = words.subject_of(prompt)
+            self.assertEqual(subject.pair, "", prompt)
+            self.assertEqual(subject.not_yet, words.SEVERAL_THINGS.format(one=one), prompt)
+
+    def test_a_plural_that_is_no_known_thing_is_made_one_by_the_plain_rules(self):
+        expected = {"horses": "horse", "wolves": "wolf", "thieves": "thief", "heroes": "hero", "calves": "calf",
+                    "mosquitoes": "mosquito", "leaves": "leaf", "loaves": "loaf", "houses": "house", "vases": "vase",
+                    "glasses": "glass", "boxes": "box", "benches": "bench", "berries": "berry", "sleeves": "sleeve",
+                    "canoes": "canoe", "lamps": "lamp"}
+        for plural, one in expected.items():
+            self.assertEqual(words.one_by_plain_rules(plural), one, plural)
 
     def test_a_lid_or_cover_is_shut_unless_the_words_open_it(self):
         expected = {"a leather-bound book, closed": "closed", "a wooden treasure chest": "closed",

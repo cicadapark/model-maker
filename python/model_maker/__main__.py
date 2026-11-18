@@ -43,8 +43,22 @@ def yes_no(text):
     raise argparse.ArgumentTypeError("yes or no")
 
 
+def attempt_number(text):
+    """--attempt: 0 for the first attempt, 1 for the next; a negative one would draw the seeds before the first's."""
+    try:
+        number = int(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError("a whole number, 0 or more") from None
+    if number < 0:
+        raise argparse.ArgumentTypeError("0 or more (0: the first attempt)")
+    return number
+
+
 def common(parser):
     parser.add_argument("--models", help="the models' folder (default MODEL_MAKER_MODELS or ./models)")
+    parser.add_argument("--attempt", type=attempt_number, default=0,
+                        help="make a refused object again from new seeds: 1 for the second attempt, 2 for the third "
+                             "(0, the first, by default)")
     parser.add_argument("--sources", help="the view painter's code, MV-Adapter (default MODEL_MAKER_SOURCES or "
                         "./sources)")
     parser.add_argument("--tries", type=int, default=pipeline.DEFAULT_TRIES, help="pictures painted per round")
@@ -109,7 +123,7 @@ def settings_of(args):
                              lead=args.lead, paint_steps=args.paint_steps, picture_rounds=args.picture_rounds,
                              touch_up_views=args.touch_up_views, touch_up_strength=args.touch_up_strength,
                              require_lettering=args.require_lettering,
-                             require_question_judge=args.require_question_judge)
+                             require_question_judge=args.require_question_judge, attempt=args.attempt)
 
 
 def report(line):
@@ -140,7 +154,7 @@ def made(prompt, out, size, stands, symmetric, settings, stages, kept=None):
         # A prompt refused has its own line, so every prompt asked is counted.
         ledger.refused(subject.prompt, out, subject.not_yet)
         return 2, None
-    folder = pipeline.job_folder(out, prompt, size, stands, symmetric)
+    folder = pipeline.job_folder(out, prompt, size, stands, symmetric, getattr(settings, "attempt", 0))
     job = pipeline.Job(folder, prompt, size, stands, symmetric, settings=settings)
     started = time.time()
     try:
@@ -170,7 +184,7 @@ def batch(args):
     settings = settings_of(args)
     jobs = {}
     for prompt in prompts_in(args.prompts):
-        folder = pipeline.job_folder(args.out, prompt, args.size)
+        folder = pipeline.job_folder(args.out, prompt, args.size, attempt=settings.attempt)
         if folder in jobs:
             # The same prompt twice is one job, counted once (two Jobs on one folder would overwrite each other).
             print(f"{prompt}: asked again; made once ({folder})")

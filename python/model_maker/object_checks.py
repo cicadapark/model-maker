@@ -464,6 +464,52 @@ def lifted_feet(corners, triangles, normal, outline, search_share=FOOT_SEARCH_SH
     return sorted(gaps, reverse=True)
 
 
+# Open underneath (0.3.0; measured 18 Nov 2026 on 309 stored objects, docs/objects.md "Open underneath"): seen
+# from straight below, the share of the footprint that lies more than HOLLOW_HEIGHT_SHARE of the height above the
+# lowest point and is closed in all round by the base. The space under a table reaches the outline and does not count.
+UNDERSIDE_SIDE = 200
+HOLLOW_HEIGHT_SHARE = 0.15
+MOST_RINGED_HOLLOW_SHARE = 0.4
+
+
+def ringed_hollow(corners, triangles, side=UNDERSIDE_SIDE):
+    """The largest share of the footprint seen from below that is a hollow closed in all round (0 for none)."""
+    from scipy import ndimage
+
+    corners = np.asarray(corners, dtype=np.float64)
+    low, high = corners.min(0), corners.max(0)
+    height = high[1] - low[1]
+    span = max(high[0] - low[0], high[2] - low[2]) * 1.05
+    if height <= 0 or span <= 0:
+        return 0.0
+    middle = (low + high) / 2
+    xy = np.stack([(corners[:, 0] - middle[0]) / span + 0.5, (corners[:, 2] - middle[2]) / span + 0.5], 1) * side
+    z, owner, _ = render.rasterised(xy, -corners[:, 1], triangles, side, side)
+    z, owner = z.reshape(side, side), owner.reshape(side, side)
+    seen = owner >= 0
+    if not seen.any():
+        return 0.0
+    above = (-z - low[1]) / height
+    deep = seen & (above > HOLLOW_HEIGHT_SHARE)
+    pieces, count = ndimage.label(deep)
+    outside = ndimage.binary_dilation(~seen, iterations=2)
+    best = 0.0
+    for piece in range(1, count + 1):
+        here = pieces == piece
+        if (here & outside).any():
+            continue
+        best = max(best, float(here.sum() / seen.sum()))
+    return best
+
+
+def underside_check(share):
+    return Check("closed underneath", share * 100, MOST_RINGED_HOLLOW_SHARE * 100, "%",
+                 share <= MOST_RINGED_HOLLOW_SHARE,
+                 "seen from below, no hollow closed in all round by the base" if share == 0 else
+                 f"seen from below, {share:.0%} of it is a hollow closed in all round by the base"
+                 + (": it is open underneath" if share > MOST_RINGED_HOLLOW_SHARE else ""))
+
+
 def base_checks(measures):
     tilt, margin = measures["tilt_deg"], measures["margin"]
     mass = "its volume's" if measures["enclosed"] else "its surface's (it is not closed)"
@@ -533,10 +579,23 @@ def mirror_check(share, turn, far=0.0):
                  f"(limits {MOST_MIRROR_DISTANCE_SHARE:.0%} and {MOST_MIRROR_FAR_SHARE:.0%})")
 
 
+def outline_size(mask):
+    """The outline's size in heights: the square root of its width over its height, at least 1. A thing wider than
+    high is measured against its own size, the square root of height x width, not its height alone: a long, low
+    bed frame (3.5 times as wide as high, 1.98 % of its height off on average against 1.9 %) and a rolling pin (about
+    9:1) were refused for a few pixels at their ends, each a large share of their small height (false refusals traced
+    15 Nov 2026). A compact or tall thing keeps its height."""
+    rows, cols = np.nonzero(mask)
+    if not len(rows):
+        return 1.0
+    return float(np.sqrt(max(1.0, (np.ptp(cols) + 1) / (np.ptp(rows) + 1))))
+
+
 def outline_distance(view):
     """How far the two outlines of a view (`OutlineView`) lie apart: (the edges' mean distance, their 95th
     percentile, the thickest piece one outline has and the other not), each edge pixel to the other outline's nearest
-    edge, both ways, all as shares of the height; the piece in a gap of the other outline, within its hull."""
+    edge, both ways, all as shares of the picture's outline's size (`outline_size`: its height for a compact or tall
+    thing); the piece in a gap of the other outline, within its hull."""
     from scipy import ndimage
 
     painted, made = view.painted, view.made
@@ -544,8 +603,9 @@ def outline_distance(view):
         return 1.0, 1.0, 1.0
     to_made = ndimage.distance_transform_edt(~edge_of(made))[edge_of(painted)]
     to_painted = ndimage.distance_transform_edt(~edge_of(painted))[edge_of(made)]
-    both = np.concatenate([to_made, to_painted]) / OUTLINE_SIDE
-    apart = max(thickest(made & ~painted & hull_of(painted)), thickest(painted & ~made & hull_of(made)))
+    size = outline_size(painted)
+    both = np.concatenate([to_made, to_painted]) / (OUTLINE_SIDE * size)
+    apart = max(thickest(made & ~painted & hull_of(painted)), thickest(painted & ~made & hull_of(made))) / size
     return float(both.mean()), float(np.percentile(both, 95)), apart
 
 
@@ -571,11 +631,12 @@ def outline_checks(view, mean, far, apart):
     seen = f"seen from {view.turn:+.0f}° round and {view.tilt:.0f}° above, {lens}"
     cut = getattr(view, "cut", 0)
     return [
-        Check("outline matches the picture", mean * 100, MOST_OUTLINE_MEAN_SHARE * 100, "% of height",
+        Check("outline matches the picture", mean * 100, MOST_OUTLINE_MEAN_SHARE * 100, "% of size",
               mean <= MOST_OUTLINE_MEAN_SHARE and far <= MOST_OUTLINE_FAR_SHARE and apart <= MOST_OUTLINE_APART_SHARE
               and cut == 0,
-              f"the outlines' edges lie {mean:.2%} of the height apart on average, {far:.2%} at the 95th percentile, "
-              f"and the thickest piece of one in a gap of the other is {apart:.1%} of the height (limits "
+              f"the outlines' edges lie {mean:.2%} of the outline's size apart on average (its height, or for a "
+              f"thing wider than high the square root of height x width), {far:.2%} at the 95th percentile, "
+              f"and the thickest piece of one in a gap of the other is {apart:.1%} of it (limits "
               f"{MOST_OUTLINE_MEAN_SHARE:.1%}, {MOST_OUTLINE_FAR_SHARE:.0%} and {MOST_OUTLINE_APART_SHARE:.0%}), "
               f"{seen}" + (f"; from it the model's outline is wider than the canvas, "
                            f"{view.painted.shape[1] // OUTLINE_SIDE} heights ({cut} pixels beyond its sides)"

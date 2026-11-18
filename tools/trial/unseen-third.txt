@@ -1,0 +1,52 @@
+# The prompts kept sealed for version 0.3.0: written before its work began and opened only after it was frozen.
+# Each was made once with 0.2.2 and once with this version's making code as it stood on 16 Nov, on two cards, the same seeds; the 0.3.0 columns of the table in docs/results.md are those objects under 0.3.0's checks. They are now part of the development set.
+a bamboo steamer basket
+a bedside cabinet with one drawer
+a blacksmith's anvil
+a brass candlestick
+a brass door knocker
+a brass hand bell
+a cast iron skillet
+a ceramic soup tureen
+a copper jug
+a copper tea kettle
+a cuckoo clock
+a curved scimitar
+a glass oil lantern
+a heater shield with an iron rim
+a leather belt pouch
+a leather saddlebag
+a long wooden staff
+a mace with a flanged head
+a mantel clock
+a pewter goblet
+a round dining table
+a steel helmet
+a stone bird bath
+a stone garden lantern
+a stone pestle
+a terracotta urn
+a wall mirror with a wooden frame
+a war axe with a single blade
+a wheelbarrow
+a wooden barrel stool
+a wooden bench with a backrest
+a wooden coat hanger
+a wooden cutting board with a handle
+a wooden fruit bowl
+a wooden jewellery chest
+a wooden mortar
+a wooden picture frame
+a wooden practice sword
+a wooden rocking chair
+a wooden spoon rack
+a wooden step ladder
+a wooden toolbox
+a wooden toy horse on wheels
+a wooden umbrella stand
+a wooden walking stick
+a woven laundry basket
+an iron cauldron on three legs
+an iron padlock
+an iron poker
+an oak writing desk

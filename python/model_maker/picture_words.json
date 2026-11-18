@@ -1,0 +1,610 @@
+{
+ "about": "Descriptions for object names the picture model does not know by name: when a prompt names one, its words are said after the prompt. Each was measured as docs/names-the-picture-model-misses.md says (8 tries with the name alone, 8 with the words, all labelled blind) and is kept only because it added at least 4 right pictures of 8. 'written_by' says whether the words were written by hand or by the question judge's language model. A row changes only with a new measurement. Not here: 'club', which has words of its own (words.HEAD_PICTURE_WORDS, measured on 11 Nov); the description measured for it on 15 Nov was said after those words, and joining the two waits for a measurement of its own.",
+ "entries": [
+  {
+   "name": "battering ram",
+   "words": "a siege engine: a heavy log with an iron cap on its front end, hung by chains from a wooden roofed frame on wheels",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "bedroll",
+   "words": "a blanket and a sleeping pad rolled up tightly into a long cylinder and tied with two leather straps",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "board game box",
+   "words": "a flat rectangular cardboard game box with a game board and pieces shown printed on its lid",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "bread knife",
+   "words": "a long straight kitchen knife with a serrated blade, its cutting edge lined with many small wavy teeth, and a wooden handle",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 4,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "buckler",
+   "words": "a small round metal shield, no larger than a dinner plate, with a big domed centre and a handle behind it",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "candle clock",
+   "words": "a tall candle marked with evenly spaced numbered rings down its side to measure the hours, in a candle holder",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "cat basket",
+   "words": "a pet carrier: a woven wicker basket with a domed lid, a carrying handle on top and a small barred door at one end",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "catapult",
+   "words": "a medieval siege engine: a wooden frame on wheels with a long throwing arm ending in a bucket, pulled back by ropes",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "chamber pot",
+   "words": "a small round lidless china pot with a wide rolled rim and one handle on its side, about the size of a large mixing bowl",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 4,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "chess knight piece",
+   "words": "a single chess piece: a carved horse's head and neck, mane and ears, rising from a round turned base",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "chisel",
+   "words": "a woodworking tool: a wooden handle and a flat steel blade with a straight square cutting edge across its end, like a narrow flat bar",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "corner shelf",
+   "words": "a set of quarter-round wooden shelves made to fit into the corner of a room, two flat back sides meeting at a right angle",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 5,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "crutch",
+   "words": "a walking crutch: a padded bar at the top to go under the arm, two long side rails meeting at a single rubber-tipped foot, and a hand grip between them",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 5,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "dibber",
+   "words": "a garden tool: a short thick wooden stick tapering to a blunt point, with a D-shaped handle on its top end",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "dice cup",
+   "words": "a tall straight-sided leather cup, open at the top, slightly wider at the mouth, with a few dice beside it",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "drawbridge",
+   "words": "a castle drawbridge: a heavy wooden plank bridge hinged at one end, half raised by two chains running up to a stone gatehouse",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 4,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "fishing net float",
+   "words": "a round glass ball float about the size of a melon, wrapped in a loose net of knotted rope",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "font",
+   "words": "a church baptismal font: a large carved stone basin on a thick stone pillar standing on the floor",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "gauntlet",
+   "words": "an armoured glove: a steel glove with articulated plates over each finger and a flared steel cuff covering the wrist",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "grappling hook",
+   "words": "a hook with four curved sharp prongs spreading out from one central shaft like an anchor, with a rope tied to its ring",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 5,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "great helm",
+   "words": "a medieval knight's helmet: a closed flat-topped steel cylinder covering the whole head, with narrow eye slits and small breathing holes",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "harpoon",
+   "words": "a long throwing spear with a barbed iron head, sharp backward-pointing barbs behind its point, and a rope tied near its head",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 6,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "katana",
+   "words": "a long curved single-edged blade attached to a straight handle, featuring a circular handguard and a simple crossguard",
+   "written_by": "model",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "leather waterskin",
+   "words": "a flexible bladder: an elongated rounded body with a narrow neck at the top, a small loop handle attached to the neck, and a spout extending from the side near the opening",
+   "written_by": "model",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "lobster pot",
+   "words": "a fishing trap: a half-round cage of wooden slats and netting on a flat wooden base, with a netted funnel opening on each end",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 6,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "log basket",
+   "words": "a sturdy woven basket with a carrying handle, filled with chopped firewood logs",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 3,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "magic wand",
+   "words": "a short slender wooden wand, about as long as a hand and forearm, with a carved handle",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 2,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "milestone",
+   "words": "a short standing stone by a road, with a rounded top, about knee high, carved with a number and an arrow",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "morning star",
+   "words": "a weapon: a short wooden handle topped by a heavy round metal ball covered in long sharp spikes",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "music box",
+   "words": "a small open wooden box with a visible brass music cylinder with tiny pins and a metal comb inside, and a winding key on its side",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "portcullis",
+   "words": "a heavy castle gate grille of crossed wooden and iron bars, with sharp spikes along its bottom edge, made to slide up and down",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 6,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "quilt folded",
+   "words": "a patchwork quilt folded into a neat thick square, its layers of stitched fabric stacked on one another",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 2,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "round shield",
+   "words": "a large circular wooden shield made of planks, with a metal rim and a domed metal boss at its centre",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 2,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "salt box",
+   "words": "a small wooden box made to hang on a kitchen wall, with a sloping hinged lid and a hole at the top of its back board",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 3,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "scroll case",
+   "words": "a long closed cylindrical tube of leather with a fitted cap on one end and a carrying strap, used to hold rolled scrolls",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "set of brass weights",
+   "words": "several solid brass cylinders of graded sizes, each with a small knob on top, standing in a row from large to small in a wooden block",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "shield with a boss",
+   "words": "a round wooden shield with a domed metal boss in its exact centre",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "shop sign",
+   "words": "a wooden board sign hanging from two chains below an iron bracket sticking out from a wall",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 3,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "sleigh bell",
+   "words": "a small hollow metal ball with a narrow slit across its lower half and a loop on top, a jingle bell, several on a leather strap",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 6,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "spyglass",
+   "words": "a hand-held telescope: a long brass tube made of three sections that slide into one another, wider at one end, with a small eyepiece at the other",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "stretcher",
+   "words": "a medical stretcher for carrying a person: two long parallel poles with a canvas sheet stretched between them",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "strongbox",
+   "words": "a small heavy iron chest with riveted metal bands, a big keyhole and lock plate on its front, and handles on its sides",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 2,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "sugar bowl",
+   "words": "a small round lidded china bowl with two little handles on its sides and a knob on its lid",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 2,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "sundial",
+   "words": "a flat circular base with a central vertical rod casting a shadow onto engraved hour lines radiating from the center",
+   "written_by": "model",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "tinderbox",
+   "words": "a small round tin box with a hinged lid, open, holding a flint, a C-shaped fire steel and some tinder",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "toasting fork",
+   "words": "a fork for toasting bread over a fire: a very long thin metal handle with a hanging loop at its end, and two or three long prongs",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "torch on a wall bracket",
+   "words": "a burning wooden torch with an open flame at its top, held upright in an iron ring bracket fixed to a wall, no glass and no lamp",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "umbrella stand",
+   "words": "a tall open cylinder on the floor, like a tall bucket, with several closed umbrellas and walking sticks standing in it",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 3,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "water clock",
+   "words": "a vessel that tells time by dripping water: an upper bowl dripping through a small spout into a tall marked cylinder below, on a stand",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "water pump",
+   "words": "an old cast-iron hand pump for water: an upright column with a curved spout on its front and a long lever handle on top",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 7,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "wizard's staff",
+   "words": "a tall gnarled wooden walking staff, taller than a person, its top twisted into a knot holding a glowing crystal",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 4,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "wooden barrel cart",
+   "words": "a two-wheeled wooden cart with handles, a wooden barrel lying on its side on its bed",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 4,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "wooden puzzle box",
+   "words": "a small closed block-like box covered all over in inlaid geometric patterns, its sides made of sliding panels, with no visible lid, hinge or lock",
+   "written_by": "hand",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "wooden recorder",
+   "words": "a straight cylindrical tube with a flared mouthpiece at one end and a series of finger holes along its side, capped by a foot joint at the opposite end",
+   "written_by": "model",
+   "measured": {
+    "right_of_8_name_alone": 0,
+    "right_of_8_with_words": 8,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  },
+  {
+   "name": "wooden shoe last",
+   "words": "a tapered wooden form: a long narrow shaft widening into a rounded foot section with a distinct heel and a flat sole base",
+   "written_by": "model",
+   "measured": {
+    "right_of_8_name_alone": 1,
+    "right_of_8_with_words": 6,
+    "date": "2026-11-15",
+    "with": "model-maker before 0.2.2, FLUX.1 [schnell] in 4 bits"
+   }
+  }
+ ]
+}

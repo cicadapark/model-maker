@@ -42,10 +42,17 @@ from scipy.spatial import cKDTree
 from . import bake, render
 from . import mesh_tools as M
 
-# The candidate views: round the object every 45 degrees, from these heights above it (the six views already see it
-# from the sides, straight above and below; what they miss is seen from above at a slant).
+# The candidate views: round the object every 45 degrees, from these heights. From above at a slant: a candle
+# holder's bowl. Level and from below as well (0.3.0, 16 Nov 2026): the inner faces of a pew's ends are seen level
+# from 45 degrees off its front, the undersides of a bunk bed's rails and a bookcase's shelves from below at a slant;
+# none of the six views and no view from above sees them squarely. Painting them raised the share of the surface a
+# view painted by 1-11 points on 45 stored objects; judged blind it changed no verdict (the smears judged wrong on
+# those objects were mostly painted by the six views themselves), so it is a coverage gain, not a fix for smears.
+# Views from below are where invented underside detail comes from: the 0.2 candidates are kept to compare.
 CANDIDATE_TURNS = tuple(range(0, 360, 45))
-CANDIDATE_TILTS = (20.0, 35.0, 50.0)
+CANDIDATE_TILTS = (-50.0, -35.0, -20.0, 0.0, 20.0, 35.0, 50.0)
+# The candidates before 0.3.0 (kept to compare the two choices on stored objects).
+CANDIDATE_TILTS_0_2 = (20.0, 35.0, 50.0)
 # At most this many views are added, each while it adds at least this share of the surface as it is seen (a box seen
 # whole by the six views gains 0.6 % from its bevelled corners, the fix-check's candle misses 14 %).
 MOST_VIEWS = 4
@@ -158,7 +165,7 @@ def squarely_seen(corners, triangles, points, normals, turn, tilt):
     return (normals @ toward >= LEAST_FACING) & (point_depth >= zbuf[row, col] - bake.SEEN_SLACK_PIXELS / frame.scale)
 
 
-def chosen_views(corners, triangles, cloud, most=MOST_VIEWS):
+def chosen_views(corners, triangles, cloud, most=MOST_VIEWS, tilts=CANDIDATE_TILTS):
     """The views to add, best first: [(turn, tilt, the share of the seen surface each adds)], and the seen share of
     the surface unpainted before them."""
     points, normals, _ = M.sampled(corners, triangles, SAMPLES, seed=11)
@@ -167,7 +174,7 @@ def chosen_views(corners, triangles, cloud, most=MOST_VIEWS):
     total = max(float(weight.sum()), 1e-12)
     before = float((weight * todo).sum() / total)
     seen = {(turn, tilt): squarely_seen(corners, triangles, points, normals, turn, tilt)
-            for turn in CANDIDATE_TURNS for tilt in CANDIDATE_TILTS}
+            for turn in CANDIDATE_TURNS for tilt in tilts}
     views = []
     while len(views) < most:
         gains = {view: float((weight * (todo & got)).sum() / total) for view, got in seen.items()}

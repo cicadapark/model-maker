@@ -1,5 +1,50 @@
 # Results, limits and what is not here yet
 
+## 0.3.0 against 0.2.2
+
+Fifty new prompts were written and sealed before this work began (`tools/trial/unseen-third.txt`). Each was made once
+with 0.2.2 and once with this version's making code as it stood on 16 Nov, the same seeds, on a 12 GB RTX 3060 and on
+a 16 GB RTX 3080 laptop card. Every object was judged by eye, blind, from all round and from below, by two judges. On
+each card 48 prompts were made; 2 were made by neither version. The 0.3.0 columns are those objects judged by 0.3.0's checks (the fill check a note),
+before the check "closed underneath" was added. The table gives the first judge's verdicts.
+
+| Of 50 | 0.2.2, RTX 3060 | 0.3.0, RTX 3060 | 0.2.2, RTX 3080 | 0.3.0, RTX 3080 |
+|---|---|---|---|---|
+| pass every check and right | 19 | 27 | 20 | 27 |
+| pass every check but wrong | 6 | 8 | 5 | 8 |
+| right but refused by a check | 14 | 6 | 11 | 4 |
+| wrong and refused | 9 | 7 | 12 | 9 |
+| not made | 2 | 2 | 2 | 2 |
+
+**More right objects pass, and more wrong ones pass too.** Right objects that pass went from 19 and 20 to 27 on each
+card; wrong objects that pass went from 6 and 5 to 8; right objects refused went from 14 and 11 to 6 and 4. No object
+that was right and passed with 0.2.2 was lost. What frees them is the fill check made a note: counted as before, the
+same objects give 18 right on the 12 GB card and 16 on the 16 GB card, as the wider touch-up views fill more and the
+check then refused more. An object that passes with a filled patch carries the note, and its report shows the patch.
+
+We had set ourselves a bar before opening the list, for each card: right objects that pass rise by at least 3; wrong
+objects that pass rise by at most half that rise; at most one object that 0.2.2 made right and passed is lost;
+invented detail above or below does not rise; the regression set holds; and the 50 take at most 1.5 times 0.2.2's
+time. It was counted with 21 verdicts that a third judge gave again. With them, right objects that pass are 25 on each
+card (0.2.2: 19 on the 12 GB card, 18 on the 16 GB card) and wrong ones 10 on each (0.2.2: 6 and 7). On the 12 GB card
+that is +6 right and +4 wrong, where half the rise allows 3: **the bar was missed there by one object.** On the 16 GB
+card it is +7 right and +3 wrong, under the 3.5 allowed, only if one disputed object is counted as right; counted
+wrong, it is +6 and +4, missed as on the other card. No object that 0.2.2 made right and passed was lost, and the
+regression set holds. Invented detail and the time were never counted, so we say nothing of them. A stricter second
+judge counted the rise in wrong objects that pass at +7 on the 12 GB card and +6 on the 16 GB card.
+
+After that measurement we added the check "closed underneath" (`objects.md`, "Open underneath"). Counted again on the
+same judged objects, it refuses one wrong object on each card, a wooden jewellery chest made open underneath, and
+nothing right: wrong objects that pass are then 7 on each card by the first judge's verdicts, and 9 on each with the
+third judge's 21 (against 0.2.2: +3 on the 12 GB card, +2 on the 16 GB card). Made again with the release, the chest
+would not stop at that refusal: a shape that fails a check gets a second shape try, and the chest's second shape was
+never made or judged. That check was chosen after the list was opened, so this is a recount, not a measurement, and we do not say the bar was reached. It misses a known case: a
+bowl-like open side that reaches the outline (a stone pestle made as a mortar).
+
+The stored objects of this list were checked again with the release's own checks on both cards: every status is the
+one counted above with "closed underneath" added, 50 of 50 a card. The objects of both versions are kept with their
+verdicts.
+
 ## 0.2.2 against 0.2.1
 
 Fifty new prompts were written and sealed before this work began (`tools/trial/unseen-next.txt`). Each was made once
@@ -139,7 +184,8 @@ were made once for this number and are now part of the development set.
 ## Not yet
 
 * bows (a bow prompt is answered that they come later; nothing is made);
-* animals (a later release);
+* animals (a later release; they are next in the work);
+* things that open and shut (a chest's lid, a door, a book's cover): made shut, in one piece, for now;
 * characters, meaning people and fantasy creatures (after the animals); a statue of either is an object, and a prompt
   that names both ("a knight on a horse") is answered as a character;
 * Windows and macOS; WSL2 on Windows should work the same but has not been tried;
@@ -148,13 +194,22 @@ were made once for this number and are now part of the development set.
 
 ## Known limits
 
-* one object, in one piece: "a pair of ..." or "two ..." is answered before any painting, asking for one thing
-  ("a pair of scissors" and "a pair of tongs" are one object, and made);
+* one object at a time: two of one thing ("a pair of boots", "two candlesticks") is made once and placed twice, the
+  second its mirror image or its copy (`objects.md`, "Pairs"); three or more, a set, or two different things are
+  answered before any painting, asking for one thing ("a pair of scissors" and "a pair of tongs" are one object, and
+  made);
 * of the qualities a prompt names, "curved" and "round" are judged; others ("tall", "broken", "rusty") are not;
 * lettering painted on an object is caught when it is written straight across a flat face; lettering round a rim (a
   coin, a medal) and very small marks still get through;
 * a side painted out of family with the other views (the teapot's black patches) is painted again; two neighbouring
   views wrong together, and polished metal, are not caught;
 * a near relative can pass for the thing asked for (a rod with a knob for a mace);
-* the paint-fill check can fail an object for a small smear the eye does not notice (on a handle's foot, on the inner
-  wall of a dark iron pot); a lining or shelf boards of another colour pass it.
+* the fill check is a note since 0.3.0, so an object whose touch-up painted a patch out of keeping with the paint
+  round it (a grey patch, a smear) passes: the note and the patch are in its report, so look at it before you use the
+  object;
+* "closed underneath" misses a bowl-like open side that reaches the outline (a pestle made as a mortar), and runs only
+  for things that stand on their own base; it would refuse a right thing whose base is closed all round with its
+  underside more than 15 % of its height up (a chair or stool with low stretchers on all four sides, a chest on a deep
+  skirt, a platform bed): none of 309 stored objects was one, and `--stands no` leaves the check out;
+* the outline is measured against its own size, so a long, low thing with a paint fault the outline once caught by
+  chance (a rolling pin with lettering stamped on it) passes.

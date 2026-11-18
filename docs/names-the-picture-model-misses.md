@@ -9,9 +9,9 @@ instead: asked for "a garden hoe", it painted a digging fork. Everything after t
 picture makes a well-made wrong object.
 
 For each name on this list we write a **description**: the same thing said in words the model does know ("a garden
-hoe" could become "a flat metal blade set across the end of a long wooden handle"). A later version of model-maker
-will say a name's measured description when it paints that name; until then, write the description into your own
-prompt.
+hoe" could become "a flat metal blade set across the end of a long wooden handle"). Since 0.3.0 model-maker says
+54 measured descriptions itself, after your words, when the thing you ask for is one of these names; for a name
+whose description it does not say, write the description into your own prompt.
 
 ## How a name is measured
 
@@ -41,11 +41,15 @@ the other 246, which it passed in 6 or more, were not, and a few of them may bel
 of the wrong tries it was shown). For each of the 89 names two descriptions were tried, one written by the question judge's model (Qwen 3.5 9B)
 and one by hand, 8 tries each, all 24 pictures of a name shuffled and labelled blind. Of 712 tries, 77 were right with
 the name alone, 138 with the model's descriptions and 460 with the hand-written ones. The better description
-gained at least 4 right tries for 57 names (12 of them the model's). The other 32 keep "no description yet"; for 20
+gained at least 4 right tries for 57 names (the model's was the better one for 5 of them, and as good for 7 more). The other 32 keep "no description yet"; for 20
 of them no version came out right in more than 2 of 8. The hand-written descriptions and the labels are by the same
 person, blind to which picture came from which. The question judge, asked about all 2,136 pictures, said yes to 161
 with the names alone, 329 with the model's descriptions and 518 with the hand-written ones: more lenient than the
-eye, but the same order and a gain of the same size.
+eye, but the same order and a gain of the same size. model-maker keeps 55 of the 57 descriptions
+(`python/model_maker/picture_words.json`) and says 54 of them after the user's words: "a set of brass weights" is
+answered "ask for one" before anything is painted. "A club" waits, because model-maker already has words of its own
+for a club, and the two together need their own check; "a pair of boots" needs none, as a pair is made as one boot and
+its mirror image.
 
 | Name | Right of 8, plain | Description | Right of 8, described | Measured with | Reported by |
 |---|---|---|---|---|---|
@@ -131,7 +135,7 @@ eye, but the same order and a gain of the same size.
 | A cannonball | 3 (5 unclear) | no description yet | 4 (best of two tried) | 15 Nov 2026, before 0.2.2 | |
 | A laundry tub | 3 (5 unclear) | no description yet | 8 (best of two tried) | 15 Nov 2026, before 0.2.2 | |
 | A log basket | 3 (5 unclear) | "a sturdy woven basket with a carrying handle, filled with chopped firewood logs" | 8 | 15 Nov 2026, before 0.2.2 | |
-| A pair of boots | 3 (5 unclear) | "two boots standing side by side, a left one and a right one" | 8 | 15 Nov 2026, before 0.2.2 | |
+| A pair of boots | 3 (5 unclear) | "two boots standing side by side, a left one and a right one" | 8 | 15 Nov 2026, before 0.2.2 | Not needed since 0.3.0: a pair is made as one boot and its mirror image |
 | A salt box | 3 (5 unclear) | "a small wooden box made to hang on a kitchen wall, with a sloping hinged lid and a hole at the top of its back board" | 7 | 15 Nov 2026, before 0.2.2 | |
 | An astrolabe | 3 (5 unclear) | no description yet | 3 (best of two tried) | 15 Nov 2026, before 0.2.2 | |
 | A wooden barrel cart | 4 (1 unclear) | "a two-wheeled wooden cart with handles, a wooden barrel lying on its side on its bed" | 8 | 15 Nov 2026, before 0.2.2 | |

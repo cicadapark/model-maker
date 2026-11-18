@@ -270,6 +270,16 @@ class AskedWords(unittest.TestCase):
         self.assertEqual(Q.asked_words("a wooden chess board"), "a chess board")
         self.assertEqual(Q.asked_words("an iron birdcage"), "an iron birdcage")
 
+    def test_a_name_of_two_things_is_asked_whole(self):
+        self.assertEqual(Q.asked_words("a bow saw"), "a bow saw")
+        self.assertEqual(Q.asked_words("an old wooden bow saw"), "a bow saw")
+        self.assertEqual(Q.asked_words("a stone bench"), "a bench")
+        for prompt, asked in {"a bone knife": "a knife", "a rock chair": "a chair", "a horn bow": "a bow",
+                              "a rope chair": "a chair"}.items():
+            self.assertEqual(Q.asked_words(prompt), asked, prompt)
+        self.assertEqual(Q.asked_words("a wooden treasure chest"), "a chest")
+        self.assertEqual(Q.asked_words("a pair of wireless headphones"), "a pair of headphones")
+
 
 class AsTheTrialSentIt(unittest.TestCase):
     def test_eight_sides_become_four_by_two_at_most_1024_wide(self):

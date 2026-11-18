@@ -162,6 +162,22 @@ class TouchUp(unittest.TestCase):
         self.assertTrue((sources[:len(cloud[0])] == 0).all())
         self.assertEqual(set(np.unique(sources[len(cloud[0]):])), set(range(1, len(record["views"]) + 1)))
 
+    def test_the_inner_faces_of_a_pews_ends_and_a_shelfs_underside_are_seen_level_or_from_below(self):
+        # Two end panels joined by a seat and a lower shelf (a pew, a bookcase's bay): the six views see the panels'
+        # inner faces only edge-on or through the other panel, and the shelves' undersides not at all. From above at
+        # a slant (the 0.2 candidates) little of them is seen; level and from below (0.3.0) most.
+        corners, triangles = shapes.surface_of([((-0.5, 0.0, 0.0), (-0.47, 0.6, 0.4)),
+                                                ((0.47, 0.0, 0.0), (0.5, 0.6, 0.4)),
+                                                ((-0.47, 0.3, 0.0), (0.47, 0.33, 0.4)),
+                                                ((-0.47, 0.1, 0.0), (0.47, 0.12, 0.4))], 0.01)
+        cloud = painted_from_six(corners, triangles)
+        old, before = touch_up.chosen_views(corners, triangles, cloud, tilts=touch_up.CANDIDATE_TILTS_0_2)
+        new, _ = touch_up.chosen_views(corners, triangles, cloud)
+        self.assertGreater(before, 0.05, "the six views leave the inner faces and the undersides")
+        gained_old, gained_new = sum(v[2] for v in old), sum(v[2] for v in new)
+        self.assertGreater(gained_new, 1.5 * gained_old, (old, new))
+        self.assertTrue(any(v[1] <= 0 for v in new), new)
+
     def test_a_shape_the_six_views_see_whole_needs_no_view(self):
         corners, triangles = shapes.surface_of([((0.0, 0.0, 0.0), (0.3, 0.2, 0.3))], 0.01)
         views, before = touch_up.chosen_views(corners, triangles, painted_from_six(corners, triangles))
@@ -194,6 +210,7 @@ class TouchUp(unittest.TestCase):
         failed = inspection.fill_check(blob_fit)
         self.assertFalse(failed.passed, blob_fit)
         self.assertEqual(failed.name, "fill matches the paint round it")
+        self.assertFalse(failed.counted)  # a note since 0.3.0 (17 Nov 2026): shown, not counted
         self.assertGreater(blob_fit["largest_patch"], touch_up.LARGEST_FOREIGN_PATCH)
         self.assertLess(good_fit["largest_patch"], touch_up.LARGEST_FOREIGN_PATCH / 2)
 

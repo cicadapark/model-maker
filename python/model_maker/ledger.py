@@ -103,7 +103,8 @@ def settings_of(settings):
             "picture_rounds": settings.picture_rounds, "touch_up_views": settings.touch_up_views,
             "touch_up_strength": settings.touch_up_strength,
             "require_lettering": getattr(settings, "require_lettering", False),
-            "require_question_judge": getattr(settings, "require_question_judge", False)}
+            "require_question_judge": getattr(settings, "require_question_judge", False),
+            **({"attempt": settings.attempt} if getattr(settings, "attempt", 0) else {})}
 
 
 def _card_peak_reset():

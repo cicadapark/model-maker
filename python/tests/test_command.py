@@ -121,6 +121,11 @@ class Folders(unittest.TestCase):
         self.assertNotEqual(pipeline.job_folder(out, "an old iron sword", 0.9),
                             pipeline.job_folder(out, "an old iron sword", 1.2))
         self.assertNotEqual(pipeline.job_folder(out, "古い椅子"), pipeline.job_folder(out, "古いテーブル"))
+        # A later attempt is its own job; the first attempt keeps the folder it always had.
+        self.assertNotEqual(pipeline.job_folder(out, "an old iron sword", attempt=1),
+                            pipeline.job_folder(out, "an old iron sword"))
+        self.assertEqual(pipeline.job_folder(out, "an old iron sword", attempt=0),
+                         pipeline.job_folder(out, "an old iron sword"))
         self.assertEqual(pipeline.job_folder(out, "an old  chair."), pipeline.job_folder(out, "an old chair"))
         self.assertTrue(os.path.basename(oak).startswith("long-wooden-dining-table-"))
 

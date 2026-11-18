@@ -323,15 +323,34 @@ def as_data(image):
     return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode()
 
 
+# Known things that also name what a thing is made of: "a stone bench" is asked as a bench, "a bone knife" as a knife.
+ALSO_A_MATERIAL = ("stone", "bone", "rock", "horn", "rope", "chain", "log", "feather")
+
+
 def asked_words(prompt):
     """What the judge is asked about: the thing the words name, with its article ("an old iron sword": "a sword"), or
-    the whole prompt when the words name no thing model-maker knows ("an iron birdcage")."""
+    the whole prompt when the words name no thing model-maker knows ("an iron birdcage"). A name of two things is
+    asked whole: "a bow saw" is asked as a bow saw, not a saw (0.3.0: asked "Is it a saw?", the judge refused a right
+    bow saw on the 12 GB card, 16 Nov 2026)."""
     from . import words
 
     noun = words.subject_of(prompt).noun
     if not noun:
         return prompt
+    before = word_before(words.cleaned(prompt).lower(), noun)
+    if before and before in words.known_things() and before not in ALSO_A_MATERIAL:
+        noun = f"{before} {noun}"
+    if noun in words.ONE_THING_IN_PAIRS:
+        return f"a pair of {noun}"  # "Is it a pair of headphones?", not "a headphones"
     return ("an " if noun[0] in "aeiou" else "a ") + noun
+
+
+def word_before(text, noun):
+    """The word right before the noun's last place in the text ("a wooden bow saw", "saw": "bow"), or ""."""
+    import re
+
+    found = list(re.finditer(rf"(?<![a-z])([a-z-]+)\s+{re.escape(noun)}(?![a-z])", text))
+    return found[-1].group(1) if found else ""
 
 
 def object_check(judge, turntable, prompt, required, unavailable=""):

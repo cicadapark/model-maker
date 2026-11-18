@@ -125,7 +125,7 @@ class RepaintTest(unittest.TestCase):
 
     def run_views(self, colours_by_seed):
         calls = []
-        settings = mock.Mock(paint_steps=20)
+        settings = mock.Mock(paint_steps=20, attempt=0)  # a first attempt, as Settings starts
         with tempfile.TemporaryDirectory() as folder, \
                 mock.patch("model_maker.paint.painted", self.painted_by_seed(colours_by_seed, calls)):
             os.makedirs(os.path.join(folder, "views"))

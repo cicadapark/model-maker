@@ -187,6 +187,11 @@ def repair_words(repair):
     if not repair:
         return "Not cleaned up before the checks."
     done = [f"{repair[key]} {words}" for key, words in REPAIR_WORDS if repair.get(key)]
+    joined = repair.get("pieces_joined") or []
+    if joined:
+        most = max(float(piece.get("moved_mm", 0.0)) for piece in joined)
+        done.append(f"{len(joined)} loose piece{'s' if len(joined) > 1 else ''} within 3 mm moved to touch the main "
+                    f"piece (at most {most:.1f} mm)")
     return "Cleaned up before the checks: " + ("; ".join(done) if done else "nothing needed") + "."
 
 
