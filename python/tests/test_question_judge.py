@@ -39,7 +39,11 @@ FAKE_SERVER = textwrap.dedent('''\
             self.send_response(200); self.end_headers(); self.wfile.write(b'{{"status":"ok"}}')
         def do_POST(self):
             body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            if os.environ.get("FAKE_BODIES"):
+                with open(os.environ["FAKE_BODIES"], "a") as said:
+                    said.write(json.dumps(body) + "\\n")
             assert body["chat_template_kwargs"] == {{"enable_thinking": False}}
+            assert body["cache_prompt"] is False, body
             assert (body["max_tokens"], body["temperature"], body["logprobs"]) == (1, 0, True), body
             content = body["messages"][0]["content"]
             assert content[0]["image_url"]["url"].startswith("data:image/png;base64,")
@@ -190,6 +194,25 @@ class Installed(unittest.TestCase):
         self.assertIn("--no-mmproj-offload", argv)
         self.assertFalse(os.path.exists(log), "its log is removed when it stops")
         self.assertEqual(Q.server_runs(where), (True, "version: 0 (a stand-in)"))
+
+    def test_it_keeps_no_earlier_prompt(self):
+        # llama.cpp keeps earlier prompts (8 GiB by default): the 9B's server grew from about 10 GB to 17.5 GB over a
+        # long batch. Neither the server's cache nor any request keeps one.
+        where = self.install()
+        said, bodies = os.path.join(self.root, "argv.json"), os.path.join(self.root, "bodies.jsonl")
+        with mock.patch.dict(os.environ, {"FAKE_ARGV": said, "FAKE_BODIES": bodies}):
+            with Q.Judge(where, threads=1) as judge:
+                data = Q.as_data(strip())
+                for question in (Q.OBJECT_QUESTION.format(prompt="a hoe"), Q.PICTURE_QUESTION.format(prompt="a hoe")):
+                    judge.ask(data, question)
+        with open(said) as file:
+            argv = json.load(file)
+        self.assertEqual(argv[argv.index("--cache-ram") + 1], "0")
+        self.assertNotIn("--no-repack", argv, "repacking is kept: without it the answers move")
+        with open(bodies) as file:
+            asked = [json.loads(line) for line in file]
+        self.assertEqual(len(asked), 2)
+        self.assertTrue(all(body["cache_prompt"] is False for body in asked), asked)
 
     def test_a_server_that_dies_and_cannot_start_again_is_a_job_not_judged(self):
         where = self.install()

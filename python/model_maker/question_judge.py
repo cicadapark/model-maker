@@ -49,7 +49,11 @@ PICTURE_QUESTION = "Does this picture show {prompt}? Answer yes or no."
 LONGEST_SIDE = 512
 STRIP_SIDES = 8
 TOP_CHOICES = 20
-# The server: loopback only, CPU only, its own threads; a start and an answer each have their limit.
+# The server: loopback only, CPU only, its own threads; a start and an answer each have their limit. It keeps no
+# earlier prompt (`--cache-ram 0`, and `cache_prompt` false in every request): each picture is asked afresh, so a
+# kept prompt is never reused, and llama.cpp's prompt cache (8 GiB by default) grew the server from about 10 GB to
+# 17.5 GB over a long batch. The answers are the same to within 1e-3 either way (measured on 160 pictures). The
+# weights are still repacked for the processor: not repacking saves memory too, but moves the answers.
 THREADS = min(12, os.cpu_count() or 1)
 CONTEXT = 4096
 START_SECONDS = 120
@@ -163,8 +167,8 @@ class Judge:
         with os.fdopen(descriptor, "wb") as log:
             self.process = subprocess.Popen(
                 [self.where.server, "-m", self.where.model, "--mmproj", self.where.vision, "-ngl", "0",
-                 "--no-mmproj-offload", "-t", str(self.threads), "-c", str(CONTEXT), "-np", "1", "--host",
-                 "127.0.0.1", "--port", str(self.port), "--jinja"],
+                 "--no-mmproj-offload", "-t", str(self.threads), "-c", str(CONTEXT), "-np", "1", "--cache-ram",
+                 "0", "--host", "127.0.0.1", "--port", str(self.port), "--jinja"],
                 stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=server_environment(self.where),
                 start_new_session=True, preexec_fn=_dies_with_parent)
         try:
@@ -281,7 +285,7 @@ class Judge:
         body = {"messages": [{"role": "user", "content": [
             {"type": "image_url", "image_url": {"url": picture}}, {"type": "text", "text": question}]}],
             "max_tokens": 1, "temperature": 0, "logprobs": True, "top_logprobs": TOP_CHOICES,
-            "chat_template_kwargs": {"enable_thinking": False}}
+            "chat_template_kwargs": {"enable_thinking": False}, "cache_prompt": False}
         request = urllib.request.Request(self.url("/v1/chat/completions"), data=json.dumps(body).encode(),
                                          headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(request, timeout=ANSWER_SECONDS) as answer:

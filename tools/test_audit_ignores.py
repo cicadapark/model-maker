@@ -26,6 +26,16 @@ class AuditIgnores(unittest.TestCase):
                     self.assertTrue(str(entry.get(key, "")).strip(), f"{entry['id']} lacks {key}")
                 self.assertGreater(len(entry["why"]), 80, "say why it does not apply or cannot be fixed yet")
 
+    def test_each_entry_is_listed_once_with_its_other_ids(self):
+        # The aliases are what Dependabot and the advisories' pages show (GHSA, CVE), so an alert can be found here.
+        ids = [entry["id"] for entry in entries()]
+        self.assertEqual(len(ids), len(set(ids)), "an id is listed twice")
+        for entry in entries():
+            with self.subTest(entry["id"]):
+                for alias in entry.get("aliases", []):
+                    self.assertRegex(alias, r"^(GHSA-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}|CVE-\d{4}-\d+)$")
+                    self.assertNotEqual(alias, entry["id"])
+
     def test_no_review_date_has_passed(self):
         today = datetime.date.today()
         for entry in entries():

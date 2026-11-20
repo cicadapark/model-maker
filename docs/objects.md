@@ -357,9 +357,17 @@ pictures unread.
 `MODEL_MAKER_SOURCES`) holds the view painter's own code, `mv-adapter`, at the commit `registry/models.toml`
 names. The shape model needs no code of its own repository: model-maker runs TripoSG's weights with its own denoiser
 and decoder (`shape_net`, `shape_vae`). Before a model is
-loaded, every file the registry lists is checked against its sha256, and a folder with code the
-registry does not list, or with none of its listed files, is refused; before MV-Adapter's code is imported, its
-checkout is checked to be at the registry's commit with nothing changed or added.
+loaded, every file the registry lists is checked against its sha256, and a folder with code, a pickle or a
+configuration (a `.json` file, a `.jinja` chat template) the registry does not list, or with none of its listed files,
+is refused. Code is anything Python imports a module from (`.py`, `.pyc`, `.pyo`, `.pyw`, and the extension modules
+`.so` and `.pyd`, which Python tries before a `.py` of the same name) and a pickle under any of its usual names
+(`.bin`, `.pt`, `.pth`, `.ckpt`, `.pkl`, `.pickle`, `.joblib`); the hub's cache folder (`.cache`) is walked like the
+rest. A linked folder inside a model folder is refused, as the check does not follow it (setup makes none; the model
+folder itself may be a link), and so is a folder the check cannot read. Such a refusal says to remove the file or set
+the models up again with `./setup.sh` in an empty folder: setup writes only the registry's files into a model folder.
+Before MV-Adapter's code is imported, its checkout is checked to be at the registry's commit with nothing
+changed or added. `--no-verify` skips reading the files for their sums only: the folders are still walked, and what
+the registry does not list is still refused (0.3.1).
 
 ## Without a card
 
@@ -1395,8 +1403,10 @@ the trials rightly passed still passes it, and the made-up faults fail it. The m
 18. **Without SigLIP 2** a thing with a lid, a cover or doors is "not made: needs SigLIP 2", and the rest of a batch is
     made.
 19. **Odd prompts.** An empty prompt (nothing left once read) is not made; a slug is at most 60 characters.
-20. **Offline.** `HF_HUB_OFFLINE` and `TRANSFORMERS_OFFLINE` are set by the `model-maker` command before Python starts (and
-    by `__main__` before any of the hub's libraries is imported).
+20. **Offline.** `HF_HUB_OFFLINE` and `TRANSFORMERS_OFFLINE` are set to 1 by the `model-maker` command before Python starts
+    (and by the package's `__init__`, before any of the hub's libraries is imported, so for every way in: the command,
+    setup's smoke test, the trial tools, a program that imports the pipeline), whatever the environment held: a 0 left
+    there is overwritten, so no configuration can fetch code from the hub (0.3.1).
 
 ### Licences
 
@@ -2371,3 +2381,14 @@ an object near 0.5 may still be judged differently on another processor.
 Known limits: long thin things (a pitchfork, a halberd) are tiny in the views and can be refused while right; names
 the model does not know pass whatever is made (a sickle painted as a scythe scored 0.90); shape and paint faults are
 not its question.
+
+**Its memory (0.3.1).** llama.cpp's server keeps the prompts it has answered (up to 8 GiB by default), to answer
+faster a prompt that begins the same way. The judge never asks the same picture twice, so nothing kept was used, and
+the server grew over a batch: on 160 pictures from 9.4 to 17.5 GB (its peak resident memory in GiB, on its processor
+alone, on the 12 GB card's PC of docs/setup.md: 24 threads, 45 GB), and up to 15.4 GB in a batch of 20 objects. Since
+0.3.1 it keeps none (`--cache-ram 0` when it starts, and `cache_prompt` false in every question). On the same 160
+pictures its peak was 9.6 GB and did not grow (its own memory 4.1 GB, the rest the model's files mapped in); asking
+again 29 finished objects of two batches and 44 of their picture tries, 9.7 GB. Every answer was the same as before,
+to the last digit: the 160 against the run before the change, the 73 against the answers their batches recorded. Not
+repacking the weights for the processor (`--no-repack`) would save about 2.5 GB more, but it moves the answers (by up
+to 0.09 on the 160), so it stays.

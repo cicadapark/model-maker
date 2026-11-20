@@ -77,6 +77,7 @@ why = "the picture model's tries whose letters the check misses, our boxes and c
 
 # Not AI-made, left alone:
 #   qualities/several-things.webp: a terminal's text, what model-maker's own code answers to prompts; no model drew it
+#   0.3.1/judge-memory.webp: a chart of measured memory, drawn by our own code; no model drew it
 
 [[picture]]
 path = "judge-caught-0.2.2.webp"

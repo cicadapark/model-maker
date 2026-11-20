@@ -7,6 +7,24 @@ import unittest
 
 from model_maker import pipeline, registry
 
+# Files Python or torch would run that a model folder must not hold unlisted: an extension module is imported before
+# the source of the same name (cutout.py imports `birefnet` from its folder), bytecode runs outside `__pycache__` too,
+# and a pickle runs code under any of its names.
+PLANTED_CODE = ("birefnet.so", "birefnet.cpython-311-x86_64-linux-gnu.so", "birefnet.abi3.so", "birefnet.pyd",
+                "extra.pyc", "extra.PYO", "extra.pyw", "state.pickle", "state.joblib")
+# Code and configurations in the hub's cache folder are not let be: a component's module named as `../.cache/x` in a
+# model_index.json is imported from there.
+IN_THE_HUBS_CACHE = (os.path.join(".cache", "huggingface", "download", "config.json"),
+                     os.path.join(".cache", "huggingface", "x.py"))
+
+
+def planted(folder, name, text="print('planted')\n"):
+    path = os.path.join(folder, name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as file:
+        file.write(text)
+    return path
+
 
 class TheRegistry(unittest.TestCase):
     def test_every_model_the_pipeline_names_is_listed_with_a_licence_and_its_files(self):
@@ -57,6 +75,111 @@ class TheSumCheck(unittest.TestCase):
         with self.assertRaisesRegex(registry.RefusedFile, "does not list"):
             registry.verify_folder("m", self.folder, self.registry)
 
+    def test_an_unlisted_configuration_is_refused(self):
+        # A config.json can name an attention kernel to fetch, a model_index.json custom code to load; a chat
+        # template is run by the tokenizer.
+        for name in ("config.json", os.path.join("unet", "config.json"), "model_index.json", "chat_template.JINJA"):
+            with self.subTest(name):
+                path = os.path.join(self.folder, name)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "w") as file:
+                    file.write("{}\n")
+                with self.assertRaisesRegex(registry.RefusedFile, "configuration the registry does not list"):
+                    registry.verify_folder("m", self.folder, self.registry)
+                with self.assertRaisesRegex(registry.RefusedFile, "configuration the registry does not list"):
+                    registry.refuse_unlisted("m", self.folder, self.registry)
+                os.remove(path)
+
+    def test_other_unlisted_files_and_the_hubs_cache_files_are_let_be(self):
+        # The hub's cache in a model folder holds only these kinds; none runs code or steers a load.
+        cache = os.path.join(".cache", "huggingface", "download")
+        for path in ("README.md", ".done", ".gitattributes", os.path.join(cache, "config.json.metadata"),
+                     os.path.join(cache, "config.json.lock"), os.path.join(cache, "abc.incomplete"),
+                     os.path.join(".cache", "huggingface", ".gitignore")):
+            planted(self.folder, path, "not read\n")
+        self.assertEqual(registry.verify_folder("m", self.folder, self.registry), 1)
+
+    def test_code_python_or_torch_would_load_is_refused(self):
+        for name in PLANTED_CODE:
+            with self.subTest(name):
+                path = planted(self.folder, name)
+                with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+                    registry.verify_folder("m", self.folder, self.registry)
+                with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+                    registry.refuse_unlisted("m", self.folder, self.registry)
+                os.remove(path)
+
+    def test_every_ending_python_imports_a_module_from_is_code(self):
+        import importlib.machinery
+
+        for ending in importlib.machinery.all_suffixes() + [".pyd", ".pyw", ".pyo"]:
+            with self.subTest(ending):
+                self.assertTrue(("module" + ending).lower().endswith(registry.CODE_ENDINGS))
+
+    def test_code_and_configurations_in_the_hubs_cache_are_refused(self):
+        for name in IN_THE_HUBS_CACHE:
+            with self.subTest(name):
+                path = planted(self.folder, name)
+                with self.assertRaisesRegex(registry.RefusedFile, "the registry does not list"):
+                    registry.verify_folder("m", self.folder, self.registry)
+                with self.assertRaisesRegex(registry.RefusedFile, "the registry does not list"):
+                    registry.refuse_unlisted("m", self.folder, self.registry)
+                os.remove(path)
+
+    def test_a_model_folder_under_a_cache_path_is_walked(self):
+        # A models folder in, say, ~/.cache/model-maker/models: the part of the path above the model folder does not
+        # turn the walk off.
+        folder = os.path.join(self.work, ".cache", "model-maker", "models", "m")
+        shutil.move(self.folder, folder)
+        self.assertEqual(registry.verify_folder("m", folder, self.registry), 1)
+        planted(folder, "evil.py")
+        with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+            registry.verify_folder("m", folder, self.registry)
+        with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+            registry.refuse_unlisted("m", folder, self.registry)
+
+    def test_a_linked_folder_inside_is_refused(self):
+        # The walk does not follow a link, so what is behind one would be neither summed nor refused.
+        elsewhere = os.path.join(self.work, "elsewhere")
+        os.makedirs(elsewhere)
+        os.symlink(elsewhere, os.path.join(self.folder, "unet"))
+        for behind in ((), ("README.md",), ("config.json", "evil.py")):
+            with self.subTest(behind=behind):
+                for name in behind:
+                    planted(elsewhere, name)
+                with self.assertRaisesRegex(registry.RefusedFile, "a linked folder inside a model folder"):
+                    registry.verify_folder("m", self.folder, self.registry)
+                with self.assertRaisesRegex(registry.RefusedFile, "a linked folder inside a model folder"):
+                    registry.refuse_unlisted("m", self.folder, self.registry)
+
+    def test_a_model_folder_that_is_itself_a_link_is_walked(self):
+        # MODEL_MAKER_MODELS/<model> may point at a folder elsewhere: its files are walked and summed.
+        linked = os.path.join(self.work, "linked")
+        os.symlink(self.folder, linked)
+        self.assertEqual(registry.verify_folder("m", linked, self.registry), 1)
+        planted(self.folder, "evil.py")
+        with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+            registry.refuse_unlisted("m", linked, self.registry)
+
+    @unittest.skipIf(os.geteuid() == 0, "the superuser reads every folder")
+    def test_a_folder_the_check_cannot_read_is_refused(self):
+        # A folder that can be entered but not listed: a file in it can still be imported by its name.
+        hidden = os.path.join(self.folder, "hidden")
+        planted(hidden, "evil.py")
+        os.chmod(hidden, 0o100)
+        try:
+            with self.assertRaisesRegex(registry.RefusedFile, "a folder the check cannot read"):
+                registry.verify_folder("m", self.folder, self.registry)
+            with self.assertRaisesRegex(registry.RefusedFile, "a folder the check cannot read"):
+                registry.refuse_unlisted("m", self.folder, self.registry)
+        finally:
+            os.chmod(hidden, 0o700)
+
+    def test_a_refusal_says_what_to_do(self):
+        planted(self.folder, "config.json", "{}\n")
+        with self.assertRaisesRegex(registry.RefusedFile, r"remove it, or set the models up again with \./setup\.sh"):
+            registry.verify_folder("m", self.folder, self.registry)
+
     def test_a_folder_without_any_listed_file_is_refused(self):
         os.remove(os.path.join(self.folder, "model.safetensors"))
         with self.assertRaisesRegex(registry.RefusedFile, "none of the files"):
@@ -70,6 +193,67 @@ class TheSumCheck(unittest.TestCase):
             file.write(b"planted")
         registry.verify_folder("m", self.folder, self.registry)
         self.assertFalse(os.path.exists(cache))
+
+
+class WithoutTheSumCheck(unittest.TestCase):
+    """`--no-verify` skips reading each file for its sum, but the folder is still walked: unlisted code is refused."""
+
+    def setUp(self):
+        self.work = tempfile.mkdtemp()
+        self.folder = os.path.join(self.work, "birefnet")
+        os.makedirs(self.folder)
+        with open(os.path.join(self.folder, "model.safetensors"), "wb") as file:
+            file.write(b"weights the sums would refuse")
+
+    def tearDown(self):
+        shutil.rmtree(self.work)
+
+    def plant(self, name, text="print('planted')\n"):
+        with open(os.path.join(self.folder, name), "w") as file:
+            file.write(text)
+
+    def test_files_are_not_read_for_their_sums(self):
+        registry.refuse_unlisted("birefnet", self.folder)
+        self.assertEqual(pipeline.Settings(models=self.work, verify=False).verified("birefnet", "birefnet"),
+                         [self.folder])
+
+    def test_unlisted_code_a_pickle_or_a_configuration_is_still_refused(self):
+        for name in ("extra.py", "pytorch_model.bin", "weights.PTH", "state.pkl", "model_index.json", "template.jinja",
+                     *PLANTED_CODE, *IN_THE_HUBS_CACHE):
+            with self.subTest(name):
+                path = planted(self.folder, name)
+                with self.assertRaisesRegex(registry.RefusedFile, "the registry does not list"):
+                    registry.refuse_unlisted("birefnet", self.folder)
+                with self.assertRaisesRegex(registry.RefusedFile, "the registry does not list"):
+                    pipeline.Settings(models=self.work, verify=False).verified("birefnet", "birefnet")
+                os.remove(path)
+
+    def test_a_models_folder_under_a_cache_path_is_walked(self):
+        models = os.path.join(self.work, ".cache", "model-maker", "models")
+        os.makedirs(models)
+        shutil.move(self.folder, os.path.join(models, "birefnet"))
+        planted(os.path.join(models, "birefnet"), "evil.py")
+        with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+            pipeline.Settings(models=models, verify=False).verified("birefnet", "birefnet")
+
+    def test_a_linked_folder_inside_is_refused(self):
+        elsewhere = os.path.join(self.work, "elsewhere")
+        planted(elsewhere, "evil.py")
+        os.symlink(elsewhere, os.path.join(self.folder, "unet"))
+        with self.assertRaisesRegex(registry.RefusedFile, "a linked folder inside a model folder"):
+            pipeline.Settings(models=self.work, verify=False).verified("birefnet", "birefnet")
+
+    def test_a_listed_code_file_passes_and_cached_bytecode_is_removed(self):
+        self.plant("birefnet.py", "changed, but its sum is not read without the check\n")
+        cache = os.path.join(self.folder, "__pycache__")
+        os.makedirs(cache)
+        with open(os.path.join(cache, "birefnet.cpython-311.pyc"), "wb") as file:
+            file.write(b"planted")
+        registry.refuse_unlisted("birefnet", self.folder)
+        self.assertFalse(os.path.exists(cache))
+
+    def test_a_missing_folder_is_left_to_the_load(self):
+        registry.refuse_unlisted("birefnet", os.path.join(self.work, "absent"))
 
 
 class TheCodeCheck(unittest.TestCase):

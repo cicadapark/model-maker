@@ -186,5 +186,71 @@ class Refused(unittest.TestCase):
             shutil.rmtree(folder)
 
 
+class Offline(unittest.TestCase):
+    def test_the_hub_stays_offline_whatever_the_environment_held(self):
+        # A 0 left in the environment would let a model's configuration fetch code from the hub: `__main__` sets both
+        # to 1 before any of the hub's libraries is imported, not only when they are unset.
+        import subprocess
+        import sys
+
+        python_folder = os.path.dirname(os.path.dirname(os.path.abspath(command.__file__)))
+        environment = dict(os.environ, HF_HUB_OFFLINE="0", TRANSFORMERS_OFFLINE="0", PYTHONPATH=python_folder)
+        read = subprocess.run([sys.executable, "-c", "import os, model_maker.__main__; "
+                               "print(os.environ['HF_HUB_OFFLINE'], os.environ['TRANSFORMERS_OFFLINE'])"],
+                              env=environment, capture_output=True, text=True, check=True)
+        self.assertEqual(read.stdout.split(), ["1", "1"])
+
+    def test_every_way_in_reads_the_hub_offline_in_the_library_itself(self):
+        # Setup's smoke test, the trial tools and a program that imports the pipeline never run `__main__`; and the
+        # hub's library reads the variable once, when it is first imported, so the library's own value is asserted.
+        import importlib.util
+        import subprocess
+        import sys
+
+        python_folder = os.path.dirname(os.path.dirname(os.path.abspath(command.__file__)))
+        environment = dict(os.environ, HF_HUB_OFFLINE="0", TRANSFORMERS_OFFLINE="0", PYTHONPATH=python_folder)
+        hub_installed = importlib.util.find_spec("huggingface_hub") is not None
+        for way_in in ("model_maker.__main__", "model_maker.registry", "model_maker.pipeline", "model_maker.kept"):
+            with self.subTest(way_in):
+                program = (f"import os, {way_in}\n"
+                           "print(os.environ['HF_HUB_OFFLINE'], os.environ['TRANSFORMERS_OFFLINE'])\n")
+                if hub_installed:
+                    program += "import huggingface_hub.constants as hub\nprint(hub.HF_HUB_OFFLINE)\n"
+                read = subprocess.run([sys.executable, "-c", program], env=environment, capture_output=True, text=True,
+                                      check=True)
+                self.assertEqual(read.stdout.split(), ["1", "1"] + (["True"] if hub_installed else []))
+
+
+class NoVerifyWiring(unittest.TestCase):
+    def test_no_verify_reaches_the_folder_walk_through_the_command(self):
+        # `--no-verify` skips the sums only: the Settings the command makes still walk the folders.
+        from unittest import mock
+
+        from model_maker import registry
+
+        models = tempfile.mkdtemp()
+        try:
+            flux = os.path.join(models, "flux1-schnell")
+            os.makedirs(flux)
+            with open(os.path.join(flux, "evil.py"), "w") as file:
+                file.write("print('planted')\n")
+            caught = []
+
+            def made(prompt, out, size, stands, symmetric, settings, stages, kept=None):
+                caught.append(settings)
+                return 0, None
+
+            for flags, verify in (([], True), (["--no-verify"], False)):
+                with self.subTest(flags=flags):
+                    with mock.patch.object(command, "made", made), contextlib.redirect_stderr(io.StringIO()):
+                        command.main(["make", "an old looking chair", "--out", models, "--models", models, *flags])
+                    settings = caught.pop()
+                    self.assertIs(settings.verify, verify)
+                    with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
+                        settings.verified("flux1-schnell", "flux1-schnell")
+        finally:
+            shutil.rmtree(models)
+
+
 if __name__ == "__main__":
     unittest.main()
