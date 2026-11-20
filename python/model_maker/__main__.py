@@ -27,10 +27,10 @@ import os
 import sys
 import time
 
-# Every model is read from its checked folder, never fetched: set before any of the hub's libraries is imported, as
-# they read it then (the `model-maker` command sets it too).
-os.environ.setdefault("HF_HUB_OFFLINE", "1")
-os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+# Offline, as the package's __init__ already set it (the `model-maker` command sets it too); kept here in case this
+# module is ever run apart from its package. Set, not defaulted (docs/objects.md, "Offline").
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
 # No bytecode cached beside the models' own code: their folders hold only what the registry lists (registry.py).
 sys.dont_write_bytecode = True
 
@@ -66,7 +66,9 @@ def common(parser):
                         help="shapes made at most when a shape check fails")
     parser.add_argument("--triangles", type=int, default=pipeline.DEFAULT_TRIANGLES, help="the triangle budget")
     parser.add_argument("--texture", type=int, default=pipeline.DEFAULT_TEXTURE, help="the texture's side in texels")
-    parser.add_argument("--no-verify", action="store_true", help="skip the models' sha256 check (it was done before)")
+    parser.add_argument("--no-verify", action="store_true",
+                        help="skip the models' sha256 check (it was done before); unlisted code and "
+                             "configurations are still refused")
     parser.add_argument("--stages", default="pictures,shape,paint,finish",
                         help="which stages to run (a stage done is kept)")
     parser.add_argument("--lead", choices=sorted(words.LEADS), default=words.DEFAULT_LEAD,
@@ -112,7 +114,8 @@ def use_signing(args):
 
 def warn_unverified(args):
     if args.no_verify:
-        print("model-maker: --no-verify: the models' files are not checked against their sha256 sums", file=sys.stderr)
+        print("model-maker: --no-verify: the models' files are not checked against their sha256 sums (code and "
+              "configurations the registry does not list are still refused)", file=sys.stderr)
 
 
 def settings_of(args):

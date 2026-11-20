@@ -1,7 +1,8 @@
 """The registry of AI models (registry/models.toml): every model's licence and the sha256 of its files.
 
 Before a model is loaded, every file in its folder that the registry lists must match its sum, and a file that runs
-code when loaded (a pickle, a model's own Python) must be listed: anything else is refused. The sidecar of every
+code when loaded (a pickle, a model's own Python) or tells the libraries what to load (a JSON configuration, a chat
+template) must be listed: anything else is refused. The sidecar of every
 object made names each model used with its version and licence.
 """
 
@@ -12,8 +13,15 @@ import tomllib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REGISTRY = os.path.normpath(os.path.join(HERE, "..", "..", "registry", "models.toml"))
-# Files that run as code when loaded: only ever with a registry sum.
-CODE_ENDINGS = (".ckpt", ".bin", ".pt", ".pth", ".pkl", ".py")
+# Files that run as code when loaded: only ever with a registry sum. Pickles under any of their usual names (torch's
+# checkpoints, joblib's), and every file Python imports a module from: its source, its bytecode (outside
+# `__pycache__` too) and an extension module (`.so`, `.pyd`), which is tried before the source of the same name.
+CODE_ENDINGS = (".ckpt", ".bin", ".pt", ".pth", ".pkl", ".pickle", ".joblib",
+                ".py", ".pyw", ".pyc", ".pyo", ".so", ".pyd")
+# Files the hub's libraries read to decide what to load and run (a config.json naming a model class or an attention
+# kernel, a model_index.json naming components, a shard index naming weight files, a chat template): only ever with a
+# registry sum too. Every one a model of the registry needs is listed.
+CONFIG_ENDINGS = (".json", ".jinja")
 HASH_CHUNK = 8 * 1024 * 1024
 
 
@@ -80,33 +88,72 @@ def without_bytecode(folder):
             dirs.remove("__pycache__")
 
 
-def verify_folder(model_id, folder, path=REGISTRY, checked=None):
-    """Every listed file in the folder matches its sum; no unlisted code (a cached `.pyc` is removed first:
-    `without_bytecode`). `checked` (a set) skips files already checked this run. Returns how many files were
-    checked."""
+def listed_sums(model_id, path=REGISTRY):
+    """The registry's sums for one model id, or for several whose files share a folder."""
     sums = {}
     for entry_id in ([model_id] if isinstance(model_id, str) else model_id):
         sums.update(sums_of(models(path)[entry_id]))
-    without_bytecode(folder)
-    present = 0
-    for root, _, names in os.walk(folder):
-        if ".cache" in root.split(os.sep):
-            continue
+    return sums
+
+
+# What a refusal of an unexpected file says to do: setup writes only the registry's files into a model folder.
+SET_UP_AGAIN = "remove it, or set the models up again with ./setup.sh in an empty folder"
+
+
+def listed_files(folder, sums):
+    """Each file in the folder with its path inside it and its listed sum (None when the registry does not list it).
+    Unlisted code and configurations are refused here, so no caller can read past them; so are a linked folder inside
+    (the walk does not follow it, so what is behind it would not be checked) and a folder the walk cannot read. The
+    hub's own cache files (`.metadata`, `.lock`, `.incomplete`) are unlisted files of neither kind, so they are let
+    be wherever they are."""
+    if not os.path.isdir(folder):
+        return
+
+    def unreadable(error):
+        raise RefusedFile(f"{error.filename}: a folder the check cannot read ({error.strerror}); refusing to load it")
+
+    for root, dirs, names in os.walk(folder, onerror=unreadable):
+        for name in dirs:
+            if os.path.islink(os.path.join(root, name)):
+                raise RefusedFile(f"{os.path.join(root, name)}: a linked folder inside a model folder, which the check "
+                                  f"does not follow; refusing to load it ({SET_UP_AGAIN})")
         for name in names:
             file_path = os.path.join(root, name)
-            relative = os.path.relpath(file_path, folder).replace(os.sep, "/")
-            listed = sums.get(relative)
+            listed = sums.get(os.path.relpath(file_path, folder).replace(os.sep, "/"))
             if listed is None and name.lower().endswith(CODE_ENDINGS):
-                raise RefusedFile(f"{file_path}: code or a pickle the registry does not list; refusing to load it")
-            if listed is None:
-                continue
-            present += 1
-            if checked is not None and file_path in checked:
-                continue
-            if sha256_of(file_path) != listed:
-                raise RefusedFile(f"{file_path}: its sha256 is not the registry's; refusing to load it")
-            if checked is not None:
-                checked.add(file_path)
+                raise RefusedFile(f"{file_path}: code or a pickle the registry does not list; refusing to load it "
+                                  f"({SET_UP_AGAIN})")
+            if listed is None and name.lower().endswith(CONFIG_ENDINGS):
+                raise RefusedFile(f"{file_path}: a configuration the registry does not list; refusing to load it "
+                                  f"({SET_UP_AGAIN})")
+            yield file_path, listed
+
+
+def refuse_unlisted(model_id, folder, path=REGISTRY):
+    """With the sums not checked (`--no-verify`), the folder is still walked: unlisted code and configurations are
+    refused (a cached `.pyc` is removed first). A walk, no file read, so it costs nothing next to the load."""
+    without_bytecode(folder)
+    for _ in listed_files(folder, listed_sums(model_id, path)):
+        pass
+
+
+def verify_folder(model_id, folder, path=REGISTRY, checked=None):
+    """Every listed file in the folder matches its sum; no unlisted code or configuration (a cached `.pyc` is removed
+    first: `without_bytecode`). `checked` (a set) skips files already checked this run. Returns how many files were
+    checked."""
+    sums = listed_sums(model_id, path)
+    without_bytecode(folder)
+    present = 0
+    for file_path, listed in listed_files(folder, sums):
+        if listed is None:
+            continue
+        present += 1
+        if checked is not None and file_path in checked:
+            continue
+        if sha256_of(file_path) != listed:
+            raise RefusedFile(f"{file_path}: its sha256 is not the registry's; refusing to load it")
+        if checked is not None:
+            checked.add(file_path)
     if present == 0:
         raise RefusedFile(f"{folder}: none of the files the registry lists for {model_id} is here; refusing to load it")
     return present

@@ -37,7 +37,8 @@ it is the thing the prompt names (the check "it is the thing asked for", docs/ob
 for?"). Setup puts llama.cpp's own CPU release archive of tag b11600 (MIT, 17 MB, its sha256 checked) in
 `.tools/llama-b11600/` and downloads Qwen 3.5 9B with its vision part (Apache-2.0, 7.1 GB) after its licence question.
 It runs on the computer's processor, never on the card: about 20 to 40 s an object on a 16-thread laptop processor
-(a median of 22 s in the 0.2.2 sealed run), with about 7 GB of memory while it runs, more over a long batch.
+(a median of 22 s in the 0.2.2 sealed run), with about 10 GB of memory while it runs (its model's files 5.6 GB of
+it), no more over a long batch (docs/objects.md, "Is it the thing asked for?", its memory).
 `./setup.sh --without-question-judge` leaves both out; then the check says "not judged" and counts as nothing
 (`--require-question-judge` counts such a job as failing it, as the measured run does).
 

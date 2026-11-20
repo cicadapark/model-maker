@@ -79,10 +79,13 @@ class Settings:
 
     def verified(self, model_id, *names, checked=None):
         """The models' folders, each listed file checked against the registry first (`checked`: the files already
-        checked, skipped; the warm process keeps one set for its life, a cold run this Settings' own)."""
-        if self.verify:
-            for name in names:
+        checked, skipped; the warm process keeps one set for its life, a cold run this Settings' own). Without the
+        check (`--no-verify`), unlisted code in them is still refused."""
+        for name in names:
+            if self.verify:
                 registry.verify_folder(model_id, self.folder(name), checked=self.checked if checked is None else checked)
+            else:
+                registry.refuse_unlisted(model_id, self.folder(name))
         return [self.folder(name) for name in names]
 
 
