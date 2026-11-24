@@ -254,3 +254,39 @@ def accessor_values(document, binary, index):
     raw = binary[view["byteOffset"]:view["byteOffset"] + view["byteLength"]]
     return np.frombuffer(raw, dtype=dtype).reshape(accessor["count"], width) if width > 1 else \
         np.frombuffer(raw, dtype=dtype)
+
+
+def painted_mesh(data):
+    """A model-maker .glb's painted mesh: corners, triangles, texture places (0-1, v down) and texture (0-1)."""
+    from PIL import Image
+
+    document, binary = read_document(data)
+    primitive = document["meshes"][0]["primitives"][0]
+    corners = accessor_values(document, binary, primitive["attributes"]["POSITION"]).astype(np.float64)
+    uvs = accessor_values(document, binary, primitive["attributes"]["TEXCOORD_0"]).astype(np.float64)
+    triangles = accessor_values(document, binary, primitive["indices"]).astype(np.int64).reshape(-1, 3)
+    view = document["bufferViews"][document["images"][0]["bufferView"]]
+    start = view.get("byteOffset", 0)
+    image = Image.open(io.BytesIO(binary[start:start + view["byteLength"]])).convert("RGB")
+    return corners, triangles, uvs, np.asarray(image).astype(np.float64) / 255
+
+
+def with_image(data, image_bytes):
+    """A .glb's bytes with its texture's image replaced by `image_bytes`; everything else kept as it is (the buffer
+    views after it moved along, 4-byte aligned)."""
+    document, binary = read_document(data)
+    replaced = document["images"][0]["bufferView"]
+    out = bytearray()
+    for index, view in enumerate(document["bufferViews"]):
+        start = view.get("byteOffset", 0)
+        raw = image_bytes if index == replaced else binary[start:start + view["byteLength"]]
+        out.extend(b"\0" * (-len(out) % 4))
+        view["byteOffset"], view["byteLength"] = len(out), len(raw)
+        out.extend(raw)
+    out.extend(b"\0" * (-len(out) % 4))
+    document["buffers"][0]["byteLength"] = len(out)
+    text = json.dumps(document, separators=(",", ":")).encode()
+    text += b" " * (-len(text) % 4)
+    total = 12 + 8 + len(text) + 8 + len(out)
+    return (struct.pack("<III", GLB_MAGIC, 2, total) + struct.pack("<II", len(text), JSON_CHUNK) + text
+            + struct.pack("<II", len(out), BIN_CHUNK) + bytes(out))

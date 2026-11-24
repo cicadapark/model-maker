@@ -127,3 +127,10 @@ kind = "composite"
 models = "object"
 version = "0.3.0"
 why = "a jewellery chest model-maker made open underneath, all round and from below, which the check closed underneath refuses"
+
+[[picture]]
+path = "0.3.2/bake-*.webp"
+kind = "composite"
+models = "object"
+version = "0.3.2"
+why = "a clay jug and a stone birdbath model-maker made, each as made before 0.3.2's bake and baked again with it from the same files, whole and close up; our labels"

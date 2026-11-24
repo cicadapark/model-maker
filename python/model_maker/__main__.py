@@ -230,6 +230,21 @@ def finish(args):
     return 0
 
 
+def repair_texture(args):
+    from . import bake, credentials, glb
+
+    use_signing(args)
+    with open(args.model, "rb") as file:
+        data = file.read()
+    corners, triangles, uvs, texture = glb.painted_mesh(data)
+    mended = bake.repaired(corners, triangles, uvs, texture)
+    signed = credentials.signed_bytes(glb.png_bytes(mended), "image/png", credentials.TRAINED,
+                                      credentials.OBJECT_MODELS)
+    credentials.write_whole(args.out, glb.with_image(data, signed))
+    print(args.out)
+    return 0
+
+
 def inspect(args):
     from .inspect_mesh import inspected
 
@@ -336,6 +351,11 @@ def main(argv=None):
                             "./sources)")
     again_made.add_argument("--no-verify", action="store_true", help="skip the models' sha256 check")
     signing_options(again_made)
+    mended = steps.add_parser("repair-texture", help="a finished .glb's texture mended where triangles thinner than a "
+                              "texel read black or a neighbour's colour, written as a new .glb (CPU)")
+    mended.add_argument("model", help="the .glb model-maker made")
+    mended.add_argument("--out", required=True, help="the .glb to write")
+    signing_options(mended)
     steps.add_parser("credentials", help="which certificate signs the pictures' content credentials, and what a "
                      "picture's say (its own options: model-maker credentials --help)")
     argv = sys.argv[1:] if argv is None else argv
@@ -348,7 +368,8 @@ def main(argv=None):
 
     try:
         return {"make": make, "batch": batch, "finish": finish, "inspect": inspect, "words": read_words,
-                "picture-check": check_picture, "bug-report": bug_report, "reproduce": reproduce}[args.step](args)
+                "picture-check": check_picture, "bug-report": bug_report, "reproduce": reproduce,
+                "repair-texture": repair_texture}[args.step](args)
     except ModelMissing as missing:
         print(f"model-maker: {missing}", file=sys.stderr)
         return MODEL_MISSING_EXIT

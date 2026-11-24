@@ -40,7 +40,7 @@ judged by).
 
 | Folder | What it holds |
 |---|---|
-| `model-maker` | the command: `make`, `batch` (run again with the same `--out`, it goes on where it stopped), `finish`, `inspect`, `picture-check`, `words`, `bug-report`, `reproduce`, `credentials` |
+| `model-maker` | the command: `make`, `batch` (run again with the same `--out`, it goes on where it stopped), `finish`, `inspect`, `picture-check`, `words`, `bug-report`, `reproduce`, `repair-texture`, `credentials` |
 | `python/` | the pipeline: pictures, cut-out, shape, paint, the checks, the bake, the `.glb`, the report (`python/tests/` its tests) |
 | `crates/` | the Rust crate `model-maker-simplify` (a shape to its triangle budget) |
 | `registry/` | the AI models the pipeline uses, their licences and the sha256 of their files |
