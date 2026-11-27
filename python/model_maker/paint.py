@@ -11,9 +11,11 @@ card: about 14 GB with the text encoders moved off it; a card under 15 GB gets t
 (`BlockOffload`), 10.1 GB at most on a 12 GB card, the same pictures.
 """
 
+import mmap
 import os
 import sys
 import types
+import weakref
 from typing import Union
 
 import numpy as np
@@ -132,22 +134,46 @@ def reference(picture_rgb, mask):
     return square
 
 
+# Where each tensor starts in its block's buffer: a 64-byte boundary, the alignment PyTorch gives its own allocations.
+PINNED_ALIGN = 64
+
+
 class BlockOffload:
     """A model's blocks on the card only while each runs, the rest of the time in pinned memory of the computer:
     block-level offloading, as later diffusers releases do it (their group offloading); torch.nn's hooks bring each
     block's weights to the card before it runs and drop them after. The same weights and the same sums, so the same
-    pictures; it costs the copies (about 7 GB a step for the view painter's UNet with its adapter)."""
+    pictures; it costs the copies (about 7 GB a step for the view painter's UNet with its adapter).
+
+    Each block's tensors are kept in one buffer of exactly their size (each at a 64-byte boundary), page-locked once
+    (cudaHostRegister) and given back by `close`: PyTorch 2.10-2.12's `pin_memory()` rounds every tensor up to a power
+    of two (its caching host allocator), which held 8.2 GiB for the view painter's 6.3 GiB of blocks (measured 27 Nov
+    2026). Where the CUDA runtime refuses to page-lock a buffer, that block's tensors are pinned one by one instead."""
 
     def __init__(self, blocks, device):
         self.device = device
         self.kept = {}
+        # The page-locked ranges' starts, given back by `close` (or when this is collected, before its buffers are).
+        self.registered = []
+        self._release = weakref.finalize(self, _unregister_all, self.registered)
         for block in blocks:
             tensors = list(block.parameters()) + list(block.buffers())
-            for tensor in tensors:
-                tensor.data = tensor.data.to("cpu").pin_memory()
-                self.kept[tensor] = tensor.data
+            for tensor, kept in zip(tensors, self._pinned(tensors)):
+                tensor.data = kept
+                self.kept[tensor] = kept
             block.register_forward_pre_hook(self._on(tensors))
             block.register_forward_hook(self._off(tensors))
+
+    def _pinned(self, tensors):
+        buffer, views, start, size = packed(tensors)
+        pointer = buffer.data_ptr() + start
+        if _register(pointer, size):
+            self.registered.append(pointer)
+            return views
+        return [_pinned_alone(tensor.data) for tensor in tensors]
+
+    def close(self):
+        """The page-locking given back; the tensors keep their values (in memory that is no longer pinned)."""
+        self._release()
 
     def _on(self, tensors):
         def hook(module, args):
@@ -160,6 +186,77 @@ class BlockOffload:
             for tensor in tensors:
                 tensor.data = self.kept[tensor]
         return hook
+
+
+def packed(tensors, align=PINNED_ALIGN, page=mmap.PAGESIZE):
+    """Every tensor's values in one uint8 buffer of the computer's memory, each at an `align`-byte boundary, and a view
+    of the buffer per tensor with its type and shape: (buffer, views, start, size). The range to page-lock is
+    [start, start + size) of the buffer: whole pages of this buffer alone (none shared with another allocation, which
+    the CUDA runtime would refuse to register twice)."""
+    import torch
+
+    offsets, end = [], 0
+    for tensor in tensors:
+        end = -(-end // align) * align
+        offsets.append(end)
+        end += tensor.numel() * tensor.element_size()
+    size = -(-max(end, 1) // page) * page
+    buffer = torch.empty(size + page, dtype=torch.uint8)
+    start = -buffer.data_ptr() % page
+    views = []
+    for tensor, offset in zip(tensors, offsets):
+        first = start + offset
+        view = buffer[first:first + tensor.numel() * tensor.element_size()].view(tensor.dtype).view(tensor.shape)
+        view.copy_(tensor.data)
+        views.append(view)
+    return buffer, views, start, size
+
+
+def _register(pointer, size):
+    """Whether the CUDA runtime page-locked [pointer, pointer + size) for the card's copies."""
+    import torch
+
+    try:
+        cudart = torch.cuda.cudart()
+        if cudart.cudaHostRegister(pointer, size, 0) == cudart.cudaError.success:
+            return True
+    except (AttributeError, RuntimeError):
+        return False
+    _forget_runtime_error()
+    return False
+
+
+def _unregister_all(pointers):
+    """Each page-locked range given back, once the card has finished the copies from it."""
+    import torch
+
+    if pointers and torch.cuda.is_available():
+        torch.cuda.synchronize()
+    while pointers:
+        _unregister(pointers.pop())
+
+
+def _unregister(pointer):
+    import torch
+
+    torch.cuda.cudart().cudaHostUnregister(pointer)
+
+
+def _pinned_alone(tensor):
+    return tensor.to("cpu").pin_memory()
+
+
+def _forget_runtime_error():
+    """A refused registration stays the CUDA runtime's last error, which PyTorch's check after its next kernel would
+    raise as that kernel's: read once, which clears it (the runtime PyTorch loaded, found by its name)."""
+    import ctypes
+
+    for name in ("libcudart.so.12", "libcudart.so.13", "cudart64_12.dll", "cudart64_13.dll"):
+        try:
+            ctypes.CDLL(name).cudaGetLastError()
+            return
+        except (OSError, AttributeError):
+            continue
 
 
 BLOCK_LISTS = ("down_blocks", "mid_block", "up_blocks")
@@ -244,6 +341,11 @@ class ViewPainter:
         pipe.cond_encoder.to("cpu")
         torch.cuda.empty_cache()
         return made
+
+    def close(self):
+        """The blocks' page-locked memory given back when the painter is closed (`kept.close`)."""
+        if self.offload is not None:
+            self.offload.close()
 
     def _unet_to(self, device):
         if self.offload is None:

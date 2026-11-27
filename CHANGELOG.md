@@ -3,10 +3,16 @@
 Each version's full note is on its release page (github.com/cicadapark/model-maker/releases); the measurements behind
 each are in [`docs/results.md`](docs/results.md) and [`docs/objects.md`](docs/objects.md).
 
-## Unreleased
+## 0.3.4
 
-- The code that starts and stops programs (the question judge's server) and reads the computer's memory now also has
-  Windows and macOS paths, to prepare those systems; nothing changes on Linux.
+A memory fix for 12 GB cards; nothing that is made changes. The 12 GB card's view painter keeps the blocks that wait
+for the card in page-locked buffers of exactly their size, not in PyTorch's pinned memory, which rounds every tensor up
+to a power of two: building the painter takes 2.7 GiB less of the computer's memory. The same pictures and objects by
+content (six objects, and 6 reference objects made again against 0.3.3's). The new path is not taken on 16 GB cards
+(by code and test); the memory advice stays as it is. [`docs/results.md`](docs/results.md).
+
+Also in this version: the code that starts and stops programs (the question judge's server) and reads the computer's
+memory now also has Windows and macOS paths, to prepare those systems; nothing changes on Linux.
 
 ## 0.3.3
 

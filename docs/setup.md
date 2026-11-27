@@ -178,7 +178,10 @@ Two changes let a 12 GB card make objects; neither changes what is made.
   picture's hidden states for twelve images (six views, with and without guidance) it reached 11.6 GB before the
   first step and ran out. On a card under 15 GB its down, middle and up blocks now come onto the card one at a time
   from pinned memory and leave after (`paint.BlockOffload`, block-level offloading as later diffusers releases do it
-  with their group offloading; diffusers 0.31 has none). The paint stage then needs 10.1 GB at most.
+  with their group offloading; diffusers 0.31 has none). The paint stage then needs 10.1 GB at most. Each block's
+  tensors wait in one page-locked buffer of exactly their size: PyTorch 2.10's own pinning rounds every tensor up to a
+  power of two, which held 8.2 GiB for the 6.3 GiB of blocks. On six objects building the painter took 2.7 GiB
+  less of the computer's memory, with the same pictures (`results.md`).
   `MODEL_MAKER_VIEW_OFFLOAD=1` or `0` overrides the choice. It is exact: SDXL's UNet run on the same inputs whole and
   offloaded gave the same output bit for bit (a batch of four at 768 pixels: 0.77 s and 5.25 GB whole, 0.96 s and
   2.59 GB offloaded); `python/tests/test_block_offload.py` checks the same on a small model when there is a card.
