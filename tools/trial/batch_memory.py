@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A batch's memory, stage by stage, from its sampled memory and its log (docs/objects.md, "A long batch").
+"""A batch's memory, stage by stage, from its sampled memory and its log (docs/history/long-batch.md).
 
     batch_memory.py MEMORY.tsv BATCH.log
 

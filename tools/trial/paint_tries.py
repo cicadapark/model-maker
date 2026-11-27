@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pictures only: each prompt's tries painted, cut out and checked as the pipeline's picture stage does them (the same
 picture words, the same consecutive seeds from `painter.seed_of`), without choosing one and without shapes. For
-measuring a change of the picture words on the card (docs/objects.md, "War hammers").
+measuring a change of the picture words on the card (docs/history/war-hammers.md).
 
     paint_tries.py OUT --tries N [--words FILE] [--view TEXT] PROMPT...
 

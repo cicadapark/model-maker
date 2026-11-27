@@ -24,7 +24,7 @@ counts only when it is read with a confidence of at least `LEAST_CONFIDENCE`, ha
 and `LEAST_WORD_CHARACTERS` letters and digits, is nearly all letters and digits once the punctuation round it is
 trimmed, and is at least `LEAST_WORD_HEIGHT` of the picture's side tall. The picture has lettering when its counted
 words hold more than `MOST_CHARACTERS` letters and digits between them. The limits were set on the trials' tries,
-labelled by eye (docs/objects.md, "Painted lettering"; tools/trial/lettering-cases.toml), so that no try a trial
+labelled by eye (docs/history/lettering.md; tools/trial/lettering-cases.toml), so that no try a trial
 rightly chose is refused, and no try without lettering.
 
 The words can ask for lettering ("a sign that says OPEN", "a book with a title on its cover": words.lettering_asked):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Two batches of the same prompts compared job by job: the seeds chosen (picture, shape, paint), the verdict, and
-every check's value and pass, from each job's sidecar (docs/objects.md, "A long batch").
+every check's value and pass, from each job's sidecar (docs/history/long-batch.md).
 
     compare_batches.py BATCH_A BATCH_B     each a batch's --out folder
 

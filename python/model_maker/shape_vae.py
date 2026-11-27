@@ -21,8 +21,7 @@ What each piece follows (diffusers, Apache-2.0, Copyright The HuggingFace Team; 
 
 How what the weights do not say was settled: the upstream code was run as a black box, the arguments it passed to
 model-maker's own block recorded, and its outputs compared with these on the same inputs (the heads' order, the
-field's sign). This code gives the same field to the last bit, in 32 and 16 bits (docs/objects.md, "The shape model's
-own decoder").
+field's sign). This code gives the same field to the last bit, in 32 and 16 bits (docs/history/shape-decoder.md).
 
 The weights' encoder (`encoder.*`, `quant.*`) turns a mesh into a latent; model-maker only decodes, so it is not built.
 Every other tensor of the file is loaded by name and none may be missing or left over (`load_decoder`).

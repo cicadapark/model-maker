@@ -9,9 +9,8 @@ for each shape try and finish of made objects (CPU), to compare before and after
 regression set (shapes, pictures and made-up cases each check must pass or fail by name). `paint_tries.py` paints a
 prompt's tries as the picture stage does (pictures only, any wording), `judge_tries.py` judges every picture under
 some folders against its prompt on the CPU (and every quality's pair), `head_sheets.py` makes blind sheets of head
-crops for labelling by eye (`head-cases.toml`; docs/objects.md, "War hammers"), and `quality_sheets.py` blind sheets of
-whole cut-outs for labelling a quality (`quality-cases.toml`; docs/objects.md, "Several things, and qualities the words
-name").
+crops for labelling by eye (`head-cases.toml`; docs/history/war-hammers.md), and `quality_sheets.py` blind sheets of
+whole cut-outs for labelling a quality (`quality-cases.toml`; docs/history/several-and-qualities.md).
 
 The diagnosis of 0.2.0's sealed run (docs/trials/2026-11-11-030-diagnosis.md), all on the CPU from made jobs:
 `paint_sources.py` shows and counts where each colour of a finished object came from (each of the six views, the

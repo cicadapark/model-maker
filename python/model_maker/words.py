@@ -38,7 +38,7 @@ OBJECT_VIEW = "centred, seen from the front and a little to one side, looking do
 # sees its whole length and the blade's width, and the checks find its length along the up axis.
 WEAPON_VIEW = "standing upright, its point or head at the top, seen straight from the side, the whole length in view"
 # A head on a haft is painted without "point": asked for "its point or head at the top", the picture model gave every
-# war hammer of the trials a spike on top and an axe-like blade (docs/objects.md, "War hammers"). A blade and a spear
+# war hammer of the trials a spike on top and an axe-like blade (docs/history/war-hammers.md). A blade and a spear
 # keep WEAPON_VIEW: their tip is a point.
 HAFTED_VIEW = "standing upright, its head at the top, seen straight from the side, the whole length in view"
 # A bow is painted facing the viewer, its curve in view: painted edge-on (the first trial), its bend was out of sight
@@ -116,7 +116,7 @@ WEAPON_KINDS = {
 # is shut: asked for "a war hammer" alone, the picture model painted an axe-like blade with a square poll or a spike in
 # every try of the trials (the concept is mixed: many war hammers pictured have a blade or beak behind the face). The
 # words name no material, so "a wooden mallet" stays wooden. FLUX.1 [schnell] runs with no guidance, so nothing can be
-# asked away: the head is described as it should look. Measured in docs/objects.md, "War hammers".
+# asked away: the head is described as it should look. Measured in docs/history/war-hammers.md.
 HEAD_PICTURE_WORDS = {
     "hammer": "its head a heavy blunt block with a flat square striking face",
     # Asked for "a short iron mace" or "a wooden club" alone, every try of the sealed run and of the 0.3.0 trial was a
@@ -292,7 +292,7 @@ IRREGULAR_PLURALS = {"staff": ("staves",), "quarterstaff": ("quarterstaves",)}
 # chair"): there it describes a part. Each quality has contrast pairs: the same evidence both ways, the thing's name
 # kept in each (classification by description, as STATE_JUDGE_TEXTS). Only the qualities whose pairs held on labelled
 # pictures are judged; "straight", "square", "tall", "squat", "broken" and "rusty" were measured and left out
-# (docs/objects.md, "Qualities the words name").
+# (docs/history/several-and-qualities.md, "Qualities the words name").
 QUALITY_WORDS = {"curved": "curved", "round": "round", "circular": "round"}
 QUALITY_OPPOSITES = {"curved": "straight", "round": "square"}
 # Words that contradict a quality: with both said ("a round square table"), the quality is not judged.
@@ -318,7 +318,7 @@ QUALITY_NOT_JUDGED = {"curved": {"knife"}}
 # A curved blade (a sabre, or a blade the words call curved) is painted facing the viewer with its curve in view, as a
 # bow is: with the blade view ("standing upright ... seen straight from the side"), 1 of 24 tries of a curved dagger,
 # a curved hunting knife and a curved iron sword was curved, and 0 of 8 of "a curved steel sabre"; with these words
-# and view, 5 of 24 (docs/objects.md, "Qualities the words name").
+# and view, 5 of 24 (docs/history/several-and-qualities.md, "Qualities the words name").
 CURVED_BLADE_VIEW = ("standing upright, its point at the top, seen from the side so its whole curve shows, the whole "
                      "length in view")
 CURVED_BLADE_WORDS = "its blade curving in one smooth arc like a sabre's"
@@ -381,9 +381,9 @@ NOT_A_CHARACTER_WORDS = ("statue", "statuette", "figurine", "sculpture", "carvin
 # What the picture-against-prompt judge (subject_judge) compares a picture with: the prompt itself, against every other
 # kind of thing release 1 makes and a few things a picture might show instead of the one asked for. Each kind is its
 # words (any of them in a prompt makes it the prompt's own kind, not a contrast) and one description of its look that
-# keeps its name first (classification by description: Menon and Vondrick 2023; see docs/objects.md, "The picture
-# against the prompt"). Near kinds that a prompt may name by either word share a row (a jug and a vase), so a jug is
-# never refused for looking like a vase.
+# keeps its name first (classification by description: Menon and Vondrick 2023; see docs/history/picture-check.md). Near
+# kinds that a prompt may name by either word share a row (a jug and a vase), so a jug is never refused for looking like
+# a vase.
 SUBJECT_KINDS = (
     (("chair", "armchair", "throne"), "a chair, a seat with a back rest and legs"),
     (("stool",), "a stool, a small seat on legs with no back rest"),
@@ -464,7 +464,8 @@ def subject_contrast(subject):
     others = {}
     # A blade the words call curved ("a curved dagger") is judged as a curved blade, a sabre's kind, not against it:
     # with the straight blade's description and the sabre's as a contrast, the trial's curved daggers scored 0.03 to
-    # 0.69 as the thing asked for, the likeliest other "a sabre" (docs/objects.md, "Qualities the words name").
+    # 0.69 as the thing asked for, the likeliest other "a sabre" (docs/history/several-and-qualities.md, "Qualities
+    # the words name").
     curved_blade = subject.weapon_kind == "curved blade" and subject.noun not in WEAPON_KINDS["curved blade"]
     for nouns, description in SUBJECT_KINDS:
         own = subject.noun in nouns and not curved_blade

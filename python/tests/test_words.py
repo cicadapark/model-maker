@@ -96,7 +96,7 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
 
     def test_a_head_on_a_haft_is_painted_without_a_point_and_a_blade_or_spear_keeps_it(self):
         # Asked for "its point or head at the top", every war hammer the trials painted had a spike and an axe-like
-        # blade (docs/objects.md, "War hammers"). A sword's and a spear's tip is a point: their words are unchanged.
+        # blade (docs/history/war-hammers.md). A sword's and a spear's tip is a point: their words are unchanged.
         for prompt in ("a war hammer", "a battle axe", "a double-bitted battle axe", "a hatchet", "a spiked mace"):
             said = words.picture_prompt(words.subject_of(prompt))
             self.assertIn(words.HAFTED_VIEW, said, prompt)

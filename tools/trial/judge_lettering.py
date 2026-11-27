@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The lettering check measured on picture tries (docs/objects.md, "Painted lettering").
+"""The lettering check measured on picture tries (docs/history/lettering.md).
 
     judge_lettering.py read LIST OUT.jsonl [--workers N]   every word tesseract reads in each picture's cut-out
     judge_lettering.py sum OUT.jsonl LABELS.json            what the check (lettering.py's limits) refuses and

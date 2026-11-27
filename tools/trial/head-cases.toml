@@ -1,12 +1,12 @@
-# The war hammer family's and the axes' pictures, their heads labelled by eye (10 November 2026; docs/objects.md, "War
-# hammers"). Painted on the 12 GB card ("3060" in names and folders) by tools/trial/paint_tries.py with the picture
-# words before the change ("old": "its point or head at the top", no head words), after it ("new": no "point" for a
-# head on a haft, and the war hammer family's head described), and with a three-quarter turn tried and not kept
-# ("turn"), 8 seeds a prompt; and the first trial's war hammers and battle axes painted on the 16 GB card ("trial";
+# The war hammer family's and the axes' pictures, their heads labelled by eye (10 November 2026;
+# docs/history/war-hammers.md). Painted on the 12 GB card ("3060" in names and folders) by tools/trial/paint_tries.py
+# with the picture words before the change ("old": "its point or head at the top", no head words), after it ("new": no
+# "point" for a head on a haft, and the war hammer family's head described), and with a three-quarter turn tried and not
+# kept ("turn"), 8 seeds a prompt; and the first trial's war hammers and battle axes painted on the 16 GB card ("trial";
 # the 12 GB card's copies are bit-identical to the "old" ones). Labelled blind: each head cropped from the top of its
 # cut-out, shuffled under a random code, with no word of its prompt or wording (tools/trial/head_sheets.py), then
-# unblinded. Where the crop missed a second head at the foot or a head painted lying down, the label was corrected
-# from the whole picture, and its `why` says so.
+# unblinded. Where the crop missed a second head at the foot or a head painted lying down, the label was corrected from
+# the whole picture, and its `why` says so.
 #
 # `head`: "hammer" (blunt striking faces; a spike on top or a pointed beak allowed), "axe" (a broad sharp blade), "hybrid"
 # (a blade and a blunt face, or flared ends between the two, or a hammer and a blade on one haft), "other" (neither: a

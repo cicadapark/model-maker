@@ -2,10 +2,10 @@
 
 The shape model makes the object as its picture shows it, in the picture's own frame. A mace, a club or an axe is
 painted "standing upright, its head at the top", but the picture model often paints a heavy head lying, tilted or
-head down: of the 26 maces the 0.3.0 words trial painted, 14 were not upright, and the two made from such pictures
-came out leaning about 40 degrees in their own frame (docs/objects.md, "Maces, clubs and things the picture model
-knows only loosely"). The weapon checks measure along the weapon's own long axis, so they passed; the object did not
-stand along the up axis.
+head down: of the 26 maces the 0.3.0 words trial painted, 14 were not upright, and the two made from such pictures came
+out leaning about 40 degrees in their own frame (docs/history/hafted-pictures.md, "Maces, clubs and things the picture
+model knows only loosely"). The weapon checks measure along the weapon's own long axis, so they passed; the object did
+not stand along the up axis.
 
 The haft is found as the weapon checks find it (`weapon_checks`: the slices along the weapon's long axis, followed along
 its line, its longest narrow stretch), and its direction is the straight line through those slices' middles, so a heavy

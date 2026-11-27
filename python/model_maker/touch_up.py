@@ -109,10 +109,10 @@ RING_PIXELS = 4
 RING_REACH = 3.0
 # Colours are one colour when at least this share of them lies within `FOREIGN_DELTA_E` of their median. A place
 # larger than `LARGEST_FOREIGN_PATCH` is a smear when neither its ring nor what the model shows in it is one colour.
-# Measured on the trials' places (docs/objects.md, "The fill judged on the model"): those smeared by eye (a candle's
-# foot spread from its wax and its dish, a chair's stretcher spread from grey and brown) read 0.61 to 0.82 for their
-# ring and 0.69 to 0.86 inside; those whose ring holds two colours but which show one by eye (a chair's post spread
-# brown from its brown and grey ring, a shield's handle) 0.97 to 1.00 inside.
+# Measured on the trials' places (docs/history/touch-up-fill.md, "The fill judged on the model"): those smeared by eye
+# (a candle's foot spread from its wax and its dish, a chair's stretcher spread from grey and brown) read 0.61 to 0.82
+# for their ring and 0.69 to 0.86 inside; those whose ring holds two colours but which show one by eye (a chair's post
+# spread brown from its brown and grey ring, a shield's handle) 0.97 to 1.00 inside.
 ONE_COLOUR = 0.9
 
 

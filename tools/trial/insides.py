@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""The bake again from stored paint data, four ways, for what a vessel's inner walls show (docs/objects.md, "Insides,
-bake-only"). Nothing is painted again and nothing is written into the jobs.
+"""The bake again from stored paint data, four ways, for what a vessel's inner walls show (docs/history/insides.md).
+Nothing is painted again and nothing is written into the jobs.
 
     insides.py sheets OUT JOB [JOB ...]     as made and with the slanted colour left out (way 1): the coverage both
                                             ways, and pictures looking into each object for labelling by eye, blind

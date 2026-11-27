@@ -316,13 +316,14 @@ def picture_job(job, settings, paint, cutter, judge, found, report):
     subject = job.subject
     prompt = words.picture_prompt(subject, settings.lead)
     # Each try's cut-out is read for letters the words do not ask for (11 November 2026: release 1's unseen "an iron
-    # anvil" was chosen with made-up words painted on its side; docs/objects.md, "Painted lettering").
+    # anvil" was chosen with made-up words painted on its side; docs/history/lettering.md).
     lettering_asked = words.lettering_asked(subject.prompt)
     first = painter.seed_of(prompt) + settings.attempt * settings.picture_rounds * settings.tries
     os.makedirs(job.path("pictures"), exist_ok=True)
     # Each try is judged to show the thing asked for, and any quality its words name, and one that does not is not
-    # chosen (10 November 2026: every war hammer chosen had an axe-like head, which this check refuses; docs/objects.md,
-    # "War hammers"; a curved dagger painted straight: "Qualities the words name").
+    # chosen (10 November 2026: every war hammer chosen had an axe-like head, which this check refuses:
+    # docs/history/war-hammers.md; a curved dagger painted straight: docs/history/several-and-qualities.md, "Qualities
+    # the words name").
     directions = subject_judge.directions_of(judge, subject) if judge else None
     made = []
     for round_number in range(settings.picture_rounds):

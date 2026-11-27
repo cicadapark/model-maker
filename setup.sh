@@ -400,7 +400,7 @@ build_rust() {
 }
 
 # The question judge's server: llama.cpp's own CPU release archive at the tag the judge was measured with (another
-# build answers differently: docs/objects.md, "Is it the thing asked for?"). Optional: a failed fetch does not fail
+# build answers differently: docs/history/question-judge.md). Optional: a failed fetch does not fail
 # the setup; the check then says "not judged".
 readonly LLAMA_TAG=b11600
 readonly LLAMA_SHA256_X86_64=a5ce0dfd864e2acad5922e0d508fe56aaa18298e79327f511efa93b16dcbfbcc

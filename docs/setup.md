@@ -33,17 +33,16 @@ on Debian and Ubuntu, for meshoptimizer). Nothing else: setup brings its own Pyt
 Rust. It uses about 69 GB (models 61 GB, environment 7.5 GB); keep 84 GB free.
 
 Optional, installed by default: the question judge, which asks each finished object, shown from eight sides, whether
-it is the thing the prompt names (the check "it is the thing asked for", docs/objects.md, "Is it the thing asked
-for?"). Setup puts llama.cpp's own CPU release archive of tag b11600 (MIT, 17 MB, its sha256 checked) in
+it is the thing the prompt names (the check "it is the thing asked for", docs/history/question-judge.md). Setup puts llama.cpp's own CPU release archive of tag b11600 (MIT, 17 MB, its sha256 checked) in
 `.tools/llama-b11600/` and downloads Qwen 3.5 9B with its vision part (Apache-2.0, 7.1 GB) after its licence question.
 It runs on the computer's processor, never on the card: about 20 to 40 s an object on a 16-thread laptop processor
 (a median of 22 s in the 0.2.2 sealed run), with about 10 GB of memory while it runs (its model's files 5.6 GB of
-it), no more over a long batch (docs/objects.md, "Is it the thing asked for?", its memory).
+it), no more over a long batch (docs/history/question-judge.md, its memory).
 `./setup.sh --without-question-judge` leaves both out; then the check says "not judged" and counts as nothing
 (`--require-question-judge` counts such a job as failing it, as the measured run does).
 
 Optional, recommended: tesseract (Apache-2.0), version 5 or newer with its English data, which reads each picture try
-for letters painted on the object (the check "no painted lettering", docs/objects.md, "Painted lettering"). Setup
+for letters painted on the object (the check "no painted lettering", docs/history/lettering.md). Setup
 installs no system package; install it yourself:
 
 * Debian 12 (5.3.0) and Ubuntu 24.04 (5.3.4): `sudo apt install tesseract-ocr tesseract-ocr-eng`.
@@ -143,7 +142,7 @@ the attention processor and the query points' embedding are `python/model_maker/
 diffusers' Apache-2.0 parts (`AttnProcessor2_0`, `Attention`, `FeedForward`, `FP32LayerNorm`; NOTICE), the TripoSG
 paper and the weights' tensor names, shapes and configuration. Their behaviour was confirmed by comparing their
 outputs with the upstream code's on the same inputs, before that code was removed from setup: they give the same
-field (docs/objects.md, "The shape model's own decoder"). They load every tensor of the weights by name (the VAE's
+field (docs/history/shape-decoder.md). They load every tensor of the weights by name (the VAE's
 encoder alone is not built: model-maker only decodes). Why: the repository's own `LICENSE` is MIT, but its `NOTICE`
 names code derived from HunyuanDiT and FlashVDM under Tencent Hunyuan community licences, and the folder its code sits
 in, `triposg/`, holds the text of the Tencent Hunyuan FlashVDM Community License Agreement, which does not apply in

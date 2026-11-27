@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Blind sheets of head crops for labelling by eye: each picture's head (the top of its cut-out, where a hafted
 thing painted upright has it) cropped square, shuffled, and shown under a random code only, sixteen to a sheet. The key
-(code to picture) is written apart, to be opened only once every label is written (docs/objects.md, "War hammers").
+(code to picture) is written apart, to be opened only once every label is written (docs/history/war-hammers.md).
 
     head_sheets.py JUDGED.json OUT [--seed N]     JUDGED.json from judge_tries.py; writes OUT/sheet-NN.png, OUT/key.json
 """

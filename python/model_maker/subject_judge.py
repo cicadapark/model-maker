@@ -16,14 +16,14 @@ The share is the sigmoid of the score difference between the thing asked for and
 judge's share is for a pair (state_judge.asked_share): 0.75 means the thing asked for is three times as likely as
 the best other. It is averaged over the two views the state judge uses, the whole picture and its crop round the
 cut-out. The limit comes from every picture the trials painted, each scored against its own prompt and against every
-other prompt of the trials (docs/objects.md, "The picture against the prompt"; tools/trial/prompt-cases.toml).
+other prompt of the trials (docs/history/picture-check.md; tools/trial/prompt-cases.toml).
 
 A quality the prompt names ("a curved dagger", "a round box": words.qualities_of) is judged in the same check, as the
 state judge judges a lid: by pairs of descriptions of the quality and of its opposite ("a curved dagger, its whole
 length bending in one smooth arc" against "a straight dagger, its whole length one straight line"), each pair's share
 the sigmoid of their score difference, averaged over the pairs and the two views. The thing asked for and each quality
-must each reach the limit; the check's value is the least of their shares. Measured in docs/objects.md, "Qualities
-the words name".
+must each reach the limit; the check's value is the least of their shares. Measured in
+docs/history/several-and-qualities.md, "Qualities the words name".
 
 The model is the state judge's: SigLIP 2 (google/siglip2-so400m-patch14-384, Apache-2.0), which runs on the CPU.
 """
@@ -117,7 +117,7 @@ def subject_check(subject, share, likeliest_other, qualities=()):
 
 def add_subject_check(result, subject, share, likeliest_other, qualities=()):
     """The check added to a try's checks (`picture_checks.PictureResult`): in the pipeline's choice of try, so a try
-    it refuses is not chosen, as with the other picture checks (docs/objects.md, "War hammers")."""
+    it refuses is not chosen, as with the other picture checks (docs/history/war-hammers.md)."""
     result.checks.append(subject_check(subject, share, likeliest_other, qualities))
 
 
