@@ -34,8 +34,8 @@ One model, FLUX.1 [schnell], is gated: setup needs a Hugging Face access token i
 |---|---|
 | System | Linux on x86_64 |
 | Graphics card | NVIDIA, 12 GB or more, a driver with CUDA 12 or newer |
-| Computer's memory | 24 GB or more (16 GB to try) |
-| Disk | keep 75 GB free |
+| Computer's memory | 24 GB or more with a 16 GB card, 32 GB with a 12 GB card (16 GB to try) |
+| Disk | keep 77 GB free |
 | One object | about 7.5 to 10 minutes on a 16 GB card |
 
 The rest, with the setup's times and the recommended tesseract: [`docs/setup.md`](docs/setup.md#what-a-pc-needs).
@@ -49,6 +49,7 @@ version number is given when a version ships.
 
 * [How it works](docs/how-it-works.md): the whole process in one diagram.
 * [The documentation](docs/README.md): what you get, results and limits, setup, how it works.
+* [What each version changed](CHANGELOG.md).
 * [How to report a problem](docs/problems.md).
 * [Licences and content credentials](docs/licences.md): Apache-2.0 ([`LICENSE`](LICENSE)); the models' terms
   ([`NOTICE`](NOTICE)) apply to what you make. The code was written with AI (Claude); the commits name each model that

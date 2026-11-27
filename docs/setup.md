@@ -15,9 +15,9 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 | | |
 |---|---|
 | System | Linux on x86_64 |
-| Graphics card | NVIDIA, 12 GB or more (tried on 12 GB and 16 GB), a driver with CUDA 12 or newer |
-| Computer's memory | 24 GB or more (16 GB to try) |
-| Disk | about 67 GB used (models 61 GB with the question judge's 7 GB, environment 6 GB); keep 82 GB free |
+| Graphics card | NVIDIA, 12 GB or more (tried on 12 GB and 16 GB), a driver with CUDA 12 or newer (0.3.3 tried with drivers 580 and 595) |
+| Computer's memory | 24 GB or more with a 16 GB card; 32 GB with a 12 GB card: 0.3.3 peaked at 25.5 GB there, and less was not tried (16 GB to try) |
+| Disk | about 69 GB used (models 61 GB with the question judge's 7 GB, environment 7.5 GB); keep 84 GB free |
 | Setup | about 20 to 35 minutes (57 GB downloaded, 64 GB with the question judge; clean PCs took 19 to 33 minutes without it) |
 | One object | about 7.5 to 10 minutes on a 16 GB card; 8 to 13 minutes on a 12 GB card ("The chair and the sword on 12 GB", below) |
 | Also needed | git, curl, tar, a C and C++ compiler; `setup.sh` brings its own Python and, if needed, its own Rust |
@@ -28,9 +28,9 @@ painter's code and the models, each after its licence is shown and accepted, eve
 One model, FLUX.1 [schnell], is gated ("A gated model", below).
 
 Linux on x86_64 with an NVIDIA card of 12 GB or more (tried on 16 GB and 12 GB, below), a driver with CUDA 12 or
-newer, 24 GB or more of the computer's memory (16 GB to try), git, curl, tar and a C/C++ compiler (`build-essential`
+newer, 24 GB or more of the computer's memory with a 16 GB card and 32 GB with a 12 GB card (16 GB to try), git, curl, tar and a C/C++ compiler (`build-essential`
 on Debian and Ubuntu, for meshoptimizer). Nothing else: setup brings its own Python and, when the PC has none, its own
-Rust. It uses about 67 GB (models 61 GB, environment 6 GB); keep 82 GB free.
+Rust. It uses about 69 GB (models 61 GB, environment 7.5 GB); keep 84 GB free.
 
 Optional, installed by default: the question judge, which asks each finished object, shown from eight sides, whether
 it is the thing the prompt names (the check "it is the thing asked for", docs/objects.md, "Is it the thing asked
@@ -152,14 +152,17 @@ FlashVDM decoder is neither written again nor used.
 
 ### Python
 
-The pipeline was tried on Python 3.11 with PyTorch 2.5.1 (CUDA 12.4), diffusers 0.31.0 and transformers 4.46.3.
-PyTorch 2.5.1 has no wheels for the Python a new distribution ships (Ubuntu 26.04 has only 3.14), so setup does not
-use the PC's Python: uv installs CPython 3.11.14 from the python-build-standalone builds into `.tools/python`. Those
+The pipeline is tried on Python 3.11 with PyTorch 2.10.0 (its CUDA 12.8 build), diffusers 0.38.0 and transformers
+5.10.1 (since 0.3.3; before it PyTorch 2.5.1 with CUDA 12.4, diffusers 0.31.0 and transformers 4.46.3: `results.md`,
+"0.3.3 against 0.3.2"). The lock pins wheels for that Python, not for the one a new distribution ships (Ubuntu 26.04
+has only 3.14), so setup does not use the PC's Python: uv installs CPython 3.11.14 from the python-build-standalone builds into `.tools/python`. Those
 builds link libedit rather than GNU readline and leave gdbm out, so no GPL code comes with them.
 
 `python/requirements.txt` lists the packages the pipeline names, each with its licence; `python/requirements.lock`
-pins all 60 that are installed, with the sha256 of each wheel, made with `uv pip compile --generate-hashes` and held
-to the versions the pipeline was tried on. torch 2.5.1 from PyPI is the CUDA 12.4 build on Linux x86_64. Left out of
+pins all 86 that are installed, with the sha256 of each wheel, made with `uv pip compile --generate-hashes` and held
+to the versions the pipeline was tried on. torch 2.10.0 from PyPI is the CUDA 12.8 build on Linux x86_64, the last
+CUDA 12 build (from 2.11 PyPI's is the CUDA 13 one). The CUDA 12.8 build was tried with NVIDIA drivers 580 and 595
+only, not with an older driver of the CUDA 12 line. Left out of
 the environment the pipeline was tried in, as it runs nothing of theirs: the TRELLIS and spconv packages (cumm,
 spconv, pccm, ccimport, xformers, ...), omegaconf.
 
@@ -256,7 +259,7 @@ Checks:
 * The chair on the limit: a 12 GB card is not why it fails, but a card is part of what a prompt makes. Whether the
   coverage limit, the views or the chair's picture should change is the pipeline's question, not setup's.
 * Only Linux on x86_64 was tried. WSL2 should work the same (not tried). aarch64 has pinned uv and rustup sums, but
-  PyTorch 2.5.1 from PyPI has no CUDA build for it, so the check stops there.
+  the lock pins Linux x86_64 wheels only, so the check stops there.
 * The lock pins wheels for CPython 3.11 on Linux x86_64 only; a newer stack (PyTorch for Python 3.13 and later) would
   need the whole pipeline tried again.
 
@@ -304,7 +307,7 @@ A package's own licence line is not enough: a wheel can bundle shared libraries 
 FFmpeg under the LGPL). `python/model_maker/check_licences.py` lists every shared library a package of the environment
 bundles (its `<package>.libs/` folder, `torch/lib/`, ...; a package's own Python extension modules are its own code) and
 compares each with an allow-list that names its licence; a library not on the list fails the check until its licence
-is read and it is added (`--list` prints them all). On the locked environment it finds 94:
+is read and it is added (`--list` prints them all). On the locked environment it finds 115 (94 before 0.3.3):
 
 | Bundled by | Libraries | Licence |
 |---|---|---|
@@ -313,7 +316,7 @@ is read and it is added (`--list` prints them all). On the locked environment it
 | numpy, scipy | **libquadmath** | **LGPL-2.1-or-later: the recorded exception** |
 | torch, torchvision, triton, bitsandbytes | their own libraries | BSD-3-Clause, MIT |
 | torch | libgomp | GPL-3.0 with the GCC Runtime Library Exception |
-| nvidia-*-cu12, torch, torchvision | CUDA, cuBLAS, cuDNN, cuFFT, cuRAND, cuSOLVER, cuSPARSE(Lt), NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG | NVIDIA's own licences: free to use and to ship with an application, not open source |
+| nvidia-*-cu12, torch, torchvision | CUDA, cuBLAS, cuDNN, cuFFT, cuRAND, cuSOLVER, cuSPARSE(Lt), NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG, cuFile, NVSHMEM | NVIDIA's own licences: free to use and to ship with an application, not open source (cuda-bindings, the Python package under torch 2.10, is under the NVIDIA Software License: NOTICE) |
 | nvidia-nccl-cu12 | NCCL | BSD-3-Clause |
 | c2pa-python | libc2pa_c (c2pa-rs's C interface, its Rust crates linked in; no OpenSSL) | MIT OR Apache-2.0; its crates MIT, Apache-2.0, BSD, ISC, Zlib, Unicode-3.0 and the like, the root certificates' list CDLA-Permissive-2.0 |
 | pillow, torchvision | libjpeg-turbo, libpng, zlib, libwebp, libtiff, OpenJPEG, libavif, Little CMS, FreeType, HarfBuzz, Brotli, zstd, xz, libxcb, libXau | IJG/BSD-3, libpng, Zlib, BSD-3, libtiff, BSD-2, BSD-2, MIT, FTL, MIT, MIT, BSD-3, 0BSD, MIT, MIT |

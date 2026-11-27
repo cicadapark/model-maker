@@ -8,7 +8,7 @@ assistant working for someone. The details are in [`objects.md`](objects.md); th
 
 - Someone wants **one 3-D object from a sentence**, as a `.glb` file: furniture, containers, tools, decor, and things
   held in the hand (swords, axes, spears, shields).
-- They have **Linux on x86_64, an NVIDIA card with 12 GB or more** (16 GB recommended), 24 GB of memory and about 75 GB
+- They have **Linux on x86_64, an NVIDIA card with 12 GB or more** (16 GB recommended), 24 GB of memory (32 GB with a 12 GB card) and about 77 GB
   of free disk. One object takes about 7.5 to 10 minutes on a 16 GB card.
 - They want to know **whether to trust each object**: every object comes with its checks and their results.
 
