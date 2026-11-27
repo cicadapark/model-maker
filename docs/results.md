@@ -1,5 +1,42 @@
 # Results, limits and what is not here yet
 
+## 0.3.4: the 12 GB card's painter holds less memory, the same objects
+
+On a card under 15 GB the view painter's UNet blocks wait in pinned memory of the computer and come onto the card one
+at a time ([`setup.md`, "On a 12 GB card"](setup.md#on-a-12-gb-card)). PyTorch 2.10, which model-maker runs since
+0.3.3, rounds every pinned tensor up to a power of two, so the 6.3 GiB of blocks held 8.2 GiB (computed from the
+weights' sizes). Each block's tensors now share one buffer of exactly their size, page-locked once (`cudaHostRegister`)
+and given back when the painter is closed; where the CUDA runtime refuses, that block is pinned tensor by tensor as
+before. The weights are the same bytes, so the pictures and the objects are the same. The new path is not taken on
+16 GB cards (by code and test: their painter keeps the UNet whole, and closing it calls nothing of the CUDA runtime).
+
+Measured on the 12 GB card (RTX 3060) on 27 Nov 2026: the paint stage of six objects, first with 0.3.3's painter and
+then with the new one, each in its own process, on copies of the same finished batch with its paint removed, nothing
+else started beside them. The bars were written down before the run.
+
+| Bar | 0.3.3 | New | Result |
+|---|---|---|---|
+| the blocks' output the same bit for bit, whole and offloaded (the blocks' test, a small model, on the card) | | passes | pass |
+| the computer's free memory just after the painter is built: at least 1.7 GiB more | 26.54 GiB | 30.05 GiB (+3.52) | pass |
+| the fall of free memory while the painter is built: at least 1.7 GiB less | 16.25 GiB | 13.59 GiB (−2.66) | pass |
+| the card's memory at its peak: at most 50 MiB more | 10,069 MiB | 10,065 MiB | pass |
+| paint time of the six: within +5 % | 2,878 s | 2,775 s (−3.6 %) | pass |
+
+The second row also carries where each run began: the new run started with 0.85 GiB more free memory, so the third
+row, each run against its own start, is what this change is credited with.
+
+The painted files of the six are identical: 58 of 58 (the views compared by pixels,
+as each run signs its own pictures; the textures by bytes). Then
+6 of the 12 GB card's reference objects were made again from start to finish with this version and compared by
+content with 0.3.3's stored reference set: identical, 286 files (gate tree = b15ff6c with the stamp of the
+stored run, b3062be: the version stamp is written into every record, so it is set to the stored run's; nothing else
+differs from the commit).
+
+![The computer's memory taken during the paint stage of six objects on a 12 GB card, 0.3.3's painter against the new one](images/0.3.4/paint-memory-12gb.webp)
+
+Not changed: the advice of 32 GB of memory with a 12 GB card stays, as it was not measured again with this change.
+Whether the change explains the rise from 23.2 GB to 25.5 GB at the paint stage's peak with 0.3.3 is not known.
+
 ## 0.3.3 against 0.3.2: new libraries, another draw
 
 0.3.3 is a security update and nothing else: the Python libraries the models run on are raised past GitHub's

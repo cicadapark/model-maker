@@ -412,9 +412,10 @@ class SignPictures(unittest.TestCase):
         pictures = tool.pictures_in(folder)
         chosen = tool.chosen_for(pictures, tool.entries_of(os.path.join(folder, "made-by-ai.toml")))
         # Every picture is named as AI-made but these, which no model made: a terminal's text, the pipeline's
-        # diagram (drawn by our own page, docs/images/pipeline.html) and 0.3.1's chart of measured memory.
+        # diagram (drawn by our own page, docs/images/pipeline.html) and the charts of measured memory.
         self.assertEqual(set(pictures) - set(chosen),
-                         {"qualities/several-things.webp", "pipeline.webp", "0.3.1/judge-memory.webp"})
+                         {"qualities/several-things.webp", "pipeline.webp", "0.3.1/judge-memory.webp",
+                          "0.3.4/paint-memory-12gb.webp"})
 
 
 class MissingPackages(unittest.TestCase):
