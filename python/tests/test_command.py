@@ -252,5 +252,96 @@ class NoVerifyWiring(unittest.TestCase):
             shutil.rmtree(models)
 
 
+class OptionsOutsideTheFolder(unittest.TestCase):
+    """The job folder's hash holds the prompt, size, stands, symmetric and attempt only, and a card stage whose file is
+    there is not run again: a second `make` of a prompt with another --paint-steps (or any setting outside the hash)
+    found its stages done and returned the first object as the new one. The seven trial settings below are no longer
+    options of `make` and `batch`: each is refused."""
+
+    # Each with a value other than its default.
+    OUTSIDE = (("--shape-tries", "4"), ("--triangles", "5000"), ("--lead", "isolated"), ("--picture-rounds", "1"),
+               ("--paint-steps", "50"), ("--touch-up-views", "0"), ("--touch-up-strength", "1"))
+
+    def asked(self, argv):
+        """What `make` would make for these words: (its job folder, its settings), or None when the command refuses."""
+        from unittest import mock
+
+        caught = []
+
+        def made(prompt, out, size, stands, symmetric, settings, stages, kept=None):
+            caught.append((pipeline.job_folder(out, prompt, size, stands, symmetric, settings.attempt), settings))
+            return 0, None
+
+        with mock.patch.object(command, "made", made), contextlib.redirect_stderr(io.StringIO()):
+            try:
+                command.main(argv)
+            except SystemExit as refused:
+                self.assertEqual(refused.code, 2)
+                return None
+        return caught.pop()
+
+    def test_make_never_reuses_a_folder_for_another_setting(self):
+        from model_maker import ledger
+
+        out = tempfile.mkdtemp()
+        try:
+            plain = ["make", "an old looking chair", "--out", out]
+            folder, settings = self.asked(plain)
+            for option, value in self.OUTSIDE:
+                with self.subTest(option=option):
+                    other = self.asked([*plain, option, value])
+                    if other is not None:
+                        self.assertNotEqual(ledger.settings_of(other[1]), ledger.settings_of(settings))
+                        self.assertNotEqual(other[0], folder, f"{option} {value} would return the default's object")
+        finally:
+            shutil.rmtree(out)
+
+    def test_batch_never_reuses_a_folder_for_another_setting(self):
+        from unittest import mock
+
+        out = tempfile.mkdtemp()
+        try:
+            prompts = os.path.join(out, "prompts.txt")
+            with open(prompts, "w") as file:
+                file.write("an old looking chair\n")
+
+            def folders(*more):
+                caught = []
+                with mock.patch.object(pipeline, "run", lambda jobs, *_, **__: caught.extend(jobs)), \
+                        contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    try:
+                        command.main(["batch", prompts, "--out", out, "--stages", "finish", *more])
+                    except SystemExit as refused:
+                        self.assertEqual(refused.code, 2)
+                        return None
+                return [job.folder for job in caught]
+
+            plain = folders()
+            for option, value in self.OUTSIDE:
+                with self.subTest(option=option):
+                    other = folders(option, value)
+                    if other is not None:
+                        self.assertNotEqual(other, plain, f"{option} {value} would return the default's objects")
+        finally:
+            shutil.rmtree(out)
+
+    def test_the_default_settings_are_the_ones_the_options_gave(self):
+        # Taking the options off changes no job made at the defaults: the settings recorded are the same values.
+        from model_maker import ledger, paint, touch_up
+
+        out = tempfile.mkdtemp()
+        try:
+            _, settings = self.asked(["make", "an old looking chair", "--out", out])
+            recorded = ledger.settings_of(settings)
+            for key, value in (("shape_tries", pipeline.DEFAULT_SHAPE_TRIES), ("triangles", pipeline.DEFAULT_TRIANGLES),
+                               ("lead", words.DEFAULT_LEAD), ("picture_rounds", pipeline.MOST_PICTURE_ROUNDS),
+                               ("paint_steps", paint.STEPS), ("touch_up_views", touch_up.MOST_VIEWS),
+                               ("touch_up_strength", touch_up.STRENGTH), ("tries", pipeline.DEFAULT_TRIES),
+                               ("texture", pipeline.DEFAULT_TEXTURE)):
+                self.assertEqual(recorded[key], value, key)
+        finally:
+            shutil.rmtree(out)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,13 @@
 Each version's full note is on its release page (github.com/cicadapark/model-maker/releases); the measurements behind
 each are in [`docs/results.md`](docs/results.md) and [`docs/objects.md`](docs/objects.md).
 
+## Unreleased
+
+- `make` and `batch` no longer take `--shape-tries`, `--triangles`, `--lead`, `--picture-rounds`, `--paint-steps`,
+  `--touch-up-views` and `--touch-up-strength`. They were trial settings outside the job folder's name: a second run
+  with another value found the stages done and returned the first object unchanged. The defaults, which every
+  published number uses, are the same; the trial tools set these in Python (`pipeline.Settings`).
+
 ## 0.3.4
 
 A memory fix for 12 GB cards; nothing that is made changes. The 12 GB card's view painter keeps the blocks that wait

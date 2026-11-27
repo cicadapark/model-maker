@@ -62,24 +62,12 @@ def common(parser):
     parser.add_argument("--sources", help="the view painter's code, MV-Adapter (default MODEL_MAKER_SOURCES or "
                         "./sources)")
     parser.add_argument("--tries", type=int, default=pipeline.DEFAULT_TRIES, help="pictures painted per round")
-    parser.add_argument("--shape-tries", type=int, default=pipeline.DEFAULT_SHAPE_TRIES,
-                        help="shapes made at most when a shape check fails")
-    parser.add_argument("--triangles", type=int, default=pipeline.DEFAULT_TRIANGLES, help="the triangle budget")
     parser.add_argument("--texture", type=int, default=pipeline.DEFAULT_TEXTURE, help="the texture's side in texels")
     parser.add_argument("--no-verify", action="store_true",
                         help="skip the models' sha256 check (it was done before); unlisted code and "
                              "configurations are still refused")
     parser.add_argument("--stages", default="pictures,shape,paint,finish",
                         help="which stages to run (a stage done is kept)")
-    parser.add_argument("--lead", choices=sorted(words.LEADS), default=words.DEFAULT_LEAD,
-                        help="the words the picture model is given first (about the light and the backdrop)")
-    parser.add_argument("--picture-rounds", type=int, default=pipeline.MOST_PICTURE_ROUNDS,
-                        help="rounds of tries when none passes")
-    parser.add_argument("--paint-steps", type=int, help="the view painter's steps (default 20; 50 was the first trial's)")
-    parser.add_argument("--touch-up-views", type=int,
-                        help="views added to paint what the six missed, at most (default 4; 0 for none)")
-    parser.add_argument("--touch-up-strength", type=float,
-                        help="how much of a touch-up view's start the inpainter repaints (default 0.6; 1 from noise)")
     parser.add_argument("--require-lettering", action="store_true",
                         help="read every picture for painted lettering: without tesseract 5 or newer and its English "
                         "data a job is not made (the measured run uses it)")
@@ -121,11 +109,11 @@ def warn_unverified(args):
 def settings_of(args):
     warn_unverified(args)
     use_signing(args)
-    return pipeline.Settings(models=args.models, sources=args.sources, tries=args.tries, shape_tries=args.shape_tries,
-                             triangles=args.triangles, texture=args.texture, verify=not args.no_verify,
-                             lead=args.lead, paint_steps=args.paint_steps, picture_rounds=args.picture_rounds,
-                             touch_up_views=args.touch_up_views, touch_up_strength=args.touch_up_strength,
-                             require_lettering=args.require_lettering,
+    # The shape tries, triangle budget, lead words, picture rounds, paint steps and touch-up are pipeline.Settings'
+    # own defaults: they are not in the job folder's hash, so as options a second run with another value found its
+    # stages done and returned the first object. The trials and `reproduce` set them in Python.
+    return pipeline.Settings(models=args.models, sources=args.sources, tries=args.tries, texture=args.texture,
+                             verify=not args.no_verify, require_lettering=args.require_lettering,
                              require_question_judge=args.require_question_judge, attempt=args.attempt)
 
 

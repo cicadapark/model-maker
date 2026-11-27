@@ -12,6 +12,10 @@
 #
 # The models and their code are found as ./model-maker finds them (MODEL_MAKER_MODELS, MODEL_MAKER_SOURCES,
 # MODEL_MAKER_PYTHON). Each part keeps what it has done, so the script can be started again.
+#
+# A record of the 9 Nov trial, run with model-maker of that day: its job folders were named by the slug alone (part 1
+# copies into them), and --paint-steps, --lead, --picture-rounds and --shape-tries were options then (taken off
+# `make` and `batch` after 0.3.3; pipeline.Settings in Python).
 set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 first="${1:?usage: second_run.sh FIRST OUT}"
