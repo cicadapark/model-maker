@@ -3,6 +3,11 @@
 Each version's full note is on its release page (github.com/cicadapark/model-maker/releases); the measurements behind
 each are in [`docs/results.md`](docs/results.md) and [`docs/objects.md`](docs/objects.md).
 
+## Unreleased
+
+- The code that starts and stops programs (the question judge's server) and reads the computer's memory now also has
+  Windows and macOS paths, to prepare those systems; nothing changes on Linux.
+
 ## 0.3.3
 
 A security update: the Python libraries the models run on are raised past GitHub's dependency alerts. No check,

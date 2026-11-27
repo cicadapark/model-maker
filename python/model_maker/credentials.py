@@ -155,7 +155,9 @@ def test_folder():
 
 def made_test_certificate(folder=None):
     """The test certificate's key and chain in `folder` (made if missing or near its end): a root of its own and a
-    signer under it, the names the same on every computer. Only the user who made the key can read it."""
+    signer under it, the names the same on every computer. Only the user who made the key can read it (on Linux and
+    macOS by the folder's and the file's modes; on Windows, where chmod cannot narrow a folder, by the access list the
+    folder inherits from where the repository is, private when that is under the user's own profile)."""
     folder = folder or test_folder()
     key_path, chain_path = os.path.join(folder, TEST_KEY), os.path.join(folder, TEST_CHAIN)
     if os.path.isfile(key_path) and os.path.isfile(chain_path) and not test_certificate_ending(chain_path):

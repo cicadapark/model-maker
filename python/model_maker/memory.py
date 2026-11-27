@@ -6,6 +6,11 @@ high-water mark, reset at the stage's start where the kernel allows it). Each ba
 into its own folder (`memory.json`), and a batch started again in that folder (a resumed one) is refused a stage its
 own measured need does not fit. `KNOWN_NEEDS_MB`, measured on the trials' machine, only warns: it is the peak with
 droppable file pages counted, and PCs with less memory than it ran 0.2.0.
+
+On Linux the numbers are the kernel's own (/proc), as they were measured. Elsewhere (Windows, macOS) they come from
+psutil where it is installed: the memory now and free, and the peak where the system keeps one (Windows); a peak
+cannot be reset there, so it counts from the process's start. Without either, each says None and the guard lets the
+stage start, saying the memory is not known.
 """
 
 import json
@@ -36,14 +41,42 @@ def _status(field):
     return None
 
 
+def _psutil():
+    try:
+        import psutil
+    except ImportError:
+        return None
+    return psutil
+
+
+def _process_info():
+    """psutil's memory figures for this process, or None without psutil."""
+    psutil = _psutil()
+    if psutil is None:
+        return None
+    try:
+        return psutil.Process().memory_info()
+    except (OSError, psutil.Error):
+        return None
+
+
 def in_use_mb():
-    """This process's resident memory now (MB), or None where the kernel does not say."""
-    return _status("VmRSS")
+    """This process's resident memory now (MB), or None where neither the kernel nor psutil says."""
+    found = _status("VmRSS")
+    if found is None:
+        info = _process_info()
+        found = info.rss // 2 ** 20 if info is not None else None
+    return found
 
 
 def peak_mb():
-    """This process's peak resident memory (MB) since it started or since `reset_peak`, or None."""
-    return _status("VmHWM")
+    """This process's peak resident memory (MB) since it started or since `reset_peak`, or None. Windows keeps its
+    peak working set (psutil's peak_wset); macOS keeps none psutil reads."""
+    found = _status("VmHWM")
+    if found is None:
+        peak = getattr(_process_info(), "peak_wset", None)
+        found = peak // 2 ** 20 if peak is not None else None
+    return found
 
 
 def reset_peak():
@@ -58,7 +91,8 @@ def reset_peak():
 
 
 def free_mb():
-    """The memory a new allocation can have without the kernel swapping or killing (MemAvailable, MB), or None."""
+    """The memory a new allocation can have without the kernel swapping or killing (MemAvailable, MB), or None.
+    Elsewhere than Linux, psutil's "available", its counterpart there."""
     try:
         with open("/proc/meminfo") as file:
             for line in file:
@@ -66,6 +100,12 @@ def free_mb():
                     return int(line.split()[1]) // 1024
     except OSError:
         pass
+    psutil = _psutil()
+    if psutil is not None:
+        try:
+            return psutil.virtual_memory().available // 2 ** 20
+        except (OSError, psutil.Error):
+            pass
     return None
 
 

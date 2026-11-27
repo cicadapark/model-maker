@@ -19,7 +19,7 @@ def tool():
     named = os.environ.get("MODEL_MAKER_SIMPLIFY")
     if named:
         return named
-    built = os.path.join(REPOSITORY, "target", "release", "model-maker-simplify")
+    built = os.path.join(REPOSITORY, "target", "release", "model-maker-simplify" + (".exe" if os.name == "nt" else ""))
     if os.path.exists(built):
         return built
     found = shutil.which("model-maker-simplify")

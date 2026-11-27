@@ -29,6 +29,24 @@ LONGEST_LICENCE_NAME = 100
 REFUSED_BUNDLED = re.compile(r"lib(avcodec|avformat|avutil|swscale|swresample|x264|x265|postproc)[-.]")
 # A package's own compiled code (a Python extension module) is under the package's own licence.
 EXTENSION_MODULE = re.compile(r"\.(cpython-\d+[^.]*|abi3)\.so$")
+# The systems whose bundled libraries the allow-list below knows (by their file names). Elsewhere (Windows' .dll,
+# macOS' .dylib, other names for NVIDIA's and Intel's libraries) the check lists what it finds and fails, rather than
+# pass having recognised nothing.
+KNOWN_SYSTEMS = ("linux",)
+
+
+def is_library(name, system=sys.platform):
+    """Whether a file of a wheel is a shared library it bundles (not the package's own extension module)."""
+    lowered = name.lower()
+    if system.startswith("win"):
+        return lowered.endswith(".dll")
+    if system == "darwin" and lowered.endswith(".dylib"):
+        return True
+    return ".so" in name and not EXTENSION_MODULE.search(name)
+
+
+def system_known(system=sys.platform):
+    return any(system.startswith(known) for known in KNOWN_SYSTEMS)
 
 # Every shared library the locked environment bundles, by the start of its file name, with its licence. A library
 # under the GPL with the GCC Runtime Library Exception may be shipped with any program (the exception's purpose).
@@ -86,7 +104,7 @@ def bundled_libraries(distribution):
     modules left out."""
     for file in distribution.files or []:
         name = file.name
-        if ".so" in name and not EXTENSION_MODULE.search(name):
+        if is_library(name):
             yield str(file), name
 
 
@@ -131,7 +149,7 @@ def judge_libraries(folder):
         return [], []
     rows, problems = [], []
     for name in sorted(os.listdir(folder)):
-        if ".so" not in name:
+        if ".so" not in name and not is_library(name):
             continue
         licence = next((text for start, text in JUDGE_LIBRARIES.items() if name.startswith(start)), "")
         rows.append((name, "allowed" if licence else "unknown", licence))
@@ -159,6 +177,9 @@ def main(argv=None):
             print(f"{'llama.cpp (question judge)':28s} {file_name:52s} {verdict:9s} {licence}")
     problems = [problem for distribution in distributions for problem in problems_of(distribution)]
     problems += judge_problems
+    if not system_known():
+        problems.append(f"this check knows the libraries of Linux's wheels only; on {sys.platform} it cannot judge "
+                        f"what the wheels bundle, so it does not pass")
     for problem in problems:
         print(problem)
     print(f"{sys.prefix}: {len(problems)} problems")

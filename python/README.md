@@ -14,6 +14,7 @@ repository's root:
 | `render`, `bake`, `glb`, `report` | our rasteriser, the texture bake, the `.glb` with its marks, the report page |
 | `pipeline` | the stages and each object's folder |
 | `registry` | the models' licences and file sums, checked before loading |
+| `processes`, `parent` | programs started and stopped on each system (the question judge's server), and the pipeline tied to the program that started it |
 
 `tests/` holds the tests of everything that runs without a card:
 `cd python && python -m unittest discover -s tests -t .`

@@ -32,6 +32,7 @@ from dataclasses import dataclass
 
 from PIL import Image
 
+from . import processes
 from .picture_checks import Check
 
 NAME = "it is the thing asked for"
@@ -81,7 +82,7 @@ class Found:
 def found(root, models):
     """The judge's files as setup put them: the server in model-maker's folder `root` (.tools/llama-b11600/, the
     release archive unpacked), the model under `models`."""
-    server = os.path.join(root, SERVER_FOLDER, "llama-server")
+    server = os.path.join(root, SERVER_FOLDER, processes.program_name("llama-server"))
     model = os.path.join(models, MODEL_FOLDER, MODEL_FILE)
     vision = os.path.join(models, MODEL_FOLDER, VISION_FILE)
     missing = [path for path in (server, model, vision) if not os.path.isfile(path)]
@@ -97,11 +98,14 @@ def found(root, models):
 # What a question can fail with: the server gone or wrong (refused, cut off mid-answer, an answer of another shape).
 ASK_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, http.client.HTTPException)
 _PR_SET_PDEATHSIG = 1
-try:
-    # Found here, in model-maker's process: the forked child only calls it (no library loading between fork and exec).
-    _PRCTL = ctypes.CDLL(None, use_errno=True).prctl
-except (OSError, AttributeError):
-    _PRCTL = None
+_PRCTL = None
+if processes.LINUX:
+    try:
+        # Found here, in model-maker's process: the forked child only calls it (no library loading between fork and
+        # exec).
+        _PRCTL = ctypes.CDLL(None, use_errno=True).prctl
+    except (OSError, AttributeError):
+        _PRCTL = None
 
 
 def _dies_with_parent():
@@ -127,7 +131,8 @@ def registry_sums():
 
 
 def server_environment(where):
-    return {**os.environ, "CUDA_VISIBLE_DEVICES": "", "LD_LIBRARY_PATH": os.path.dirname(where.server)}
+    """The server's environment: no card (it runs on the CPU), and the libraries beside it found first."""
+    return processes.library_environment(os.path.dirname(where.server), {**os.environ, "CUDA_VISIBLE_DEVICES": ""})
 
 
 def server_runs(where):
@@ -170,7 +175,8 @@ class Judge:
                  "--no-mmproj-offload", "-t", str(self.threads), "-c", str(CONTEXT), "-np", "1", "--cache-ram",
                  "0", "--host", "127.0.0.1", "--port", str(self.port), "--jinja"],
                 stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, env=server_environment(self.where),
-                start_new_session=True, preexec_fn=_dies_with_parent)
+                **processes.start_options(_dies_with_parent))
+        processes.tie_to_this_process(self.process)
         try:
             deadline = time.time() + START_SECONDS
             while time.time() < deadline:
@@ -201,16 +207,7 @@ class Judge:
     def __exit__(self, *_):
         process, self.process = self.process, None
         if process is not None and process.poll() is None:
-            for sent in (signal.SIGTERM, signal.SIGKILL):
-                try:
-                    os.killpg(process.pid, sent)
-                except ProcessLookupError:
-                    break
-                try:
-                    process.wait(timeout=20)
-                    break
-                except subprocess.TimeoutExpired:
-                    continue
+            processes.stop(process, wait_seconds=20)
         if process is not None:
             try:
                 process.wait(timeout=5)
@@ -239,14 +236,9 @@ class Judge:
         the processor, its caches) and what is the model files mapped in (the kernel can drop and read those again)."""
         if self.process is None:
             return None
-        found = {}
-        try:
-            with open(f"/proc/{self.process.pid}/status") as file:
-                for line in file:
-                    key, _, value = line.partition(":")
-                    if key in ("VmHWM", "VmRSS", "RssAnon", "RssFile"):
-                        found[key] = int(value.split()[0]) // 1024
-        except (OSError, ValueError, IndexError):
+        # From /proc on Linux; elsewhere what psutil reads (now, and the peak on Windows).
+        found = processes.memory_of(self.process.pid)
+        if found is None:
             return None
         return {"peak": found.get("VmHWM"), "now": found.get("VmRSS"), "own": found.get("RssAnon"),
                 "model_files": found.get("RssFile")}
