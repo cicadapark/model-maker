@@ -1,5 +1,163 @@
 # Results, limits and what is not here yet
 
+## 0.3.3 against 0.3.2: new libraries, another draw
+
+0.3.3 is a security update and nothing else: the Python libraries the models run on are raised past GitHub's
+dependency alerts. No check, setting, model or step of the pipeline changed. Measured in full on the 16 GB card only
+(the 50 prompts of the third list); the 12 GB card was checked on six objects and on its 25 fixed reference objects.
+
+**What changed.** PyTorch 2.5.1 (CUDA 12.4 build) to 2.10.0 (CUDA 12.8, PyPI's last CUDA 12 build), torchvision
+0.20.1 to 0.25.0, transformers 4.46.3 to 5.10.1 (5.10.0 is withdrawn on the package index), diffusers 0.31.0 to
+0.38.0, accelerate 1.1.1 to 1.15.0, bitsandbytes 0.44.1 to 0.46.1 (transformers 5 loads in 4 bits only with 0.46.1 or
+newer), and what they pull along (huggingface-hub 1.5.0, tokenizers 0.22.1, peft 0.18.0, triton 3.6.0, NVIDIA's CUDA
+12.8 libraries): 86 packages where there were 65, every wheel's sha256 in `python/requirements.lock`. The environment
+takes 7.5 GB (was 6). Two pictures are now prepared by model-maker's own steps, the shape model's (DINOv2) and the
+state judge's (SigLIP 2): transformers 5 resizes them otherwise, and with our own steps they are the same pixels with
+either version, exactly (1,039 labelled pictures).
+
+**What it closes.** GitHub listed 31 alerts on the old pins (1 critical, 9 high, 15 moderate, 6 low), all in torch,
+transformers, diffusers and accelerate. 0.3.3 closes 30: every critical, high and moderate one of those 31, and 5 of
+the 6 low. Two advisories stay open, both in torch 2.10.0, each with its reason in `tools/ci/pip-audit-ignore.toml`:
+one is GitHub's last alert (low, `torch.jit.script`, fixed only in the CUDA 13 builds); the other is not among GitHub's
+31 but is high by its score (7.8: loading a `.pt2` archive, by someone already on the machine; no fixed CUDA 12
+build exists). model-maker never loads a `.pt2` archive: nothing in its code, nor in MV-Adapter's and BiRefNet's code
+at the commits the registry pins, nor in the installed diffusers, transformers, accelerate, peft, timm, kornia,
+huggingface-hub or torchvision, calls PyTorch's archive loaders, and no model folder holds such a file. None of the 31
+alerts could be reached in 0.3.2 either (offline, every model file checked against its sum, unlisted code refused);
+the update takes the faults out of the libraries instead of relying on that guard alone.
+
+### The first test: the same seed should give the same picture. It did not.
+
+Before any measured run, six objects were made with the old and the new libraries on both cards, the same seeds,
+twice each. The bars were: the same picture from the same seed (within 1.5 of 255 on average), and all six passing
+with the same seeds. They failed:
+
+* **Same seed, another picture.** 4 of 24 pictures on the 16 GB card moved more than 1.5 of 255 on average (at most
+  2.99), 2 of 24 on the 12 GB card (at most 2.46).
+* **The armchair lost.** Its picture came out with other slats and another top rail; the shape closed the narrow gap
+  between two slats, and the check "holes the picture shows are open" refused it (its measure 0 % before and 100 %
+  after on the 16 GB card, against a limit of 33 %; 13.7 % and 41.3 % on the 12 GB card).
+
+Where it comes from, measured:
+
+* **Not the shape code.** The new shape stage given the old picture passes (16 GB card 4.8 % where the old gave 0 %,
+  12 GB card 11.8 % where the old gave 13.7 %: the shape stage is another draw too, a small one); the old shape
+  stage given the new picture fails (100 %, 47.8 %).
+* **PyTorch.** The picture stage run with the old pins and one group of new ones at a time: bitsandbytes 0.46.1 alone
+  gives the same pictures, bit for bit; the PyTorch group alone (torch, torchvision, triton, the CUDA libraries) gives
+  other pictures from the same seeds. The Hugging Face libraries cannot be tried alone: they need the new PyTorch.
+* **The painter magnifies a tiny change.** On average the pictures moved only 0.5 to 1.8 of 255, which no eye sees.
+  The average hides where it moved: in the armchair's picture 1.28 % of the pixels (34.5 % of the object itself) moved by
+  more than 24 levels
+  (199 at most: another top rail), and 99 % of the pixels where the cut-out changed lie within 8 pixels of such a
+  change. The picture model's four steps turn a kernel-level difference into a locally different picture; the
+  cut-out and the shape follow it faithfully. Our first reading, that the cut-out magnified invisible noise, was
+  wrong.
+
+So any PyTorch after 2.5.1 paints another draw from the same seed, and a same-seed bar can never pass. The armchair
+had passed on one draw near a check's limit. The bars for 0.3.3 were therefore set anew and written down, dated, before
+any measured run began: the new libraries must be another draw, not a worse one. The
+six objects of the first test were spent on finding this; they are shown here, never counted as evidence.
+
+![The armchair from the same seed with 0.3.2 and 0.3.3: the pictures differ in the back's slats and top rail; turned round, the old one passes and the new one is refused for the gap closed between two slats](images/0.3.3/gate-armchair.webp)
+
+### The measured run: another draw, not a worse one
+
+**Bars, fixed before the run.** On the 16 GB card, the third list's 50 prompts (written for 0.3.0's measurement, all
+of them, no subset), made once with released 0.3.2 on the old pins and once with 0.3.3, the same seeds, flags and
+machine. Both sides judged together by two judges, blind (neither knew which side a sheet came from, or that there
+were two), each object from all round: "would you use it as it is, as the thing the words ask for?". Counted per
+judge: an object is **good** when it passes every check and is judged right; **L** = good with 0.3.2 and not with
+0.3.3, **G** = the reverse.
+
+| Bar | Judge A | Judge B | Result |
+|---|---|---|---|
+| no release if L - G is 6 or more | L 4, G 5: L - G = -1 | L 4, G 3: L - G = 1 | pass |
+| wrong objects that pass: no more than 3 above 0.3.2 | 13 to 9 (-4) | 10 to 8 (-2) | pass |
+| every flip with its picture-change map; a flip with no pixel inside the object moved over 24 levels has its cause outside the painter: no release until found | 1.8 to 31.4 % of the object's pixels moved over 24 levels on every flip; none at 0 | the same | pass |
+| a closing run of the six first-test objects on the old pins after the whole run, identical to their first | identical: pictures, masks, shapes, textures and checks; only clock times, ids and memory readings differ | | pass |
+
+Also: the old pins run twice gave the same objects bit for bit, and so did the new pins run twice, one of the two
+stopped in the paint stage and resumed; so on one card the floor is zero and every difference is the libraries'.
+Each judge saw 10 objects twice under other codes and judged all 10 alike both times; the two judges agreed on 85 of
+96 objects.
+
+| Of 50 (48 made on each side) | 0.3.2, judge A | 0.3.3, judge A | 0.3.2, judge B | 0.3.3, judge B |
+|---|---|---|---|---|
+| pass every check | 34 | 31 | 34 | 31 |
+| pass and are right (good) | 21 | 22 | 24 | 23 |
+| pass and are wrong | 13 | 9 | 10 | 8 |
+| right but refused by a check | 5 | 7 | 4 | 9 |
+
+The 0.3.2 columns are lower than 0.3.0's count on this list (27 good by its first judge): the objects were made
+again from the same seeds and as many pass every check, but other judges judged them, each counted alone.
+Compare only the two columns of one judge.
+
+Two prompts made no object on either side: no picture passed its picture checks. Fewer objects pass every check with
+0.3.3 (31 against 34), but the good ones hold and fewer wrong ones pass: the checks refused more on this draw, about
+as many right objects as wrong ones. On 4 of the 50 prompts another of the four picture tries was chosen, so the object is another one altogether.
+
+The flips, each the same chosen seed on both sides (every one has the painter's change on its map):
+
+| Prompt | Judge | 0.3.2 | 0.3.3 | Inside the object, moved over 24 of 255 |
+|---|---|---|---|---|
+| a blacksmith's anvil | both: lost | passes, right | refused: base level; centre over the base | 1.8 % |
+| a curved scimitar | both: lost | passes, right | refused by the question judge | 5.6 % |
+| a wheelbarrow | both: lost | passes, right | refused: holes the picture shows are open | 18.9 % |
+| a wooden rocking chair | both: lost | passes, right | refused: base level; centre over the base | 11.0 % |
+| an oak writing desk | both: gained | refused: left-right symmetry | passes, right | 28.4 % |
+| a terracotta urn | both: gained | passes, wrong | passes, right | 4.9 % |
+| a brass hand bell | A: gained | passes, wrong | passes, right | 4.1 % |
+| a round dining table | A: gained | passes, wrong | passes, right | 2.3 % |
+| a wooden spoon rack | A: gained | passes, wrong | passes, right | 31.4 % |
+| a brass door knocker | B: gained | refused: one main piece | passes, right | 13.3 % |
+
+![A wheelbarrow from the same seed with 0.3.2 and 0.3.3: the pictures differ round the legs and the wheel; the 0.3.3 one is refused because a hole the picture shows was closed](images/0.3.3/flip-wheelbarrow.webp)
+![An oak writing desk from the same seed with 0.3.2 and 0.3.3: the 0.3.2 one is refused for left-right symmetry, the 0.3.3 one passes](images/0.3.3/flip-oak-writing-desk.webp)
+![A copper tea kettle from the same seed with 0.3.2 and 0.3.3: 1.6 % of the object moved; both pass](images/0.3.3/same-copper-tea-kettle.webp)
+
+**What 50 prompts can and cannot see.** With 50 prompts, a real loss of about 8 objects or more (16 points) would
+have stopped the release. A smaller loss cannot be told from the draw: 0.3.3 may be a little worse or a little
+better than 0.3.2 by fewer objects than that, and this measurement cannot say which. If the two were truly equal,
+these bars would still stop a release wrongly about 1 time in 28 when 8 objects flip, and 1 time in 10 when 16 do. Here
+9 or 7 objects flipped, both ways. No quality gain is claimed.
+
+### The 12 GB card
+
+Checked, not measured in full. On the six first-test objects the 4-bit picture model loaded and the view painter's
+blocks took turns as before, with no shortage of card memory: the picture stage's peak 11,604 MB (11,580 with
+0.3.2), the paint stage's 9,760 MB (9,759). The computer's memory at the paint stage's peak rose from 23.2 GB to
+25.5 GB; why is not known. So for a 12 GB card the advice is now 32 GB of memory
+(24 GB or more with a 16 GB card; 32 GB with a 12 GB card: 0.3.3 peaked at 25.5 GB there, and one object in a 23 GiB limit with no swap was stopped by the out-of-memory killer). On the card's 25 fixed reference objects (seen before, not judged by eye), 22 pass every
+check with 0.3.3 and 20 with 0.3.2.
+
+### Smaller numbers
+
+* **Time.** On the 16 GB card a prompt took 9.9 minutes on average with 0.3.3, 9.3 with 0.3.2 (6 % longer, the 50
+  prompts). On the 12 GB card the six first-test objects took 4,528 s with 0.3.3 against 5,062 s and 5,389 s with
+  0.3.2; its 25 references, made at another time of day, took 20 % longer. Time on that card is not settled.
+* **The first test of the processor, before any card.** Every exact test passed: the token ids of five tokenizers
+  over every prompt and word list, the pixels each model is given, the seeded starting noise of all four samplers,
+  the cut-out's mask, a finished `.glb`, the question judge's answers. The judge's features (SigLIP 2) stayed within
+  1e-5 with our own picture steps (8.4e-7). Two shape steps stayed within 1e-4 (5.9e-5) and one view step within 1.5 of
+  255 (0.072).
+* **A bar changed after its result.** The shape model's picture features (DINOv2) had a bar of 1e-4, set without
+  measuring anything; they differed by 1.09e-3 at most. The old libraries alone differ by 1.03e-3 on the same picture
+  between their own two ways of computing attention, so no choice could meet it. The bar was replaced after the
+  result, and that is said here: (a) at most 2e-3 on any picture and a median of at most 1e-4 (measured 1.09e-3 and
+  2.1e-5: pass); (b) on each of the 11 pictures over 1e-4, the old-against-new difference at most twice the old
+  libraries' own difference between their two attention methods: 9 of 11 pass; a wooden barrel (6.5e-4 against
+  2.3e-4) and a wooden chair (1.1e-4 against 2.1e-5) do not, though both differences are smaller than a ten-thousandth
+  of the largest feature; (c) the two shape steps built on these features within 1e-4 (5.9e-5: pass).
+  Part (b) was owed before the measured run and was measured only after it; it failed as written and stays
+  failed. Its cause was then looked for, with the rule written first: computed in 64-bit numbers, the old and the
+  new libraries and both attention methods give the same features on all 11 pictures (within 1.1e-11), so the
+  maths is the same and the differences are 32-bit rounding. Each 32-bit result is itself 1e-4 to 5e-2 from the
+  64-bit one, more than old and new are apart. The yardstick of (b), one reading of the old libraries' own
+  spread, runs from 2.1e-5 to 1.8e-3 over these pictures: too unsteady to judge by.
+* **Drivers.** Tried with NVIDIA drivers 580 (16 GB card) and 595 (12 GB card). The CUDA 12.8 build was not tried with
+  an older driver.
+
 ## 0.3.0 against 0.2.2
 
 Fifty new prompts were written and sealed before this work began (`tools/trial/unseen-third.txt`). Each was made once

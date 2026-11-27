@@ -46,6 +46,9 @@ ALLOWED_BUNDLED = {
     "libtorchbind_test": "BSD-3-Clause (PyTorch)",
     "torchvision/_C.so": "BSD-3-Clause (torchvision)", "torchvision/image.so": "BSD-3-Clause (torchvision)",
     "libtriton": "MIT (Triton)", "libproton": "MIT (Triton)",
+    # Triton's own instrumentation libraries (its wheel's triton/instrumentation/), MIT as the rest of it.
+    "triton/instrumentation/libGPUInstrumentationTestLib.so": "MIT (Triton)",
+    "triton/instrumentation/libPrintLoadStoreMemSpaces.so": "MIT (Triton)",
     "libbitsandbytes": "MIT (bitsandbytes)",
     "libgomp": GCC_RUNTIME,
     # NVIDIA's runtime libraries (the nvidia-*-cu12 wheels, and in torch's and torchvision's)
@@ -53,6 +56,9 @@ ALLOWED_BUNDLED = {
     "libcupti": NVIDIA, "libcheckpoint": NVIDIA, "libpcsamplingutil": NVIDIA, "libnvperf": NVIDIA,
     "libcurand": NVIDIA, "libcusolver": NVIDIA, "libcusparse": NVIDIA, "libnvJitLink": NVIDIA,
     "libnvToolsExt": NVIDIA, "libnvrtc": NVIDIA, "libnvjpeg": NVIDIA,
+    # torch 2.10's: cuFile (GPUDirect Storage) and NVSHMEM; each wheel's License.txt is the CUDA Toolkit's end user
+    # licence, the same text, byte for byte, as cuBLAS's.
+    "libcufile": NVIDIA, "libnvshmem": NVIDIA, "nvshmem_bootstrap_": NVIDIA, "nvshmem_transport_": NVIDIA,
     "libnccl": "BSD-3-Clause (NVIDIA NCCL)",
     # pillow's (and torchvision's) picture libraries
     "libjpeg": "IJG and BSD-3-Clause (libjpeg-turbo)", "libpng16": "libpng-2.0", "libz": "Zlib",

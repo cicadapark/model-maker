@@ -134,3 +134,10 @@ kind = "composite"
 models = "object"
 version = "0.3.2"
 why = "a clay jug and a stone birdbath model-maker made, each as made before 0.3.2's bake and baked again with it from the same files, whole and close up; our labels"
+
+[[picture]]
+path = "0.3.3/*.webp"
+kind = "composite"
+models = "object"
+version = "0.3.3"
+why = "four objects model-maker made from the same prompt and seed with 0.3.2 and with 0.3.3: the two pictures, where they differ, and each object turned round; our labels and marks"

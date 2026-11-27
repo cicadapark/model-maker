@@ -157,10 +157,45 @@ def load_denoiser(device, dtype, **choices):
     return model.to(device, dtype).eval()
 
 
-def load_encoder(device, dtype):
-    from transformers import BitImageProcessor, Dinov2Model
+class PicturePixels:
+    """The picture as DINOv2 takes it, by the steps TripoSG's preprocessor config names (`feature_extractor_dinov2`):
+    resized with Pillow so its shortest edge is `size`, cut to the middle `crop_size`, scaled to 0-1 and normalised by
+    the config's mean and spread. These are the steps transformers' BitImageProcessor took up to 4.x, with which the
+    shape stage was made and measured; transformers 5 resizes in torch instead, and moved the pixels by up to 0.0175 (in
+    normalised units) and DINOv2's features by up to 0.053, enough to close a hole of the armchair's in its shape on
+    both cards. Done here, the input is the same whatever transformers does: the same pixels as 4.46's, exactly."""
 
-    processor = BitImageProcessor.from_pretrained(os.path.join(WEIGHTS, "feature_extractor_dinov2"))
+    def __init__(self, folder):
+        import json
+
+        with open(os.path.join(folder, "preprocessor_config.json")) as file:
+            config = json.load(file)
+        self.shortest = int(config["size"]["shortest_edge"])
+        self.crop = (int(config["crop_size"]["height"]), int(config["crop_size"]["width"]))
+        self.resample = int(config.get("resample", 3))
+        self.rescale = float(config.get("rescale_factor", 1 / 255))
+        self.mean = np.asarray(config["image_mean"], dtype=np.float32)
+        self.std = np.asarray(config["image_std"], dtype=np.float32)
+
+    def __call__(self, image):
+        from PIL import Image
+
+        image = image.convert("RGB")
+        w, h = image.size
+        scale = self.shortest / min(w, h)
+        size = (int(round(w * scale)), int(round(h * scale))) if w != h else (self.shortest, self.shortest)
+        resized = np.asarray(image.resize(size, Image.Resampling(self.resample)))
+        top, left = (resized.shape[0] - self.crop[0]) // 2, (resized.shape[1] - self.crop[1]) // 2
+        cropped = resized[top:top + self.crop[0], left:left + self.crop[1]]
+        scaled = (cropped.astype(np.float64) * self.rescale).astype(np.float32)
+        normalised = (scaled - self.mean) / self.std
+        return torch.from_numpy(np.ascontiguousarray(normalised.transpose(2, 0, 1)))[None]
+
+
+def load_encoder(device, dtype):
+    from transformers import Dinov2Model
+
+    processor = PicturePixels(os.path.join(WEIGHTS, "feature_extractor_dinov2"))
     encoder = Dinov2Model.from_pretrained(os.path.join(WEIGHTS, "image_encoder_dinov2")).to(device, dtype).eval()
     return processor, encoder
 
@@ -183,7 +218,7 @@ def prepared(picture_rgb, mask):
 
 @torch.no_grad()
 def picture_features(processor, encoder, image, device, dtype):
-    pixels = processor(image, return_tensors="pt").pixel_values.to(device, dtype)
+    pixels = processor(image).to(device, dtype)
     return encoder(pixels).last_hidden_state
 
 

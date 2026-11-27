@@ -47,7 +47,7 @@ class StateJudge:
 
     def __init__(self, folder, device=None):
         import torch
-        from transformers import GemmaTokenizerFast, SiglipImageProcessor, SiglipModel
+        from transformers import GemmaTokenizerFast, SiglipModel
 
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         # 32-bit floats on the card too, as the regression judges on the CPU: in 16 bits a picture near the limit
@@ -56,19 +56,23 @@ class StateJudge:
         self.dtype = torch.float32
         self.model = SiglipModel.from_pretrained(folder, torch_dtype=self.dtype).to(self.device).eval()
         self.tokenizer = GemmaTokenizerFast.from_pretrained(folder)
-        self.images = SiglipImageProcessor.from_pretrained(folder)
+        self.pixels = PicturePixels(folder)
 
     def features(self, image=None, texts=None):
         import torch
 
         with torch.no_grad():
             if image is not None:
-                pixels = self.images(images=image.convert("RGB"), return_tensors="pt")["pixel_values"]
+                pixels = self.pixels(image)
                 found = self.model.get_image_features(pixel_values=pixels.to(self.device, self.dtype))
             else:
                 tokens = self.tokenizer([t.lower() for t in texts], padding="max_length", max_length=TEXT_TOKENS,
                                         truncation=True, return_tensors="pt")
                 found = self.model.get_text_features(input_ids=tokens["input_ids"].to(self.device))
+        if not torch.is_tensor(found):
+            # transformers 5 returns the projected features as the output's pooler_output (4.x returned them alone):
+            # the same numbers, to 1e-5, on the same inputs.
+            found = found.pooler_output
         found = found.float().cpu().numpy()
         return found / np.linalg.norm(found, axis=-1, keepdims=True)
 
@@ -86,6 +90,36 @@ class StateJudge:
         del self.model
         if self.device == "cuda":
             torch.cuda.empty_cache()
+
+
+class PicturePixels:
+    """The picture as SigLIP 2 takes it, by the steps its preprocessor config names: resized with Pillow to `size`,
+    scaled to 0-1 and normalised by the config's mean and spread. These are the steps transformers' SiglipImageProcessor
+    took up to 4.x, with which the judges' limits were set and measured; transformers 5 resizes in torch instead and
+    moved the pixels of 1037 of the regression's 1039 labelled pictures, and the features by up to 0.0027. Done here, the
+    input is the same whatever transformers does: the same pixels as 4.46's, exactly (as shape_net.PicturePixels does
+    for the shape model)."""
+
+    def __init__(self, folder):
+        import json
+        import os
+
+        with open(os.path.join(folder, "preprocessor_config.json")) as file:
+            config = json.load(file)
+        self.size = (int(config["size"]["width"]), int(config["size"]["height"]))
+        self.resample = int(config.get("resample", 2))
+        self.rescale = float(config.get("rescale_factor", 1 / 255))
+        self.mean = np.asarray(config["image_mean"], dtype=np.float32)
+        self.std = np.asarray(config["image_std"], dtype=np.float32)
+
+    def __call__(self, image):
+        import torch
+        from PIL import Image
+
+        resized = np.asarray(image.convert("RGB").resize(self.size, Image.Resampling(self.resample)))
+        scaled = (resized.astype(np.float64) * self.rescale).astype(np.float32)
+        normalised = (scaled - self.mean) / self.std
+        return torch.from_numpy(np.ascontiguousarray(normalised.transpose(2, 0, 1)))[None]
 
 
 def cropped(picture, mask):

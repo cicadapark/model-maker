@@ -38,7 +38,7 @@ def main(models, sources):
     from diffusers.models.attention_processor import Attention  # noqa: F401
     from diffusers.models.embeddings import TimestepEmbedding, Timesteps  # noqa: F401
     from diffusers.models.normalization import FP32LayerNorm  # noqa: F401
-    from transformers import BitImageProcessor, Dinov2Model  # noqa: F401
+    from transformers import Dinov2Model  # noqa: F401
     from skimage import measure  # noqa: F401
 
     # Paint: MV-Adapter's pipeline on SDXL.

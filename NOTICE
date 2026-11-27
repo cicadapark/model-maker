@@ -62,9 +62,11 @@ none is shipped in this repository. Some of their wheels bundle shared libraries
 (python/model_maker/check_licences.py lists each one; docs/setup.md, "What the wheels bundle"):
 
   NVIDIA's CUDA libraries (CUDA runtime, cuBLAS, cuDNN, cuFFT, cuRAND, cuSOLVER, cuSPARSE, cuSPARSELt,
-    NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG), in the nvidia-*-cu12 wheels and in torch's and torchvision's:
-    NVIDIA's own licences (CUDA, cuDNN, cuSPARSELt). Free to use and to ship with an application; not
-    open source.
+    NVRTC, nvJitLink, NVTX, CUPTI, nvJPEG, cuFile, NVSHMEM), in the nvidia-*-cu12 wheels and in torch's
+    and torchvision's: NVIDIA's own licences (CUDA, cuDNN, cuSPARSELt). Free to use and to ship with an
+    application; not open source.
+  NVIDIA's CUDA Python bindings (cuda-bindings, under torch): the NVIDIA Software License, to use and
+    distribute for systems with NVIDIA GPUs; not open source.
   libgfortran (numpy, scipy) and libgomp (torch): GPL-3.0-or-later with the GCC Runtime Library
     Exception, which allows shipping them with any program.
   libquadmath (numpy, scipy): LGPL-2.1-or-later. GCC's quad-precision maths, loaded at run time and

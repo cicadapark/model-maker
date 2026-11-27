@@ -60,6 +60,37 @@ class TheCheck(unittest.TestCase):
         self.assertIsNone(state_judge.check_from_record({"checks": []}))
 
 
+class ThePicturesPixels(unittest.TestCase):
+    def test_the_picture_is_resized_scaled_and_normalised_by_its_config_alone(self):
+        # The steps SiglipImageProcessor took in transformers 4.x, by Pillow and numpy: the same pixels whatever
+        # transformers version is installed.
+        try:
+            import torch  # noqa: F401
+        except ImportError:
+            self.skipTest("needs torch (installed by setup.sh)")
+        import json
+        import tempfile
+
+        from PIL import Image
+
+        with tempfile.TemporaryDirectory() as folder:
+            with open(os.path.join(folder, "preprocessor_config.json"), "w") as file:
+                json.dump({"size": {"height": 384, "width": 384}, "resample": 2, "rescale_factor": 1 / 255,
+                           "image_mean": [0.5, 0.5, 0.5], "image_std": [0.5, 0.5, 0.5]}, file)
+            pixels = state_judge.PicturePixels(folder)
+            grey = pixels(Image.new("RGB", (500, 300), (51, 51, 51)))
+            self.assertEqual(tuple(grey.shape), (1, 3, 384, 384))
+            self.assertEqual(str(grey.dtype), "torch.float32")
+            expected = (np.float32(51 / 255) - np.float32(0.5)) / np.float32(0.5)
+            self.assertTrue(np.allclose(grey[0, :, 200, 200].numpy(), expected, atol=1e-6))
+            # Squeezed to the square, not cropped: a left half and a right half stay halves.
+            halves = np.zeros((300, 600, 3), np.uint8)
+            halves[:, 300:] = 255
+            cut = pixels(Image.fromarray(halves))
+            self.assertLess(float(cut[0, 0, 0, 100]), 0)
+            self.assertGreater(float(cut[0, 0, 0, 300]), 0)
+
+
 class TheModel(unittest.TestCase):
     def test_siglip_2_reads_with_the_pinned_transformers(self):
         folder = os.path.join(os.environ.get("MODEL_MAKER_MODELS", "models"), state_judge.MODEL_FOLDER)

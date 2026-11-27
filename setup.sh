@@ -43,7 +43,9 @@ readonly CUDA_MAJOR=12
 readonly MEMORY_GOOD_GIB=24      # the computer's memory (loading the picture model peaked at 32 GB resident, much
                                  # of it the weights' files mapped into memory: docs/setup.md)
 readonly MEMORY_LEAST_GIB=16
-readonly DISK_GB=75              # model weights about 57 GB, the Python environment about 6 GB, builds
+readonly MEMORY_GOOD_GIB_SMALL_CARD=32  # with a card under 16 GB (the view painter's blocks take turns): 0.3.3
+                                        # peaked at 25.5 GB there, and less was not tried (docs/results.md)
+readonly DISK_GB=77              # model weights about 57 GB, the Python environment about 7.5 GB, builds
 readonly PYTHON_VERSION=3.11.14  # the CPython uv installs for the environment (what the pipeline is tried on: 3.11)
 readonly UV_VERSION=0.13.5
 readonly UV_SHA256_X86_64=f68d291c75783122dad58ab77def0e13f3233f358731db5d6d7e8715603b928f
@@ -90,6 +92,7 @@ check_gpu() {
         mib=${mib//[^0-9]/}
         if [ "${mib:-0}" -gt "$best_mib" ]; then best_mib=$mib; best_name=$(echo "$name" | sed 's/^ *//'); fi
     done <<< "$cards"
+    card_mib=$best_mib
     local found="$best_name, $((best_mib / 1024)) GB"
     if [ "$best_mib" -ge "$GPU_GOOD_MIB" ]; then
         row "NVIDIA graphics card" "$found" "ok"
@@ -117,15 +120,19 @@ memory_gib() {
     echo $(( ${total_kb:-0} / 1024 / 1024 ))
 }
 
+# The card's memory in MiB, found by check_gpu (0: no card seen); SETUP_CARD_MIB names it instead, for the tests.
+card_mib=0
+
 check_memory() {
-    local gib
+    local gib good=$MEMORY_GOOD_GIB card=${SETUP_CARD_MIB:-$card_mib}
     gib=$(memory_gib)
-    if [ "$gib" -ge "$MEMORY_GOOD_GIB" ]; then
+    if [ "$card" -gt 0 ] && [ "$card" -lt "$GPU_GOOD_MIB" ]; then good=$MEMORY_GOOD_GIB_SMALL_CARD; fi
+    if [ "$gib" -ge "$good" ]; then
         row "Memory" "$gib GB" "ok"
     elif [ "$gib" -ge "$MEMORY_LEAST_GIB" ]; then
-        row "Memory" "$gib GB" "try it ($MEMORY_GOOD_GIB GB or more is advised; swap helps)"
+        row "Memory" "$gib GB" "try it ($good GB or more is advised; swap helps)"
     else
-        missing "Memory" "$gib GB" "at least $MEMORY_LEAST_GIB GB ($MEMORY_GOOD_GIB GB or more is advised)"
+        missing "Memory" "$gib GB" "at least $MEMORY_LEAST_GIB GB ($good GB or more is advised)"
     fi
 }
 
