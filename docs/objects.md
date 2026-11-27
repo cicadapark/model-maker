@@ -40,13 +40,17 @@ the first trial every hole was a seam of unjoined corners and every torn edge a 
 left by the cut to the triangle budget; the one hole left after joining was 8 edges and 2.5 % of
 the barrel's size round.
 
-Settings worth knowing: `--lead` (the words about light and backdrop the picture model is given
-first), `--paint-steps` (the view painter's steps, 20 by default: on the second trial 20 painted as
-well as 50 by coverage and likeness in under half the time, about 4 minutes, not 8 to 9),
-`--shape-tries`, `--tries`, `--picture-rounds`, `--attempt N` (a refused object made again: its pictures, shapes
+Settings worth knowing: `--tries`, `--attempt N` (a refused object made again: its pictures, shapes
 and views from seeds after every seed the attempts before it used; 0, the default, draws the same seeds as before),
 `--require-lettering` (every picture must be read for painted
 lettering: without a usable tesseract no job is made; the measured runs use it).
+
+The trials' settings are not options of `make` and `batch`: the lead words, the view painter's steps (20: on the
+second trial 20 painted as well as 50 by coverage and likeness in under half the time, about 4 minutes, not 8 to 9),
+the shape tries, the picture rounds, the triangle budget and the touch-up's views and strength. They are not in the
+job folder's name, so as options a second run with another value found its stages done and returned the first
+object. Every published number is for their defaults; the trial tools and `reproduce` set them through
+`pipeline.Settings` in Python.
 
 `./model-maker batch PROMPTS.txt --out DIR` runs many prompts stage by stage, so each model is
 loaded once, and writes `DIR/times.csv`, the time of each stage for each object. A stage already
@@ -611,7 +615,7 @@ so its views cannot simply be moved up. Measured on the candle's shape, what vie
 least 0.55, as the colour cloud keeps): the six, 84.9 % of the surface as seen; with four more at 20° above, 91.7 %;
 at 30°, 94.0 %; at 45°, 96.6 %.
 
-The paint stage now touches the paint up (`touch_up.py`, at most 4 views, `--touch-up-views`, 0 for none): candidate
+The paint stage now touches the paint up (`touch_up.py`, at most 4 views; `Settings(touch_up_views=0)` for none): candidate
 views every 45° round, level and 20°, 35° and 50° above and below, are ranked by the unpainted surface each sees squarely, weighted as
 the coverage check weights it; the best is taken, the object drawn from it in its colours so far, the unpainted pixels
 in it (grown by 3 pixels so the fill meets the paint round it) painted by SDXL's base model through diffusers' SDXL
@@ -692,7 +696,7 @@ quarter of them, the 32 nearest, agree on 99 % of the filled points in 3 s.
 ### The fill itself
 
 * **From the painted neighbours first.** The masked places start from the colour spread to them and are repainted at
-  strength 0.6 (`--touch-up-strength`; 1 paints from noise as before).
+  strength 0.6 (`Settings(touch_up_strength=...)`; 1 paints from noise as before).
 * **The paint round it as context.** Each view is drawn in the colour cloud's colours as the bake mixes them (the six
   views' paint and the earlier views' kept fills), the spread colours only where the cloud does not reach.
 * **The mask grown by a latent cell** (8 pixels, square), so every unpainted pixel's cell is repainted, and only pixels
