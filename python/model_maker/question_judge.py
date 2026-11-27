@@ -2,7 +2,7 @@
 together, "Is it <the thing named>?" (`asked_words`), and the probability of "yes" against "no" in the answer's first token (VQAScore's way:
 Lin et al. 2024, "Evaluating text-to-visual generation with image-to-text generation").
 
-Measured (docs/objects.md, "Is it the thing asked for?"; docs/results.md for 0.2.2): on 50 prompts sealed before the work, judged blind, refusing under
+Measured (docs/history/question-judge.md; docs/results.md for 0.2.2): on 50 prompts sealed before the work, judged blind, refusing under
 0.5 caught 6 of the 8 objects whose picture showed another thing (a digging fork for a hoe, a pick for a scythe) and
 refused 3 good ones (long thin things: a pitchfork, a halberd; a barrel). It does not see a shape's or a paint's fault.
 Asked of the pictures, the same question is a note only: over 4 tries it would refuse two names that had a right one.
@@ -42,7 +42,7 @@ LIMIT = 0.5
 # good sword the regression set holds (0.44), the paint not looking old; asked the thing the words name ("Is it a
 # sword?", 0.78) and measured on the next sealed 50 by a plan written before the run, it caught 7 of 16 bad objects
 # that passed every other check and refused none of 15 good (12 GB card), 5 of 14 and 2 of 15 (16 GB card), and kept
-# every good object of the regression set (docs/objects.md, "Is it the thing asked for?").
+# every good object of the regression set (docs/history/question-judge.md).
 COUNTED = True
 # The words, the grid and the picture's size are the ones the limit was measured with; the limit belongs to them.
 OBJECT_QUESTION = "These are eight views of one object, seen from all round. Is it {prompt}? Answer yes or no."

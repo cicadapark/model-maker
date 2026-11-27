@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Blind sheets for labelling painted lettering by eye: each picture cropped round its cut-out (its own proportions,
 large enough to read small letters), shuffled, and shown under a random code only, twelve to a sheet. The key (code
-to picture) is written apart, to be opened only once every label is written (as quality_sheets.py; docs/objects.md,
-"Painted lettering").
+to picture) is written apart, to be opened only once every label is written (as quality_sheets.py; docs/history/lettering.md).
 
     lettering_sheets.py OUT LIST [--seed N]
 

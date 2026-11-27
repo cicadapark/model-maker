@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Every model input Pillow makes, hashed, so two Pillow versions can be compared byte for byte (docs/objects.md,
-"Pillow 13"): run it with each environment over the same pictures and compare the two outputs with `--compare`.
+"""Every model input Pillow makes, hashed, so two Pillow versions can be compared byte for byte
+(docs/history/pillow-13.md): run it with each environment over the same pictures and compare the two outputs with
+`--compare`.
 
     python pillow_inputs.py OUT.json PICTURE.png ...          hash each picture's inputs under this environment
     python pillow_inputs.py --compare A.json B.json           how many differ, and where

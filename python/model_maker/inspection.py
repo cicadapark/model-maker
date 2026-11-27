@@ -32,7 +32,7 @@ def shape_checks(subject, picture_mask, corners, triangles, laid=None, picture=N
                            "edge_mean": mean, "edge_95": far, "apart": apart, "cut": view.cut}
     checks += O.outline_checks(view, mean, far, apart)
     # The holes the picture shows, open in the model (and none the picture lacks): a web too thin or a hole too narrow
-    # for the outline's gap piece and the carving is judged here (docs/objects.md, "Holes the picture shows").
+    # for the outline's gap piece and the carving is judged here (docs/history/holes.md, "Holes the picture shows").
     from . import carving
 
     holes = carving.holes_open(picture_mask, as_made, triangles, picture, outline_view=view)

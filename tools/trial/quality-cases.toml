@@ -1,12 +1,12 @@
-# The quality judge's labelled pictures (11 November 2026; docs/objects.md, "Qualities the words name"): picture tries
-# painted with a quality in the prompt and without it, by tools/trial/paint_tries.py with the pipeline's own seeds, on
-# the 16 GB card ("3080") and the 12 GB card ("3060"). `wording`: "plain" (the picture words of release 1),
-# "described" (a description of the curve added after the prompt, not kept), "described2" (the curved blade's words and
-# view that are kept: words.CURVED_BLADE_WORDS, words.CURVED_BLADE_VIEW), "view" (that view alone: "a curved hunting
-# knife" was then not read as curved, "hunting" taken for a participle, so its words were not added, and its
-# "described" tries are its plain ones painted again). None of release 1's unseen prompts is here.
-# Labelled blind: each picture cropped round its cut-out, shuffled under a random code (`code`), with no word of its
-# prompt, wording or score (tools/trial/quality_sheets.py); every label was written before the key was opened.
+# The quality judge's labelled pictures (11 November 2026; docs/history/several-and-qualities.md, "Qualities the words
+# name"): picture tries painted with a quality in the prompt and without it, by tools/trial/paint_tries.py with the
+# pipeline's own seeds, on the 16 GB card ("3080") and the 12 GB card ("3060"). `wording`: "plain" (the picture words of
+# release 1), "described" (a description of the curve added after the prompt, not kept), "described2" (the curved
+# blade's words and view that are kept: words.CURVED_BLADE_WORDS, words.CURVED_BLADE_VIEW), "view" (that view alone: "a
+# curved hunting knife" was then not read as curved, "hunting" taken for a participle, so its words were not added, and
+# its "described" tries are its plain ones painted again). None of release 1's unseen prompts is here. Labelled blind:
+# each picture cropped round its cut-out, shuffled under a random code (`code`), with no word of its prompt, wording or
+# score (tools/trial/quality_sheets.py); every label was written before the key was opened.
 #
 # `shows`: "curved" (the whole thing bends: one arc, or an S), "straight"; "round" (a circle in plan), "square" (four
 # corners, square or oblong); "unclear" (in between, a part bent only, or not the thing asked for), with `why`. The

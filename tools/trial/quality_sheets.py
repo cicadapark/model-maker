@@ -2,7 +2,7 @@
 """Blind sheets of whole cut-outs for labelling a quality by eye (curved or straight, round or square, tall or squat):
 the pictures of the given prompts, each cropped square round its cut-out, shuffled, and shown under a random code
 only, twenty to a sheet. The key (code to picture and prompt) is written apart, to be opened only once every label is
-written (docs/objects.md, "Qualities the words name"; as head_sheets.py for the war hammers).
+written (docs/history/several-and-qualities.md, "Qualities the words name"; as head_sheets.py for the war hammers).
 
     quality_sheets.py OUT --prompts "a curved bronze dagger|a hunting knife|..." TRIES_FOLDER...
 

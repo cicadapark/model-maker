@@ -2,7 +2,7 @@
 # the prompt it was painted for. `regression.py build` copies them into DATA/prompts and `regression.py run` judges them
 # as the case "prompt-pictures": each must pass "shows the thing asked for" against its own prompt and fail it against
 # every other prompt here, and an empty backdrop must fail it for every prompt (the prompt's words written out, the
-# typographic attack, still pass: a known miss, shown, not held; docs/objects.md). Labelled by eye: `shows = "unclear"` marks a picture that does not clearly show the
+# typographic attack, still pass: a known miss, shown, not held; docs/history/picture-check.md). Labelled by eye: `shows = "unclear"` marks a picture that does not clearly show the
 # thing its prompt names (a war hammer painted with an axe-like or hybrid head, labelled blind in head-cases.toml; a table seen from straight above); it is shown, not
 # held. The longbows the trials painted are left out: bows are not made in release 1 (words.NOT_YET). Labels are never
 # changed to make a run hold (docs/metrics.md, the honesty rules).

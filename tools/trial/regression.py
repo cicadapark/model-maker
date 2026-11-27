@@ -716,7 +716,7 @@ def judged_prompts(folder):
         for what, image in made_up_pictures(prompt).items():
             theirs = share([judge.features(image=image)[0]], prompt)[0]
             made_up.append((theirs, what, prompt))
-            # Written words are a known miss (the typographic attack; docs/objects.md): shown, not held.
+            # Written words are a known miss (the typographic attack; docs/history/picture-check.md): shown, not held.
             if theirs >= least and what == "an empty backdrop":
                 wrong.append(f"{what} passes for {prompt!r} ({theirs:.0%})")
     own.sort()

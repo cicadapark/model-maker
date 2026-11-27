@@ -96,7 +96,7 @@ LEAST_FOOT_OUTSIDE_SHARE = 0.2
 # (no sampling floor), has its own limit. The 98th: a chair's leg is under 5 % of its surface, so at the 95th a leg
 # missing read 1.25 %, as a good chair; at the 98th it reads 23.5 %, a leg 8 cm out 9.6 %, an armrest on one side
 # 17.1 %, while the trials' models that pass every check read at most 3.5 % (a book; tables 2.7 %, stools 1.9 %).
-# The limit lies in that gap (docs/objects.md, "Defects found by measurement").
+# The limit lies in that gap (docs/history/defects.md).
 MOST_MIRROR_DISTANCE_SHARE = 0.02
 MIRROR_FAR_PERCENTILE = 98
 MOST_MIRROR_FAR_SHARE = 0.05

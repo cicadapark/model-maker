@@ -2,10 +2,10 @@
 """Every picture under the given folders judged against its own prompt on the CPU, as the pipeline's choice of try
 judges it ("shows the thing asked for", subject_judge), one copy of each picture (by its sha256). Also the head pair
 considered as a second layer ("a hammer head with a flat blunt striking face" against "an axe head with a sharp curved
-blade"), for every picture, to see whether it is needed and where its limit would lie (docs/objects.md, "War
+blade"), for every picture, to see whether it is needed and where its limit would lie (docs/history/war-hammers.md, "War
 hammers"). And every quality's share (words.QUALITY_JUDGE_TEXTS, each judged with the picture's own thing's word),
 whether its prompt names the quality or not, so a quality's pair can be measured on pictures painted with it and
-without it (docs/objects.md, "Qualities the words name").
+without it (docs/history/several-and-qualities.md, "Qualities the words name").
 
     judge_tries.py OUT.json FOLDER... [--only-qualities]     --only-qualities: only pictures whose prompt names one
 

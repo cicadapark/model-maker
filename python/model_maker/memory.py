@@ -1,5 +1,5 @@
 """The computer's memory as a batch uses it: what this process holds, its peak, what is free, and the guard that
-refuses to start a stage the memory cannot hold (docs/objects.md, "A long batch").
+refuses to start a stage the memory cannot hold (docs/history/long-batch.md).
 
 A stage's need is measured as it runs: the process's peak resident memory while the stage ran (the kernel's
 high-water mark, reset at the stage's start where the kernel allows it). Each batch writes the needs it measured
@@ -113,7 +113,7 @@ def give_back():
     """Freed memory handed back to the system. A stage's models closed and a job's arrays dropped are freed, but glibc
     keeps a freed heap for the process unless told (malloc_trim), and torch keeps the pinned memory it has freed for
     its next copy to the card: measured, closing the shape model left 3.5 of its 4.6 GB held, and malloc_trim gave all
-    but 0.3 GB back (docs/objects.md, "A long batch"). Elsewhere than glibc, the trim is skipped."""
+    but 0.3 GB back (docs/history/long-batch.md). Elsewhere than glibc, the trim is skipped."""
     import gc
     import sys
 

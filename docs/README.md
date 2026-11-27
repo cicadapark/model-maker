@@ -23,6 +23,8 @@ How it works:
 
 * [`how-it-works.md`](how-it-works.md): the whole process in one diagram, and each step in words.
 * [`objects.md`](objects.md): 3-D objects from a prompt, every check and its limit, the marks, thin parts.
+* [`history/`](history/README.md): how each check and limit came to be: what it was measured on, the trials' faults
+  and what did not work, dated, one file per topic.
 * [`metrics.md`](metrics.md): the job ledger, what each line holds, and the summary made from it.
 * [`trials/`](trials/): the notes of the release's first two trials, and of the diagnosis of 0.2.0's sealed run: what
-  failed, why, and what was decided (the other trials are described in `objects.md`; their notes are not published).
+  failed, why, and what was decided (the other trials are described in `history/`; their notes are not published).

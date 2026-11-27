@@ -3,8 +3,8 @@
 The raw mask is kept for the picture checks (a second piece is a fault they must see); the shape model is given the
 largest piece with its holes as the picture shows them: only a pinhole of the cut-out is filled. With every hole
 closed off inside the object filled, the shape model saw the backdrop's grey (darkened by the object's shadow) in a
-jug's handle, as if it were a surface, and filled the loop with a web (docs/objects.md, "The jug's handle"). The holes
-are kept and the object is put on white, as the shape model's input was prepared in its training.
+jug's handle, as if it were a surface, and filled the loop with a web (docs/history/holes.md, "The jug's handle").
+The holes are kept and the object is put on white, as the shape model's input was prepared in its training.
 """
 
 import os

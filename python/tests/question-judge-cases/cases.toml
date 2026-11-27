@@ -1,7 +1,7 @@
 # The question judge's regression case (tests/test_question_judge_cases.py): finished objects' eight sides (their
 # reports' turntables, lossless), each with the verdict the judge must give at its limit. Every case scored at least
 # 0.15 from the limit with llama.cpp's b11600 release archive, so a verdict here never rests on a hair. Made by
-# model-maker 0.2.0 and 0.3.0 work on the 12 GB card (the sword: the first trial, 16 GB card), judged blind by eye (docs/objects.md, "Is it the thing asked
+# model-maker 0.2.0 and 0.3.0 work on the 12 GB card (the sword: the first trial, 16 GB card), judged blind by eye (docs/history/question-judge.md, "Is it the thing asked
 # for?").
 
 [[case]]

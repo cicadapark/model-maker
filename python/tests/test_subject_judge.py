@@ -156,7 +156,7 @@ class TheLabelledSet(unittest.TestCase):
             self.assertTrue(picture["why"])
             noun = words.subject_of(picture["prompt"]).noun
             self.assertTrue(noun in family or noun in ("battle axe", "hatchet"), picture)
-        # At least eight tries a prompt for each wording measured (docs/objects.md, "War hammers").
+        # At least eight tries a prompt for each wording measured (docs/history/war-hammers.md).
         counts = {}
         for picture in pictures:
             key = (picture["prompt"], picture["wording"])

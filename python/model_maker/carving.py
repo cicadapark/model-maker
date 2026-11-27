@@ -57,7 +57,7 @@ MOST_SHIFT_PX = 12
 # Lab) lies within this of the backdrop's just outside the object; else it is a thin part of the object the cut-out
 # missed (a lantern's glass, a mirror, a framed canvas), never carved and never judged open. On the trials every hole
 # with an inner part read at most 2.2 from the backdrop (a lantern's glass, the backdrop seen through it), most under 1;
-# the made-up mirror whose glass the cut-out missed reads 63 (docs/objects.md, "Holes the picture shows").
+# the made-up mirror whose glass the cut-out missed reads 63 (docs/history/holes.md, "Holes the picture shows").
 MOST_HOLE_BACKDROP_DELTA_E = 10.0
 # The backdrop round the object: the picture's pixels this far outside its cut-out (pixels of the picture).
 BACKDROP_BAND_PX = (12, 48)
@@ -548,11 +548,11 @@ def carve_check(record):
 # `MARGIN_SHARE` of the height in from its edge), showing the backdrop, is judged from the camera found with the holes'
 # inner parts left out (as the carving finds it): the share of its inner part the model's outline covers. A hole too
 # small to have an inner part is not judged. Conversely, a hole of the model's outline with an inner part that the
-# picture covers is a hole the picture does not have. Limits set from the trials (docs/objects.md, "Holes the picture
-# shows"): of the 112 holes judged on the trials and the regression set, the models that pass read at most 8.3 % covered
-# (a round table, carved; 6.4 % a chair's back, 2.6 % a jug), the faults 100 % (an early jug, a ring filled by a
-# web, a panel between a chair's spindles); no model's own hole was covered by its picture at all. The limits lie in
-# the gap, a third.
+# picture covers is a hole the picture does not have. Limits set from the trials (docs/history/holes.md, "Holes the
+# picture shows"): of the 112 holes judged on the trials and the regression set, the models that pass read at most 8.3 %
+# covered (a round table, carved; 6.4 % a chair's back, 2.6 % a jug), the faults 100 % (an early jug, a ring filled by a
+# web, a panel between a chair's spindles); no model's own hole was covered by its picture at all. The limits lie in the
+# gap, a third.
 MOST_HOLE_COVERED_SHARE = 0.33
 MOST_EXTRA_HOLE_COVERED_SHARE = 0.33
 # An inner part smaller than this (canvas pixels, the outline 384 high: a square of 7 pixels, 1.8 % of the height) is

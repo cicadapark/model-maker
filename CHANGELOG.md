@@ -1,7 +1,8 @@
 # Changes
 
 Each version's full note is on its release page (github.com/cicadapark/model-maker/releases); the measurements behind
-each are in [`docs/results.md`](docs/results.md) and [`docs/objects.md`](docs/objects.md).
+each are in [`docs/results.md`](docs/results.md), [`docs/objects.md`](docs/objects.md) and
+[`docs/history/`](docs/history/README.md).
 
 ## Unreleased
 
@@ -9,6 +10,9 @@ each are in [`docs/results.md`](docs/results.md) and [`docs/objects.md`](docs/ob
   `--touch-up-views` and `--touch-up-strength`. They were trial settings outside the job folder's name: a second run
   with another value found the stages done and returned the first object unchanged. The defaults, which every
   published number uses, are the same; the trial tools set these in Python (`pipeline.Settings`).
+- `docs/objects.md` is now the reference (the steps, how a prompt is read, every check and its limit, the
+  marks, content credentials, where the models are, without a card, offline); its dated sections, what each limit
+  was measured on and what did not work, moved unchanged to `docs/history/`, one file per topic.
 
 ## 0.3.4
 

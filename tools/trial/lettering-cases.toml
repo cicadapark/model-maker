@@ -1,4 +1,4 @@
-# The lettering check's labelled pictures (11 November 2026; docs/objects.md, "Painted lettering"): picture tries the
+# The lettering check's labelled pictures (11 November 2026; docs/history/lettering.md): picture tries the
 # trials painted (every try that looser limits would have refused, and 100 drawn at random from the rest), and 160
 # painted for this by tools/trial/paint_tries.py, with the pipeline's own picture words and seeds, on the 16 GB card
 # ("invite-3080") and the 12 GB card ("asked-3060"), for prompts that invite lettering ("an old iron anvil", "a wooden

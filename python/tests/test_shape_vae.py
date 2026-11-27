@@ -1,6 +1,6 @@
 """The shape model's own decoder, attention processor and point embedding (shape_vae), on small made-up weights: what
 each computes, and that the weights load strictly. Their equivalence with the code they replaced was measured on the
-real weights once (docs/objects.md, "The shape model's own decoder")."""
+real weights once (docs/history/shape-decoder.md)."""
 
 import importlib.util
 import json
