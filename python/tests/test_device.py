@@ -262,10 +262,21 @@ class WhatCanRun(unittest.TestCase):
         with mock.patch.object(device, "current", lambda: device.Device("cpu")):
             with self.assertRaisesRegex(SystemExit, "needs a graphics card"):
                 pipeline.needs_card("shape")
+        # bitsandbytes there and not there, whatever this computer has: four_bit_refusal's own lookups stubbed (its
+        # defaults, which stage_refusal's default holds), so the real refusal is what is tested.
+        installed = (lambda package: "0.46.1", lambda package: object())
+        missing = (lambda package: None, lambda package: None)
         with mock.patch.object(device, "current", lambda: device.Device("cuda")), \
-                mock.patch.object(device, "four_bit_refusal", lambda chosen: ""):
+                mock.patch.object(device.four_bit_refusal, "__defaults__", installed):
             for stage in device.CARD_STAGES:
                 pipeline.needs_card(stage)
+        with mock.patch.object(device, "current", lambda: device.Device("cuda")), \
+                mock.patch.object(device.four_bit_refusal, "__defaults__", missing):
+            with self.assertRaisesRegex(SystemExit, "pictures stage cannot run on an NVIDIA card .*bitsandbytes, "
+                                                    "which is not installed"):
+                pipeline.needs_card("pictures")
+            pipeline.needs_card("shape")
+            pipeline.needs_card("paint")
 
         def named_wrong():
             raise device.DeviceError("MODEL_MAKER_DEVICE=mps: not here")
