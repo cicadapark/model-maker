@@ -28,6 +28,9 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 One model, FLUX.1 [schnell], is gated: setup needs a Hugging Face access token in a file
 ([`docs/setup.md`](docs/setup.md#a-gated-model)).
 
+Rather not type commands? The release archives also hold a small window, `model-maker-companion`, that checks and
+sets up the PC and makes one object ([`docs/companion.md`](docs/companion.md)).
+
 ## What's needed
 
 | | |

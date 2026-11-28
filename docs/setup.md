@@ -14,7 +14,7 @@ git clone https://github.com/cicadapark/model-maker && cd model-maker
 
 | | |
 |---|---|
-| System | Linux on x86_64 |
+| System | Linux on x86_64; Windows 11 on x86_64 ([Windows](#windows): its own install, no `setup.sh`) |
 | Graphics card | NVIDIA, 12 GB or more (tried on 12 GB and 16 GB), a driver with CUDA 12 or newer (0.3.3 tried with drivers 580 and 595) |
 | Computer's memory | 24 GB or more with a 16 GB card; 32 GB with a 12 GB card: 0.3.3 peaked at 25.5 GB there, and less was not tried (16 GB to try) |
 | Disk | about 69 GB used (models 61 GB with the question judge's 7 GB, environment 7.5 GB); keep 84 GB free |
@@ -78,7 +78,7 @@ another folder.
 | 5 | Rust, only when the PC has neither `rustup` nor a `cargo` as new as `Cargo.toml`'s `rust-version` (a distribution's older `cargo` is not used): rustup 1.28.2, then the toolchain `rust-toolchain.toml` names | `.tools/rust` | rustup-init's sha256, named in `setup.sh` |
 | 6 | `model-maker-simplify` (`cargo build --release --locked`) | `target/release` | `Cargo.lock` |
 | 7 | each model: its licence shown (where it carries use restrictions, SDXL's RAIL++-M, its whole text saved to `models/licences/` to read first), then asked; its code checked out at its commit (MV-Adapter only); its files downloaded at its hub revision | `models/`, `sources/` | every file's sha256 in `registry/models.toml`; a checkout's commit by `git rev-parse`, and again, with nothing changed or added, each time the code is imported |
-| 8 | the self-test (about 2 to 11 minutes): the Python tests, every model file present and checked (by its stamp when it passed), every stage's code importing as the pipeline imports it (`setup/smoke.py`, no weights), PyTorch sees the card | | the tests' own output, made-up jobs whose failures they expect, goes to `.tools/self-test.log` |
+| 8 | the self-test (about 2 to 11 minutes): the Python tests (`tools/ci/run_tests.py`, four test modules at once, each one's verdict shown as it ends, every minute the ones still running; one still running after 30 minutes is stopped and named as FAILED), every model file present and checked (by its stamp when it passed), every stage's code importing as the pipeline imports it (`setup/smoke.py`, no weights), PyTorch sees the card | | the tests' own output, made-up jobs whose failures they expect, goes to `.tools/self-test.log` |
 
 Everything setup installs lands in the repository's folder (`.tools`, `.venv`, `target`, `models`, `sources`; git
 ignores them): delete the folder and it is gone. The system and the shell's setup are left alone (uv's cache is
@@ -89,7 +89,8 @@ from `~/.cache/huggingface/token` when no other is given (below). Setup writes n
 
 A second run checks what is there and carries on: a download stopped half-way goes on from where it stopped (each file
 is written to `<name>.part` and renamed once its sum matches); a file already checked is not read again unless its
-size or time changed (`models/.verified`); an accepted licence is not asked again (`models/.accepted` keeps which
+size or time changed (`models/.verified`, by each file's path inside `models/`; without it when the folder is
+read-only); an accepted licence is not asked again (`models/.accepted` keeps which
 licence and version, the day and how: asked or `--yes`).
 
 Options:
@@ -115,8 +116,9 @@ shares the account's user name and e-mail address with Black Forest Labs, as the
 3. `./setup.sh --hf-token-file THAT-FILE`.
 
 The token is read from the file and sent only to huggingface.co (not on to the file store the hub redirects to). It is
-never printed or written anywhere. Without it, setup says which model it could not fetch and why. The other models
-need no account.
+never printed or written anywhere. The token is for downloading only: a models folder that already holds every file
+of the model with the registry's sum (a copy, a shared folder) needs none. Without it, setup says which files it
+could not fetch and why. The other models need no account.
 
 ### The models it downloads
 
@@ -208,6 +210,97 @@ on 16 threads. The picture stage needs FLUX.1 in 4 bits, which the pinned bitsan
 CUDA; elsewhere it stops before loading and says what is missing. The ledger records the device's
 backend with every line, and `"tier": "measured"` on Linux with an NVIDIA card, where every published number was made.
 
+### Platforms
+
+Only Linux x86_64 with an NVIDIA card of 12 GB or more is measured: setup.sh installs `python/requirements.lock`, every
+published number comes from it, and it is never changed for another platform. For the others `python/locks/` holds a
+lock each, made from `python/requirements.txt` with the measured lock's versions by `tools/ci/locks.py make` (uv
+compiles each for its platform from Linux), every wheel's sha256 in it:
+
+| Lock | For | Not the measured versions | State |
+|---|---|---|---|
+| `windows-x86_64-cuda128.lock` | Windows with an NVIDIA card | PyTorch's CUDA 12.8 build for Windows (PyPI's is the processor's); c2pa-python 0.39.0 (0.38.1 has no Windows wheel) | CI: installed, tested, the tiny-model smoke test; on a 12 GB card an object was made with it and passes every check ([Windows](#windows)) |
+| `macos-arm64.lock` | macOS 14+ on Apple Silicon | bitsandbytes 0.50.2 (0.46.1 has no macOS wheel) | CI: installed, tested, the tiny-model smoke test; never run on Metal |
+| `linux-x86_64-cpu.lock` | Linux without a card | PyTorch's processor build | CI only (the smoke test's Linux leg) |
+| `linux-x86_64-rocm71.lock` | Linux with an AMD card (ROCm 7.1) | PyTorch's ROCm build, triton-rocm 3.6.0; bitsandbytes 0.50.2 | **refused by the licence check**: PyTorch's ROCm build bundles LGPL libraries (libnuma, libelf) and about 45 AMD libraries and kernel files not yet read; never installed |
+
+CI (`.github/workflows/ci.yml`) checks every lock on each push: compiled again it must come out the same, with a
+wheel for its platform for every package (`locks.py check`); every shared library its wheels bundle is judged by
+`check_licences.py`'s tables, read from the wheels themselves (`locks.py licences`); and pip-audit reads it. On
+GitHub's free Linux, Windows and macOS (Apple Silicon) machines it then installs the lock, runs the licence check,
+the unit tests and the tiny-model smoke test, all on the processor: those machines have no usable card.
+
+`setup/tiny_smoke.py` makes one object through every stage on the processor with models built from the real ones'
+configurations shrunk to a few channels and layers, random weights, at 64 pixels (a minute or two, about 2 GB of
+memory; it fetches only BiRefNet's and MV-Adapter's code, checked by the registry). It proves the device and float type
+chosen, each model's operations in the installed wheels and every stage's own steps; it never proves an object good.
+FLUX.1 refuses the processor (4 bits on CUDA only), so the test checks that refusal and paints the stage's pictures
+with a stand-in that draws one object. Run it with `.venv/bin/python -I setup/tiny_smoke.py`.
+
+### Windows
+
+On Windows the program `model-maker.exe` does what setup.sh and the bash `model-maker` do on Linux: `model-maker.exe
+check` shows what the PC has and lacks, `model-maker.exe setup` installs uv, Python, `windows-x86_64-cuda128.lock`,
+the tools and the models into its own folder, and every other command goes to the Python side. Windows 11 with an
+NVIDIA card is supported: objects were made on it with a 12 GB card and pass every check. The published numbers
+(pass counts, times) were measured on Linux.
+
+The archive also holds `model-maker-companion.exe`, a small window that runs the same setup and makes without a
+terminal ([companion.md](companion.md)).
+
+**The builds are not signed yet.** Each release publishes the archive's SHA-256 in two places, the release and this
+documentation page; check it before you run anything. Never switch a protection of Windows off for model-maker.
+
+Three ways to install it, the first one recommended:
+
+1. **The one-line install.** In PowerShell (no administrator rights needed):
+
+   ```
+   powershell -ExecutionPolicy Bypass -c "irm https://github.com/cicadapark/model-maker/releases/download/v0.4.0/install.ps1 | iex"
+   ```
+
+   `-ExecutionPolicy Bypass` lasts for that one PowerShell only. `install.ps1` is short: read it first. It downloads
+   the release's zip, checks its SHA-256 against the sum written in the script **and** the sum on this page, refuses
+   if either differs, and unpacks it into `%LOCALAPPDATA%\model-maker\model-maker-<version>` (or under the folder
+   `MODEL_MAKER_HOME` names). It never replaces an existing install (that folder may hold your models), asks for no
+   administrator rights and changes no setting. It prints the next command, `model-maker.exe setup`.
+2. **The plain download.** Download the zip from the release page and check its sum with
+   `Get-FileHash -Algorithm SHA256 <the zip>` against both published sums. A browser marks the downloaded file as
+   from the internet, and Explorer's "Extract all" carries that mark to the program, so Windows shows "Windows
+   protected your PC" when it starts: that is the missing signature, said honestly. Choose "More info", check the
+   name, and run it only if the sums matched.
+3. **Build from source** (for developers): Rust through rustup and Microsoft's C++ build tools (or Visual Studio;
+   about 3.2 GB of downloads together, and the build tools need administrator rights), then
+   `cargo build --release -p model-maker-launcher -p model-maker-simplify` and the two programs copied to the
+   repository's top folder.
+
+**A PC without internet.** `model-maker setup --wheels <folder or http address>` takes the lock's wheels from there
+only, never from the package index; each is still checked against the lock's sums. Without the option, the
+variable `MODEL_MAKER_WHEELS` is used when set (for a caller that passes no options, such as the desktop window). On a PC with internet,
+`python3 tools/ci/locks.py wheels windows-x86_64-cuda128 <folder>` fills such a folder (with `SHA256SUMS`), PyTorch's
+build too; setup pins that one by its version for uv, so it comes from the folder as well.
+
+What `setup` needs on Windows besides what the table above says:
+
+- **32 GB of the computer's memory with a 12 GB card**, as on Linux: a make there peaks at about 26 GB. On Windows
+  in a 28 GB test PC the make's Python ran Windows out of memory (36.5 GB committed, the page file included) and
+  stopped in its paint stage; with 32 GB it made the object (the Windows card test, 28 Nov 2026).
+- **Microsoft's Visual C++ runtime** (torch and the question judge's server need it; a fresh Windows lacks it).
+  `setup` offers to fetch Microsoft's Visual C++ Redistributable (x64) from Microsoft's own address, checks that
+  Windows calls its signature valid and Microsoft's, and starts it only after you say yes (one administrator prompt).
+  Without a yes it stops and says how to install it yourself.
+- **Short paths.** Some installed files are 168 characters below the folder: `check` warns when the folder's own path
+  is over 75 characters and Windows' long paths are off.
+- **Room while installing:** about 10 GB free beyond the models (the environment about 5 GB, uv's cache about 5 GB).
+- **Antivirus** reads every model file the first time (57 GB): the first run is slower. No setting is changed for it.
+- **The self-test** at the end of `setup` takes about 20 minutes on Windows (1253 s on the test PC, four modules
+  at once; the touch-up module alone most of it). `--skip-tests` leaves it out.
+- **Models shared from another computer.** A models folder another computer downloaded (`--models` or
+  `MODEL_MAKER_MODELS`) may be read-only: setup then keeps no `.verified` and reads every file in full on each run.
+  Let setup check out the models' code (`sources/`) on Windows itself. A checkout made on Linux and read from a share
+  works (its files' executable bits are not compared on Windows, their contents are), but git may call a share's
+  folder of "dubious ownership" and refuse to read it; setup does not switch that check off.
+
 ## Tried on a clean PC
 
 
@@ -280,7 +373,10 @@ Checks:
 ## Your own signing certificate
 
 Every picture is signed with content credentials (`docs/objects.md`, "Content credentials"). Without a key of your
-own, setup makes a test certificate in `.tools/c2pa-test` (`./model-maker credentials --make-test` makes it again);
+own, setup makes a test certificate for you in model-maker's folder of your own data (`%LOCALAPPDATA%\model-maker\c2pa-test`
+on Windows, `~/.local/share/model-maker/c2pa-test` on Linux, `~/Library/Application Support/model-maker/c2pa-test` on
+macOS; an install's `.tools/c2pa-test` from before is still used while you can read it; `./model-maker credentials
+--make-test` makes it again);
 checkers call what it signs untrusted. A certificate checkers trust comes from a certificate authority on the
 **C2PA trust list**, issued under the C2PA certificate policy to a **conforming generator product**:
 

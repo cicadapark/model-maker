@@ -34,3 +34,19 @@ its pixels as they are; every other picture is left alone. Run it with the envir
 by hand as CI does: `pip install --no-deps --require-hashes --only-binary :all: -r tools/ci/pip-audit.lock` in a Python
 3.11 environment of its own, then `pip-audit --requirement python/requirements.lock --require-hashes --disable-pip
 --strict`.
+
+`ci/locks.py`: the Python environment's lock for each platform (`python/locks/`; the measured
+`python/requirements.lock` is never written by it). `make` compiles them with uv from Linux (`--python-platform`),
+`check` compiles each again and compares (and finds a wheel for its platform for every package), `licences` judges
+every shared library each lock's wheels bundle with `python/model_maker/check_licences.py`'s tables, read from the
+wheels' zip directories by ranged requests (nothing installed), and `audit-view` gives a lock as pip-audit can read it
+(a PyTorch build named by its file as the release it is built from). CI's job "per-platform locks" runs `check` and
+`licences`, and the vulnerability audit reads every lock. It needs `packaging` and, for `make` and `check`, uv (`UV`,
+setup.sh's pinned release); its tests (`test_locks.py`) need no network. docs/setup.md, "Platforms".
+
+`ci/run_tests.py`: the unit tests as `unittest discover` runs them, each test module in a process of its own, as many
+at once as the machine has processors (the slowest started first), each verdict as it ends and every minute the
+modules still running; a module still running after 30 minutes (`--module-limit`) is stopped with the processes it
+started and FAILED, named as over the limit. CI's Windows, macOS and Linux legs run it (job "platforms"), since their
+minutes are what CI costs. Run it with the environment's Python: `.venv/bin/python -I
+tools/ci/run_tests.py`.

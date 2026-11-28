@@ -268,7 +268,8 @@ signed (their pixels as they are). A bug report keeps each PNG's credentials. Th
 
 **The certificate.** `--signing-key` and `--signing-cert` (or `MODEL_MAKER_SIGNING_KEY` and
 `MODEL_MAKER_SIGNING_CERT`) give your own key and certificate chain, both PEM; without them the pictures are signed
-with a test certificate `setup.sh` makes on your computer (`.tools/c2pa-test`, its key readable by you alone). C2PA
+with a test certificate setup makes for you on your computer (in model-maker's folder of your own data, its key
+readable by you alone; `docs/setup.md`, "Your own signing certificate", says where). C2PA
 checkers report a picture signed with it as signed by an untrusted certificate. That is true: the mark is still there
 and still machine-readable. `docs/setup.md`, "Your own signing certificate", says how to get one checkers trust. Your
 own certificate's names (its organisation, for one) are shown with every picture it signs. `MODEL_MAKER_TIMESTAMP_URL`

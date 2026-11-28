@@ -142,3 +142,24 @@ kind = "composite"
 models = "object"
 version = "0.3.3"
 why = "four objects model-maker made from the same prompt and seed with 0.3.2 and with 0.3.3: the two pictures, where they differ, and each object turned round; our labels and marks"
+
+[[picture]]
+path = "0.4.0/windows-spear-picture.webp"
+kind = "ai"
+models = "picture"
+version = "0.4.0"
+why = "the picture model's picture for \"a long wooden spear\", made in Windows on a 12 GB card: nothing of ours drawn on it"
+
+[[picture]]
+path = "0.4.0/windows-spear-t*.webp"
+kind = "ai"
+models = "object"
+version = "0.4.0"
+why = "renders of the 3-D spear model-maker made in Windows on a 12 GB card, from eight sides, painted: nothing of ours drawn on it"
+
+[[picture]]
+path = "0.4.0/windows-spear-bare.webp"
+kind = "ai"
+models = "object"
+version = "0.4.0"
+why = "renders of the same 3-D spear's shape from eight sides, without paint: nothing of ours drawn on it"
