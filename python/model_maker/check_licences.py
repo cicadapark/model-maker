@@ -29,10 +29,10 @@ LONGEST_LICENCE_NAME = 100
 REFUSED_BUNDLED = re.compile(r"lib(avcodec|avformat|avutil|swscale|swresample|x264|x265|postproc)[-.]")
 # A package's own compiled code (a Python extension module) is under the package's own licence.
 EXTENSION_MODULE = re.compile(r"\.(cpython-\d+[^.]*|abi3)\.so$")
-# The systems whose bundled libraries the allow-list below knows (by their file names). Elsewhere (Windows' .dll,
-# macOS' .dylib, other names for NVIDIA's and Intel's libraries) the check lists what it finds and fails, rather than
-# pass having recognised nothing.
-KNOWN_SYSTEMS = ("linux",)
+# The systems whose bundled libraries the allow-list below knows (by their file names): every library the wheels of
+# python/requirements.lock and python/locks/ bundle there, each read (tools/ci/locks.py licences, in CI). Elsewhere the
+# check lists what it finds and fails, rather than pass having recognised nothing.
+KNOWN_SYSTEMS = ("linux", "win32", "darwin")
 
 
 def is_library(name, system=sys.platform):
@@ -84,12 +84,49 @@ ALLOWED_BUNDLED = {
     "libopenjp2": "BSD-2-Clause", "libavif": "BSD-2-Clause", "liblcms2": "MIT", "libfreetype": "FTL (FreeType)",
     "libharfbuzz": "MIT", "libbrotli": "MIT", "libzstd": "BSD-3-Clause", "liblzma": "0BSD (xz)", "libxcb": "MIT",
     "libXau": "MIT",
-    # c2pa-python's native library: c2pa-rs's C interface (0.91.3), MIT OR Apache-2.0, with its Rust crates linked in.
-    # Every crate of its tree (`cargo metadata` of c2pa-c-ffi 0.91.3) is under MIT, Apache-2.0, BSD, ISC, Zlib,
-    # Unicode-3.0, 0BSD, CC0-1.0, BSL-1.0 or the Unlicense (each with MIT or Apache-2.0 beside it where it is one of the
-    # last two), but webpki-roots, CDLA-Permissive-2.0 (the root certificates' list, data); cbindgen, MPL-2.0, only
-    # writes its C header at build time and is not in the library. No OpenSSL: it signs with ring and RustCrypto.
+    # c2pa-python's native library: c2pa-rs's C interface (0.91.3 in c2pa-python 0.38.1, 0.92.0 in 0.39.0, the
+    # Windows lock's), MIT OR Apache-2.0, with its Rust crates linked in. Every crate of its tree (`cargo metadata`
+    # of c2pa-c-ffi 0.91.3, and of 0.92.0: 424 crates) is under MIT, Apache-2.0, BSD, ISC, Zlib, Unicode-3.0, 0BSD,
+    # CC0-1.0, BSL-1.0 or the Unlicense (each with MIT or Apache-2.0 beside it where it is one of the last two;
+    # r-efi offers MIT or Apache-2.0 beside the LGPL), but webpki-roots, CDLA-Permissive-2.0 (the root certificates'
+    # list, data); cbindgen, MPL-2.0, only writes its C header at build time and is not in the library. No OpenSSL:
+    # it signs with ring and RustCrypto.
     "libc2pa_c": "MIT OR Apache-2.0 (c2pa-rs; its crates permissive, see above)",
+    "c2pa_c.dll": "MIT OR Apache-2.0 (c2pa-rs; its crates permissive, see above)",
+    # Windows (python/locks/windows-x86_64-cuda128.lock): PyTorch's own and what its third_party folder names in the
+    # wheel's LICENSE file, NVIDIA's runtime under its Windows names, and two runtimes free to ship but not open source.
+    "c10.dll": "BSD-3-Clause (PyTorch)", "c10_cuda.dll": "BSD-3-Clause (PyTorch)",
+    "caffe2_nvrtc.dll": "BSD-3-Clause (PyTorch)", "shm.dll": "BSD-3-Clause (PyTorch)",
+    "torch.dll": "BSD-3-Clause (PyTorch)", "torch_cpu.dll": "BSD-3-Clause (PyTorch)",
+    "torch_cuda.dll": "BSD-3-Clause (PyTorch)", "torch_global_deps.dll": "BSD-3-Clause (PyTorch)",
+    "torch_python.dll": "BSD-3-Clause (PyTorch)", "fbgemm.dll": "BSD-3-Clause (FBGEMM, in PyTorch)",
+    "asmjit.dll": "Zlib (AsmJit, in PyTorch)", "uv.dll": "MIT (libuv, in PyTorch)", "zlibwapi.dll": "Zlib",
+    "zlib.dll": "Zlib", "jpeg8.dll": "IJG and BSD-3-Clause (libjpeg-turbo)",
+    "cublas64_": NVIDIA, "cublasLt64_": NVIDIA, "cudart64_": NVIDIA, "cudnn64_": NVIDIA, "cudnn_": NVIDIA,
+    "cufft64_": NVIDIA, "cufftw64_": NVIDIA, "cupti64_": NVIDIA, "curand64_": NVIDIA, "cusolver64_": NVIDIA,
+    "cusolverMg64_": NVIDIA, "cusparse64_": NVIDIA, "nvJitLink_": NVIDIA, "nvToolsExt64_": NVIDIA,
+    "nvrtc-builtins64_": NVIDIA, "nvrtc64_": NVIDIA, "nvjpeg64_": NVIDIA,
+    # torch 2.10's (torch/lib/): NVIDIA's Nsight Perf SDK host library (2024.5, its version resource), which CUPTI
+    # loads; Linux's libnvperf_host, which NVIDIA's own CUPTI wheel ships, under its Windows name. The CUDA licence's
+    # Attachment A names only cupti.dll for CUPTI; proprietary like the rest of NVIDIA's, not copyleft.
+    "nvperf_host.dll": NVIDIA,
+    # torchvision 0.25's Windows wheel (torchvision\\ in its RECORD), each read from the wheel: the CUDA runtime 12.8.90
+    # and nvJPEG 12.3 (NVIDIA, the rows above), libjpeg-turbo 2.0.0 (jpeg8.dll), zlib 1.3.1 (zlib.dll), libpng
+    # 1.6.50 and libwebp with its SharpYuv (the libpng16, libwebp and libsharpyuv rows), and these two:
+    "libjpeg.dll": ("IJG (the Independent JPEG Group's own libjpeg, 9f of 14 January 2024): permissive; a program "
+                    "shipped as a binary says it is based in part on the work of the Independent JPEG Group"),
+    "python311.dll": ("PSF-2.0 (the Python Software Foundation License: the CPython 3.11.14 runtime, its version "
+                      "resource read; permissive)"),
+    "msvcp140": ("Microsoft's Visual C++ runtime: proprietary, its redistributable files free to ship with an "
+                 "application (numpy's Windows wheel bundles it), not open source"),
+    "libiomp5md.dll": ("Intel's OpenMP runtime, under the Intel End User License Agreement for Developer Tools (PyPI's "
+                       "intel-openmp): proprietary, its Redistributables free to ship as part of a product, no "
+                       "non-commercial limit and no copyleft; not open source"),
+    "libiompstubs5md.dll": "the same as libiomp5md.dll (Intel's OpenMP stubs)",
+    # macOS on Apple Silicon (python/locks/macos-arm64.lock)
+    "libgcc_s": GCC_RUNTIME,
+    "libomp": "Apache-2.0 WITH LLVM-exception (LLVM's OpenMP runtime; older releases MIT or NCSA)",
+    "libc++": "Apache-2.0 WITH LLVM-exception (LLVM's libc++)",
 }
 # The rule's one recorded exception (CONTRIBUTING.md, rule 1): an LGPL library that comes inside a standard package's
 # own PyPI wheel, is loaded only at run time and stays replaceable. It is allowed and listed in NOTICE.
@@ -103,13 +140,21 @@ def bundled_libraries(distribution):
     """The shared libraries a package bundles: (path within the environment, file name), its own Python extension
     modules left out."""
     for file in distribution.files or []:
-        name = file.name
+        # A wheel's RECORD may write Windows paths (torchvision's does: torchvision\\zlib.dll), which importlib's
+        # posix paths keep whole in `.name`: the file's own name is after the last separator of either kind.
+        path = str(file).replace("\\", "/")
+        name = path.rsplit("/", 1)[-1]
         if is_library(name):
-            yield str(file), name
+            yield path, name
 
 
 def judged_library(path, name):
-    """(verdict, licence): "allowed" or "unknown"."""
+    """(verdict, licence): "allowed" or "unknown". A row naming the whole file is taken before a row naming the start of
+    a name (Windows' libjpeg.dll is the IJG's libjpeg, not libjpeg-turbo's libjpeg.so)."""
+    path = path.replace("\\", "/")
+    for table, verdict in ((ACCEPTED_EXCEPTIONS, "allowed"), (ALLOWED_BUNDLED, "allowed")):
+        if name in table:
+            return verdict, table[name]
     for table, verdict in ((ACCEPTED_EXCEPTIONS, "allowed"), (ALLOWED_BUNDLED, "allowed")):
         for start, licence in table.items():
             if ("/" in start and path.endswith(start)) or name.startswith(start):
@@ -139,17 +184,22 @@ def problems_of(distribution):
 # it links the system's libstdc++, libgomp, OpenSSL and zlib, which it does not bundle.
 JUDGE_FOLDER = os.path.join(".tools", "llama-b11600")
 JUDGE_LIBRARIES = {"libggml": "MIT (ggml, llama.cpp's LICENSE)", "libllama": "MIT (llama.cpp's LICENSE)",
-                   "libmtmd": "MIT (llama.cpp's LICENSE)"}
+                   "libmtmd": "MIT (llama.cpp's LICENSE)",
+                   # The Windows zip's names (no "lib"), and LLVM's OpenMP runtime it carries (its own licence file,
+                   # LICENSE-LLVM-OpenMP, beside it); its LICENSE is fetched from the tag's source by setup.
+                   "ggml": "MIT (ggml, llama.cpp's LICENSE)", "llama": "MIT (llama.cpp's LICENSE)",
+                   "mtmd": "MIT (llama.cpp's LICENSE)",
+                   "libomp": "Apache-2.0 WITH LLVM-exception (LLVM's OpenMP runtime, LICENSE-LLVM-OpenMP)"}
 
 
-def judge_libraries(folder):
+def judge_libraries(folder, system=None):
     """(file name, verdict, licence) for each shared library in the judge's folder, and the problems: an unknown
     library, or no MIT LICENSE beside them. Nothing when the folder is not there (the judge is optional)."""
     if not os.path.isdir(folder):
         return [], []
     rows, problems = [], []
     for name in sorted(os.listdir(folder)):
-        if ".so" not in name and not is_library(name):
+        if ".so" not in name and not is_library(name, system or sys.platform):
             continue
         licence = next((text for start, text in JUDGE_LIBRARIES.items() if name.startswith(start)), "")
         rows.append((name, "allowed" if licence else "unknown", licence))
@@ -162,6 +212,35 @@ def judge_libraries(folder):
     except OSError:
         problems.append(f"{JUDGE_FOLDER}: its LICENSE is missing (unpack the release archive whole)")
     return rows, problems
+
+
+# The standalone CPython setup installs (uv's, from python-build-standalone) carries one copyleft library: its
+# `_dbm` module links Berkeley DB under the Sleepycat licence (Linux build). `_gdbm` would link GNU dbm (GPL); no build
+# has it today. Nothing in model-maker or its locks imports `dbm` (Python's `dbm` falls back to `dbm.dumb` without
+# them), so setup removes them after installing the interpreter (docs/licences.md), and this check refuses them there.
+# In an interpreter setup did not install (a developer's own, CI's), they are only reported: that Python is not ours.
+REFUSED_INTERPRETER_MODULES = ("_dbm", "_gdbm")
+
+
+def interpreter_modules_folder(base, system=sys.platform):
+    """Where an interpreter keeps its compiled standard modules."""
+    if system == "win32":
+        return os.path.join(base, "DLLs")
+    return os.path.join(base, "lib", f"python{sys.version_info.major}.{sys.version_info.minor}", "lib-dynload")
+
+
+def interpreter_findings(base=sys.base_prefix, system=sys.platform, repository=REPOSITORY):
+    """(problems, notes): the refused modules found in the interpreter; problems when setup installed it (it lives in
+    the repository's .tools), notes otherwise."""
+    folder = interpreter_modules_folder(base, system)
+    try:
+        names = sorted(os.listdir(folder))
+    except OSError:
+        return [], []
+    found = [name for name in names if name.split(".")[0] in REFUSED_INTERPRETER_MODULES]
+    words = [f"{folder}: {name} links a copyleft library (Berkeley DB or GNU dbm); setup removes it" for name in found]
+    ours = os.path.realpath(base).startswith(os.path.realpath(os.path.join(repository, ".tools")) + os.sep)
+    return (words, []) if ours else ([], words)
 
 
 def main(argv=None):
@@ -177,6 +256,10 @@ def main(argv=None):
             print(f"{'llama.cpp (question judge)':28s} {file_name:52s} {verdict:9s} {licence}")
     problems = [problem for distribution in distributions for problem in problems_of(distribution)]
     problems += judge_problems
+    interpreter_problems, interpreter_notes = interpreter_findings()
+    problems += interpreter_problems
+    for note in interpreter_notes:
+        print(f"note (an interpreter setup did not install): {note}")
     if not system_known():
         problems.append(f"this check knows the libraries of Linux's wheels only; on {sys.platform} it cannot judge "
                         f"what the wheels bundle, so it does not pass")

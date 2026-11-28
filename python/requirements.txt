@@ -13,6 +13,11 @@ c2pa-python==0.38.1         # MIT OR Apache-2.0 (its native library is c2pa-rs's
                             # permissive: python/model_maker/check_licences.py)
 cryptography==50.0.2        # Apache-2.0 OR BSD-3-Clause (the test certificate, the key's kind; its wheel holds OpenSSL 3,
                             # Apache-2.0)
+# Windows only: setup's downloads checked by Windows' own certificate verifier, which fetches a root a fresh Windows
+# does not hold yet (setup/fetch_models.py, system_trust)
+truststore==0.10.5 ; sys_platform == "win32"   # MIT
+# Memory and processes where Linux's /proc and prctl are missing (Windows, macOS: memory.py, parent.py, question_judge.py)
+psutil==7.2.2               # BSD-3-Clause
 # The models (an NVIDIA card)
 torch==2.10.0               # BSD-3-Clause (from PyPI on Linux x86_64: the CUDA 12.8 build, the last for CUDA 12)
 torchvision==0.25.0         # BSD-3-Clause (BiRefNet's backbone)
