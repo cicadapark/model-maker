@@ -134,12 +134,66 @@ class Signing(unittest.TestCase):
         self.assertFalse(reading.trusted)
         self.assertEqual(reading.issuer, credentials.TEST_ORGANISATION)
         self.assertIn(credentials.UNTRUSTED, reading.failures)
-        # Only the user who made the test key can read it.
+        # Only the user who made the test key can read it. Windows has no such mode bits (its user folder's own
+        # rights keep it the user's): there the key is only checked to be there.
         key = os.path.join(credentials.test_folder(), credentials.TEST_KEY)
-        self.assertEqual(os.stat(key).st_mode & 0o777, 0o600)
+        self.assertTrue(os.path.isfile(key))
+        if os.name != "nt":
+            self.assertEqual(os.stat(key).st_mode & 0o777, 0o600)
         said = []
         pipeline.run([], pipeline.Settings(verify=False), report=said.append)
         self.assertTrue(any("test certificate" in line and "untrusted" in line for line in said), said)
+
+    def test_the_test_folder_is_narrowed_by_chmod_except_on_windows(self):
+        # The Windows card test of 28 Nov 2026: the window's make (a plain user) stopped on os.chmod(folder) with
+        # WinError 5 for a folder an administrator's run had made.
+        for platform, chmods in (("linux", 1), ("win32", 0)):
+            with self.subTest(platform=platform):
+                folder = os.path.join(self.folder, f"test-{platform}")
+                calls = []
+                real_chmod = os.chmod
+                with mock.patch.object(credentials.os, "chmod",
+                                       lambda path, mode: (calls.append(path), real_chmod(path, mode))):
+                    key, chain = credentials.made_test_certificate(folder, platform=platform)
+                self.assertTrue(os.path.isfile(key) and os.path.isfile(chain))
+                self.assertEqual(calls.count(folder), chmods)
+
+    def test_the_test_certificate_lives_in_the_users_own_data_unless_given_or_kept_in_the_install(self):
+        # The Windows card test's sixth try (28 Nov 2026): an install's .tools/c2pa-test made by an administrator's
+        # run could not be used by the plain user who ran the window.
+        install = os.path.join(self.folder, "install-c2pa-test")
+        home = os.path.join(self.folder, "home")
+        for platform, environment, want in (
+                ("win32", {"LOCALAPPDATA": "D:\\appdata"},
+                 os.path.join("D:\\appdata", "model-maker", "c2pa-test")),
+                ("win32", {}, os.path.join(home, "AppData", "Local", "model-maker", "c2pa-test")),
+                ("linux", {"XDG_DATA_HOME": "/data"}, os.path.join("/data", "model-maker", "c2pa-test")),
+                ("linux", {}, os.path.join(home, ".local", "share", "model-maker", "c2pa-test")),
+                ("darwin", {}, os.path.join(home, "Library", "Application Support", "model-maker", "c2pa-test"))):
+            with self.subTest(platform=platform, environment=environment):
+                self.assertEqual(credentials.test_folder(environment, platform, home, install), want)
+        self.assertEqual(credentials.test_folder({credentials.TEST_FOLDER_VARIABLE: "/given"}, "linux", home, install),
+                         "/given")
+        # An earlier setup's certificate in the install is kept while this user can read it.
+        key, chain = credentials.made_test_certificate(install, platform="linux")
+        self.assertEqual(credentials.test_folder({}, "win32", home, install), install)
+        with mock.patch("builtins.open", side_effect=PermissionError(13, "Permission denied")):
+            self.assertFalse(credentials.readable_pair(install))
+        os.remove(chain)
+        self.assertEqual(credentials.test_folder({}, "linux", home, install),
+                         os.path.join(home, ".local", "share", "model-maker", "c2pa-test"))
+
+    def test_a_test_folder_this_user_may_not_use_is_said_in_words(self):
+        def denied(*_args, **_kwargs):
+            raise PermissionError(5, "Access is denied")
+
+        folder = os.path.join(self.folder, "not-mine")
+        for name in ("chmod", "open"):
+            with self.subTest(denied=name), mock.patch.object(credentials.os, name, denied):
+                with self.assertRaises(credentials.NotSigned) as said:
+                    credentials.made_test_certificate(folder, platform="linux")
+                self.assertIn("cannot be used by this user (Access is denied)", str(said.exception))
+                self.assertIn(credentials.TEST_FOLDER_VARIABLE, str(said.exception))
 
     def test_a_key_and_certificate_given_sign(self):
         given = os.path.join(self.folder, "given")
@@ -241,7 +295,7 @@ class Finish(unittest.TestCase):
             job = self.made_job(folder)
             pipeline.finish_stage([job], pipeline.Settings(texture=256, verify=False), report=lambda _: None)
             pictures = credentials.job_pictures(job.folder)
-            names = {os.path.relpath(path, job.folder) for path in pictures}
+            names = {os.path.relpath(path, job.folder).replace(os.sep, "/") for path in pictures}
             for expected in ("picture.png", "mask.png", "pictures/7.png", "pictures/7-mask.png", "views/view-0.png",
                              "views/touch-up-0.png", "views/touch-up-0-mask.png", "report/picture.png",
                              "report/try-7.png", "report/outline.png", "report/turntable.png"):

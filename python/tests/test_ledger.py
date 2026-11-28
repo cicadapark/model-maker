@@ -1,8 +1,11 @@
+import ast
 import importlib.util
+import ntpath
 import os
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 import numpy as np
 from PIL import Image
@@ -20,6 +23,49 @@ def summary_tool():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+class WindowsVerbatimPaths(unittest.TestCase):
+    r"""The Windows card test, 28 Nov 2026: started from a `\\?\` path, the ledger asked Windows for
+    `\\?\C:\...\python\model_maker\..` (WinError 123: no ".." inside such a path) while writing why a stage had
+    failed, and that error hid the first one."""
+
+    VERBATIM_FILE = r"\\?\C:\Programs\model-maker-0.4.0\python\model_maker\ledger.py"
+
+    def test_the_ledger_folder_from_a_verbatim_windows_path_holds_no_dot_dot(self):
+        with mock.patch.object(ledger, "os") as simulated, mock.patch.object(ledger, "__file__", self.VERBATIM_FILE):
+            simulated.path = ntpath
+            simulated.environ = {}
+            found = ledger.folder()
+        self.assertEqual(found, r"\\?\C:\Programs\model-maker-0.4.0\metrics")
+
+    def test_every_join_with_dot_dot_in_the_python_side_is_normalised(self):
+        r"""A path built with ".." must go through os.path.normpath (which folds it on Windows' `\\?\` paths too)."""
+        found = []
+        for top in ("python", "setup"):
+            for folder, _, files in os.walk(os.path.join(REPOSITORY, top)):
+                for name in sorted(f for f in files if f.endswith(".py")):
+                    path = os.path.join(folder, name)
+                    found += [f"{os.path.relpath(path, REPOSITORY)}:{line}" for line in self.unnormalised(path)]
+        self.assertEqual(found, [])
+
+    @staticmethod
+    def unnormalised(path):
+        tree = ast.parse(open(path, encoding="utf-8").read())
+        parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+
+        def named(call, name):
+            return isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and call.func.attr == name
+
+        def normalised(node):
+            while node in parents:
+                node = parents[node]
+                if named(node, "normpath"):
+                    return True
+            return False
+
+        return [node.lineno for node in ast.walk(tree) if named(node, "join")
+                and any(isinstance(a, ast.Constant) and a.value == ".." for a in node.args) and not normalised(node)]
 
 
 class OwnLedger(unittest.TestCase):

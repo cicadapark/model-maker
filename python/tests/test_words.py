@@ -297,7 +297,7 @@ class TheTrialPromptsAreReadAsMeant(unittest.TestCase):
     def test_the_state_judges_labelled_pictures_are_well_formed(self):
         import tomllib
 
-        path = os.path.join(os.path.dirname(__file__), "..", "..", "tools", "trial", "state-cases.toml")
+        path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "tools", "trial", "state-cases.toml"))
         with open(path, "rb") as file:
             pictures = tomllib.load(file)["picture"]
         self.assertEqual(len({p["name"] for p in pictures}), len(pictures))

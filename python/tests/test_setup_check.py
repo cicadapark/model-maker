@@ -10,6 +10,9 @@ import unittest
 REPOSITORY = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SETUP = os.path.join(REPOSITORY, "setup.sh")
 GIB_IN_KB = 1024 * 1024
+# setup.sh is the Linux and macOS setup (Windows has the launcher's own check); these tests run it under bash with
+# stand-in programs put first on a ":"-joined PATH, which Windows cannot do.
+runs_setup_sh = unittest.skipIf(os.name == "nt", "runs setup.sh under bash with POSIX stand-ins; not on Windows")
 
 
 def figure(name):
@@ -38,21 +41,25 @@ class Memory(unittest.TestCase):
         self.assertEqual(figure("MEMORY_GOOD_GIB_SMALL_CARD"), 32)
         self.assertEqual(figure("MEMORY_LEAST_GIB"), 16)
 
+    @runs_setup_sh
     def test_enough_memory_is_ok(self):
         rows, output = memory_row(figure("MEMORY_GOOD_GIB") * GIB_IN_KB)
         self.assertEqual(rows["Memory"], "ok", output)
         self.assertEqual(list(rows), ["Memory"], "one row about memory")
 
+    @runs_setup_sh
     def test_between_the_two_says_try_it(self):
         rows, _ = memory_row(figure("MEMORY_GOOD_GIB") * GIB_IN_KB - 1)
         self.assertTrue(rows["Memory"].startswith("try it"), rows)
 
+    @runs_setup_sh
     def test_a_12_gb_card_asks_for_more(self):
         rows, _ = memory_row(figure("MEMORY_GOOD_GIB") * GIB_IN_KB, card_mib=12288)
         self.assertTrue(rows["Memory"].startswith("try it (32 GB"), rows)
         rows, output = memory_row(figure("MEMORY_GOOD_GIB_SMALL_CARD") * GIB_IN_KB, card_mib=12288)
         self.assertEqual(rows["Memory"], "ok", output)
 
+    @runs_setup_sh
     def test_too_little_is_missing(self):
         rows, _ = memory_row(figure("MEMORY_LEAST_GIB") * GIB_IN_KB - 1)
         self.assertIn("MISSING", rows["Memory"])
@@ -84,6 +91,7 @@ def tesseract_row(version_out="", version_err="", version_code=0, languages="eng
     return rows, done.stdout + done.stderr
 
 
+@runs_setup_sh
 class Tesseract(unittest.TestCase):
     """The optional tesseract row never ends the check (set -e, pipefail), and says whether it can be used: version 5 or
     newer with its English data (the 0.2.0 review, defect 4 and missing test 9)."""
@@ -114,6 +122,48 @@ class Tesseract(unittest.TestCase):
         rows, output = tesseract_row(version_out="tesseract 5.5.0\\n leptonica-1.86.0\\n")
         self.assert_row(rows, output, "tesseract 5.5.0", "ok")
         self.assertEqual(rows[0][1], "ok")
+
+
+STUB_NVIDIA_SMI = """#!/bin/bash
+case "$1" in
+    --query-gpu=*) echo "NVIDIA GeForce RTX 3080 Laptop GPU, 16384" ;;
+    *) printf '%s\\n' "$STUB_HEADER" ;;
+esac
+"""
+
+
+def cuda_row(header):
+    """The check's CUDA row (what it found, its result) with a stand-in nvidia-smi that prints `header`."""
+    with tempfile.TemporaryDirectory() as folder:
+        stub = os.path.join(folder, "nvidia-smi")
+        with open(stub, "w") as file:
+            file.write(STUB_NVIDIA_SMI)
+        os.chmod(stub, 0o755)
+        done = subprocess.run(["bash", SETUP, "--check-only"], capture_output=True, text=True, timeout=120,
+                              env={**os.environ, "PATH": f"{folder}:{os.environ['PATH']}", "STUB_HEADER": header})
+    rows = [(line[23:67].strip(), line[68:].strip()) for line in done.stdout.splitlines()
+            if line[:22].strip() == "CUDA"]
+    return rows, done.stdout + done.stderr
+
+
+@runs_setup_sh
+class Cuda(unittest.TestCase):
+    """The driver's CUDA version from nvidia-smi's header, in both of the forms drivers print."""
+
+    def test_the_cuda_version_line(self):
+        rows, output = cuda_row("| NVIDIA-SMI 580.95.05    Driver Version: 580.95.05    CUDA Version: 13.0     |")
+        self.assertEqual(rows, [("13.0 (driver)", "ok")], output)
+
+    def test_the_cuda_umd_version_line(self):
+        # NVIDIA's Windows driver 621.40 in the Windows test of 26 November 2026: no "CUDA Version:" there.
+        rows, output = cuda_row("NVIDIA-SMI 621.40 KMD Version: 621.40  CUDA UMD Version: 13.5")
+        self.assertEqual(rows, [("13.5 (driver)", "ok")], output)
+
+    def test_no_version_is_missing(self):
+        rows, output = cuda_row("NVIDIA-SMI has failed")
+        self.assertEqual(len(rows), 1, output)
+        self.assertEqual(rows[0][0], "not reported")
+        self.assertIn("MISSING", rows[0][1])
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ import unittest
 
 from model_maker import kept as K, ledger, parent
 
-from . import shapes
+from . import shapes, stand_ins
 from .test_command import made_up_job
 from .test_ledger import OwnLedger
 
@@ -165,11 +165,7 @@ class Parent(unittest.TestCase):
     def gone_soon(self, pid):
         until = time.time() + 10
         while time.time() < until:
-            try:
-                with open(f"/proc/{pid}/stat") as file:
-                    if file.read().rsplit(") ", 1)[1].startswith("Z"):
-                        return True
-            except OSError:
+            if not stand_ins.alive(pid):
                 return True
             time.sleep(0.05)
         return False
@@ -206,7 +202,7 @@ class Parent(unittest.TestCase):
 
     def gone_soon_quick(self, pid):
         time.sleep(0.2)
-        return not os.path.exists(f"/proc/{pid}")
+        return not stand_ins.alive(pid)
 
 
 @unittest.skipUnless(HAS_TORCH, "needs torch (installed by setup.sh)")

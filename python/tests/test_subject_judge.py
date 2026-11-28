@@ -15,8 +15,8 @@ from model_maker import __main__ as command, inspect_mesh, object_checks as O, p
 from . import shapes
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROMPT_CASES = os.path.join(HERE, "..", "..", "tools", "trial", "prompt-cases.toml")
-HEAD_CASES = os.path.join(HERE, "..", "..", "tools", "trial", "head-cases.toml")
+PROMPT_CASES = os.path.normpath(os.path.join(HERE, "..", "..", "tools", "trial", "prompt-cases.toml"))
+HEAD_CASES = os.path.normpath(os.path.join(HERE, "..", "..", "tools", "trial", "head-cases.toml"))
 
 
 def unit(v):

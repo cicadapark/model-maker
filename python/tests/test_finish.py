@@ -9,7 +9,7 @@ from PIL import Image
 
 from model_maker import bake, glb, mesh_tools as M, object_checks as O, pipeline, render, simplify
 
-from . import shapes
+from . import shapes, stand_ins
 
 REPOSITORY = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -427,10 +427,8 @@ class Finish(unittest.TestCase):
         folder = tempfile.mkdtemp()
         try:
             job = self.anvil_with_its_try(folder)
-            broken = os.path.join(folder, "llama-server")
-            with open(broken, "w") as file:
-                file.write("#!/bin/sh\necho cannot load the model\nexit 1\n")
-            os.chmod(broken, 0o755)
+            broken = stand_ins.program(os.path.join(folder, "llama-server"),
+                                       "import sys\nprint('cannot load the model', flush=True)\nsys.exit(1)\n")
             said = self.finish_judged(job, question_judge.Found(True, broken, broken, broken))
             self.assertEqual(sum("cannot load the model" in line for line in said), 1, said)
             self.assertIn("did not start", job.record["question_judge"]["why"])

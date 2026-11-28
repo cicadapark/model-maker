@@ -19,11 +19,15 @@ from unittest import mock
 
 from model_maker import question_judge as Q
 
+from . import stand_ins
+
 # A stand-in for llama-server: /health, and every question answered "yes" with the share in its environment.
 FAKE_SERVER = textwrap.dedent('''\
-    #!{python}
     import json, math, os, sys
     from http.server import BaseHTTPRequestHandler, HTTPServer
+    # Its own id, for the test's clean-up: on Windows it runs under a launcher (stand_ins.program).
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "stand-in.pids"), "a") as pids:
+        pids.write(f"{{os.getpid()}}\\n")
     if "--version" in sys.argv:
         print("version: 0 (a stand-in)"); sys.exit(0)
     if os.environ.get("FAKE_ARGV"):
@@ -61,16 +65,7 @@ FAKE_SERVER = textwrap.dedent('''\
             out = {{"choices": [{{"logprobs": {{"content": [{{"token": top[0]["token"], "top_logprobs": top}}]}}}}]}}
             self.send_response(200); self.end_headers(); self.wfile.write(json.dumps(out).encode())
     HTTPServer(("127.0.0.1", port), Handler).serve_forever()
-''').format(python=sys.executable)
-
-
-def alive(pid):
-    """Whether `pid` runs (a zombie, ended but not yet reaped by init, counts as gone)."""
-    try:
-        with open(f"/proc/{pid}/stat") as file:
-            return file.read().rsplit(")", 1)[1].split()[0] != "Z"
-    except OSError:
-        return False
+''').replace("{{", "{").replace("}}", "}")
 
 
 def strip(width=2880, height=360):
@@ -83,11 +78,10 @@ class Installed(unittest.TestCase):
         self.models = tempfile.mkdtemp()
 
     def install(self):
-        server = os.path.join(self.root, Q.SERVER_FOLDER, "llama-server")
-        os.makedirs(os.path.dirname(server))
-        with open(server, "w") as file:
-            file.write(FAKE_SERVER)
-        os.chmod(server, os.stat(server).st_mode | stat.S_IXUSR)
+        folder = os.path.join(self.root, Q.SERVER_FOLDER)
+        os.makedirs(folder)
+        stand_ins.program(os.path.join(folder, "llama-server"), FAKE_SERVER)
+        self.addCleanup(self.end_stand_ins, folder)
         os.makedirs(os.path.join(self.models, Q.MODEL_FOLDER))
         for name in (Q.MODEL_FILE, Q.VISION_FILE):
             open(os.path.join(self.models, Q.MODEL_FOLDER, name), "wb").close()
@@ -96,6 +90,14 @@ class Installed(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         return Q.found(self.root, self.models)
+
+    @staticmethod
+    def end_stand_ins(folder):
+        try:
+            with open(os.path.join(folder, "stand-in.pids")) as file:
+                stand_ins.end(int(line) for line in file if line.strip())
+        except OSError:
+            pass
 
     def test_missing_it_is_not_judged_and_counts_for_nothing(self):
         where = Q.found(self.root, self.models)
@@ -242,8 +244,8 @@ class Installed(unittest.TestCase):
 
     def test_a_server_that_cannot_start_leaves_nothing_running(self):
         where = self.install()
-        with open(where.server, "w") as file:
-            file.write("#!/bin/sh\necho no model here\nexit 7\n")
+        stand_ins.program(os.path.join(self.root, Q.SERVER_FOLDER, "llama-server"),
+                          "import sys\nprint('no model here', flush=True)\nsys.exit(7)\n")
         judge = Q.Judge(where, threads=1)
         with self.assertRaises(RuntimeError) as said:
             judge.start()
@@ -273,9 +275,9 @@ class Installed(unittest.TestCase):
             parent.kill()
             parent.wait()
             deadline = time.time() + 10
-            while time.time() < deadline and alive(server):
+            while time.time() < deadline and stand_ins.alive(server):
                 time.sleep(0.2)
-            self.assertFalse(alive(server), "the server outlived model-maker")
+            self.assertFalse(stand_ins.alive(server), "the server outlived model-maker")
         finally:
             parent.kill()
 
