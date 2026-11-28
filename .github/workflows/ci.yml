@@ -3,6 +3,9 @@ name: ci
 on:
   push:
   pull_request:
+  # The platform jobs (the launcher, the three systems, the parity check) run on pull requests, on main and by hand,
+  # not on every push to every branch: they take 20 to 35 minutes and, in a private repository, are billed.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -124,6 +127,302 @@ jobs:
           # shellcheck disable=SC2086
           .audit/bin/pip-audit --requirement python/requirements.lock --require-hashes --disable-pip --strict \
             --progress-spinner off --desc $ignored
+      - name: Known vulnerabilities in the other platforms' locks
+        # The same audit, the same ignore list, for each lock in python/locks/ as pip-audit can read it: a PyTorch build
+        # the lock names by its file is looked up as the release it is built from (tools/ci/locks.py audit-view).
+        run: |
+          ignored=$(python3 -I -c 'import sys, tomllib
+          for entry in tomllib.load(open(sys.argv[1], "rb"))["ignore"]:
+              print("--ignore-vuln", entry["id"])' tools/ci/pip-audit-ignore.toml)
+          for lock in python/locks/*.lock; do
+            name=$(basename "$lock" .lock)
+            echo "$name:"
+            .audit/bin/python -I tools/ci/locks.py audit-view "$name" > "$RUNNER_TEMP/$name.txt"
+            # shellcheck disable=SC2086
+            .audit/bin/pip-audit --requirement "$RUNNER_TEMP/$name.txt" --require-hashes --disable-pip --strict \
+              --progress-spinner off --desc $ignored
+          done
+
+  locks:
+    name: per-platform locks (made again, a wheel for each platform, every bundled library's licence)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: uv, the release and sum setup.sh pins
+        run: |
+          version=$(sed -nE 's/^readonly UV_VERSION=([0-9.]+).*/\1/p' setup.sh)
+          sum=$(sed -nE 's/^readonly UV_SHA256_X86_64=([0-9a-f]{64}).*/\1/p' setup.sh)
+          curl --fail --silent --show-error --location --retry 3 --output "$RUNNER_TEMP/uv.tar.gz" \
+            "https://github.com/astral-sh/uv/releases/download/$version/uv-x86_64-unknown-linux-gnu.tar.gz"
+          sha256sum --check --strict <<< "$sum  $RUNNER_TEMP/uv.tar.gz"
+          mkdir "$RUNNER_TEMP/uv"
+          tar -xzf "$RUNNER_TEMP/uv.tar.gz" -C "$RUNNER_TEMP/uv" --strip-components=1
+          echo "UV=$RUNNER_TEMP/uv/uv" >> "$GITHUB_ENV"
+      - name: packaging (wheel tags), from the measured lock
+        run: |
+          python -m venv .venv
+          python3 -I -c 'import re, sys
+          names = set(sys.argv[2:])
+          blocks = re.split(r"\n(?=\S)", open(sys.argv[1]).read())
+          print("\n".join(b for b in blocks if b.split("==")[0] in names))' python/requirements.lock packaging \
+            > "$RUNNER_TEMP/packaging.txt"
+          .venv/bin/pip install --quiet --no-deps --require-hashes --only-binary :all: -r "$RUNNER_TEMP/packaging.txt"
+      - name: The lock tool's own tests (none may skip here)
+        run: |
+          status=0
+          .venv/bin/python -I -m unittest discover -v -s tools -p test_locks.py > "$RUNNER_TEMP/locks.log" 2>&1 || status=$?
+          cat "$RUNNER_TEMP/locks.log"
+          if grep -E ' \.\.\. skipped ' "$RUNNER_TEMP/locks.log"; then
+            echo "the lock tool's tests must run here, not skip"
+            exit 1
+          fi
+          exit "$status"
+      - name: Each lock is what its recipe makes today, with a wheel for its platform for every package
+        run: .venv/bin/python -I tools/ci/locks.py check
+      - name: Every shared library the locks' wheels bundle, judged as setup judges an environment
+        # Read from each wheel's own zip directory and metadata (ranged requests; nothing installed), with
+        # python/model_maker/check_licences.py's tables for the wheel's system.
+        run: .venv/bin/python -I tools/ci/locks.py licences --list
+
+  platforms:
+    name: "${{ matrix.system }}: installed by the launcher, licence check, unit tests, tiny-model smoke test (processor)"
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
+    # GitHub's free machines have no usable card (a Mac's Metal device there is virtual), so everything here runs on
+    # the processor (MODEL_MAKER_DEVICE=cpu): it proves the install, the imports, the processes and each stage's code
+    # path on each system, never memory on a card or an object's quality (docs/setup.md, "Platforms").
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: Linux x86_64
+            os: ubuntu-latest
+            lock: linux-x86_64-cpu
+          - system: Windows x86_64
+            os: windows-latest
+            lock: windows-x86_64-cuda128
+          - system: macOS arm64
+            os: macos-latest
+            lock: macos-arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      MODEL_MAKER_DEVICE: cpu
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: The launcher and model-maker-simplify (the Rust tool the shape stage runs)
+        # rust-toolchain.toml pins the version; the runner's rustup installs it on first use.
+        run: |
+          rustup show active-toolchain
+          cargo build --locked -p model-maker-launcher -p model-maker-simplify
+          tool="$PWD/target/debug/model-maker-simplify"
+          if [ "$RUNNER_OS" = Windows ]; then tool=$(cygpath --windows "$tool.exe"); fi
+          echo "MODEL_MAKER_SIMPLIFY=$tool" >> "$GITHUB_ENV"
+      - name: "Installed by the launcher: uv, Python (its sums), python/locks/${{ matrix.lock }}.lock (every wheel's sha256)"
+        # As a person installs it (`model-maker setup`), without the models and with no card required.
+        run: |
+          target/debug/model-maker setup --lock "${{ matrix.lock }}" --processor-only --skip-models --skip-tests --yes
+          if [ "$RUNNER_OS" = Windows ]; then python=.venv/Scripts/python.exe; else python=.venv/bin/python; fi
+          echo "PY=$PWD/$python" >> "$GITHUB_ENV"
+          "$python" -I -c 'import platform, torch; print(platform.platform(), "PyTorch", torch.__version__)'
+      - name: "`model-maker check` on this system (a runner has no card and too little disk for the models: shown only)"
+        run: target/debug/model-maker check --processor-only || true
+      - name: Licence check of the installed environment (as setup runs it)
+        run: '"$PY" -I python/model_maker/check_licences.py --list'
+      - name: Unit tests (no card, no model files)
+        # The same tests as the Linux job's `unittest discover`, each module in a process of its own, as many at once
+        # as the machine has processors (tools/ci/run_tests.py): every skipped test is listed with its reason.
+        run: '"$PY" -I tools/ci/run_tests.py'
+      - name: Tiny-model smoke test (one object through every stage, tiny random models, on the processor)
+        # Downloads only BiRefNet's code (checked by the registry's sums) and MV-Adapter's at the registry's commit.
+        run: '"$PY" -I setup/tiny_smoke.py'
+
+  launcher:
+    name: "${{ matrix.system }}: the launcher built, tested, its children's ends, the release archive"
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - system: linux-x86_64
+            os: ubuntu-latest
+          - system: windows-x86_64
+            os: windows-latest
+            # The C runtime linked in: no Visual C++ redistributable needed for the launcher itself. Only this MSVC
+            # build is released.
+            rustflags: -C target-feature=+crt-static
+          - system: macos-arm64
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    # Builds and runs third-party code (build scripts, cargo-about, the tests): read-only, it signs nothing. The
+    # archives' provenance is the `provenance` job's.
+    defaults:
+      run:
+        shell: bash
+    env:
+      RUSTFLAGS: ${{ matrix.rustflags }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - name: Build (release)
+        run: |
+          rustup show active-toolchain
+          cargo build --release --locked -p model-maker-launcher -p model-maker-simplify -p model-maker-companion
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        if: runner.os == 'Windows'
+        with:
+          python-version: "3.11"
+      - name: Tests, and the two that fetch (a pinned file over TLS; this system's llama.cpp archive)
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            # The window's Cancel through the release's own model-maker.exe, with a Python that starts a grandchild
+            # (crates/model-maker-companion/src/make.rs, cancel_on_windows).
+            export COMPANION_TEST_LAUNCHER="$(cygpath --windows "$PWD/target/release/model-maker.exe")"
+            export COMPANION_TEST_PYTHON="$(python -c 'import sys; print(sys.executable)')"
+          fi
+          COMPANION_REQUIRE_FONT=1 cargo test --locked -p model-maker-launcher -p model-maker-companion
+          cargo test --locked -p model-maker-launcher -- --ignored
+      - name: clippy for this system
+        run: cargo clippy --locked -p model-maker-launcher -p model-maker-companion --all-targets -- -D warnings
+      - name: From a folder whose path has a space and a non-ASCII letter
+        run: |
+          suffix=""; temp="$RUNNER_TEMP"
+          # Git's bash and its tar take /d/... paths, not D:\...
+          if [ "$RUNNER_OS" = Windows ]; then suffix=.exe; temp=$(cygpath --unix "$RUNNER_TEMP"); fi
+          folder="$temp/model maker ä"
+          mkdir -p "$folder"
+          git archive --format=tar HEAD | tar -x -C "$folder"
+          cp "target/release/model-maker$suffix" "target/release/model-maker-simplify$suffix" "$folder/"
+          "$folder/model-maker$suffix" --version
+          set +e
+          "$folder/model-maker$suffix" check --processor-only | tee "$RUNNER_TEMP/check.txt"
+          set -e
+          grep -q "^Platform" "$RUNNER_TEMP/check.txt"
+          grep -q "model-maker-simplify   found" "$RUNNER_TEMP/check.txt"
+      - name: "Windows: everything the launcher starts ends with it (hard kill, Ctrl+C, the console closed, a grandchild)"
+        if: runner.os == 'Windows'
+        run: |
+          python -m venv "$RUNNER_TEMP/venv"
+          python -I tools/ci/launcher_ends.py target/release/model-maker.exe "$RUNNER_TEMP/venv/Scripts/python.exe"
+      - name: The third-party licence file (cargo-about, pinned)
+        run: |
+          cargo install cargo-about --version 0.9.3 --features cli --locked
+          cargo about generate --locked -c crates/model-maker-launcher/about/about.toml \
+            --manifest-path crates/model-maker-launcher/Cargo.toml --workspace \
+            crates/model-maker-launcher/about/licences.hbs -o "$RUNNER_TEMP/THIRD-PARTY-LICENCES.md"
+      - name: The release archive (not published here)
+        run: |
+          suffix=""; if [ "$RUNNER_OS" = Windows ]; then suffix=.exe; fi
+          version=$(sed -nE 's/^version = "([0-9.]+)"/\1/p' Cargo.toml | head -n 1)
+          python3 -I tools/ci/release_archive.py "${{ matrix.system }}" "$version" "target/release/model-maker$suffix" \
+            "target/release/model-maker-simplify$suffix" "$RUNNER_TEMP/THIRD-PARTY-LICENCES.md" release \
+            --companion "target/release/model-maker-companion$suffix"
+      - name: "Windows: install.ps1 installs the archive into a folder of the user's, and refuses a wrong sum"
+        # The archive and a sums file served on this machine only (the real addresses are https; the tool refuses
+        # anything else outside --test). Nothing in the script asks for administrator rights. The sums file has no
+        # extension, so it is served as application/octet-stream, as a release asset is (not as text).
+        if: runner.os == 'Windows'
+        run: |
+          version=$(sed -nE 's/^version = "([0-9.]+)"/\1/p' Cargo.toml | head -n 1)
+          archive=$(ls release/*-unsigned.zip)
+          name=$(basename "$archive")
+          serve="$RUNNER_TEMP/serve"
+          mkdir -p "$serve"
+          cp "$archive" "$serve/"
+          cp "$archive.sha256" "$serve/SHA256SUMS"
+          python -I -m http.server 8765 --bind 127.0.0.1 --directory "$serve" > "$RUNNER_TEMP/serve.log" 2>&1 &
+          server=$!
+          trap 'kill $server' EXIT
+          python -I tools/ci/install_script.py "$version" "$archive" "http://127.0.0.1:8765/$name" \
+            http://127.0.0.1:8765/SHA256SUMS "$RUNNER_TEMP/install.ps1" --test
+          script=$(cygpath --windows "$RUNNER_TEMP/install.ps1")
+          home="$RUNNER_TEMP/home"
+          MODEL_MAKER_HOME=$(cygpath --windows "$home") powershell -NoProfile -ExecutionPolicy Bypass -File "$script"
+          "$home/model-maker-$version/model-maker.exe" --version
+          # Run again: an existing install (it may hold the models) is refused, never replaced.
+          if MODEL_MAKER_HOME=$(cygpath --windows "$home") powershell -NoProfile -ExecutionPolicy Bypass -File "$script"; then
+            echo "an existing install was replaced"; exit 1
+          fi
+          # The documentation page's sum differs: refused before the download, nothing installed.
+          echo "$(printf '0%.0s' {1..64})  $name" > "$serve/SHA256SUMS"
+          if MODEL_MAKER_HOME=$(cygpath --windows "$RUNNER_TEMP/home2") powershell -NoProfile -ExecutionPolicy Bypass -File "$script"; then
+            echo "a wrong sum was accepted"; exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/home2/model-maker-$version"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: model-maker-${{ matrix.system }}-unsigned
+          path: release/
+          if-no-files-found: error
+
+  provenance:
+    name: build provenance of the release archives (checks out nothing, builds nothing)
+    needs: launcher
+    # Ties each archive to this commit and workflow (free for a public repository); not on pull requests. Only this
+    # job may sign, and it runs no code from the repository or its dependencies.
+    if: >-
+      (github.event_name != 'push' || github.ref == 'refs/heads/main')
+      && github.event_name != 'pull_request' && !github.event.repository.private
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          pattern: model-maker-*-unsigned
+          path: release
+          merge-multiple: true
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: release/*-unsigned.*
+
+  parity:
+    name: "Linux: the launcher sets a repository up exactly as setup.sh does"
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+      - name: Room for two installs of the measured lock, one after the other
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h .
+      - name: setup.sh, the measured path (without the models and the self-test)
+        # A runner has no card, 16 GB of memory and little disk: stand-ins answer setup.sh's PC checks only
+        # (nvidia-smi, the memory file it reads, df). What it installs is not touched by them.
+        run: |
+          mkdir "$RUNNER_TEMP/stand-ins"
+          printf '#!/bin/sh\ncase "$*" in *query-gpu*) echo "Stand-in card, 16384";; *) echo "CUDA Version: 12.8";; esac\n' \
+            > "$RUNNER_TEMP/stand-ins/nvidia-smi"
+          printf '#!/bin/sh\necho "Filesystem 1024-blocks Used Available Capacity Mounted"\necho "x 1 1 999999999 1%% /"\n' \
+            > "$RUNNER_TEMP/stand-ins/df"
+          chmod +x "$RUNNER_TEMP/stand-ins/"*
+          printf 'MemTotal:       33554432 kB\n' > "$RUNNER_TEMP/meminfo"
+          PATH="$RUNNER_TEMP/stand-ins:$PATH" SETUP_MEMINFO="$RUNNER_TEMP/meminfo" ./setup.sh --skip-models --skip-tests --yes
+          python3 -I tools/ci/parity.py manifest . > "$RUNNER_TEMP/setup-sh.json"
+          rm -rf .venv .tools target
+      - name: The launcher, the same folder (its own checks; no card required)
+        run: |
+          CARGO_TARGET_DIR="$RUNNER_TEMP/launcher-build" cargo build --release --locked -p model-maker-launcher
+          mkdir bin
+          cp "$RUNNER_TEMP/launcher-build/release/model-maker" bin/
+          bin/model-maker setup --processor-only --skip-models --skip-tests --yes
+          rm -rf bin
+          python3 -I tools/ci/parity.py manifest . > "$RUNNER_TEMP/launcher.json"
+      - name: The same files (only tools/ci/parity-exclusions.txt's, each with why, left out)
+        run: python3 -I tools/ci/parity.py compare "$RUNNER_TEMP/setup-sh.json" "$RUNNER_TEMP/launcher.json"
 
   setup-check:
     name: setup.sh --check-only (runs; a runner has no GPU, so it reports that)
