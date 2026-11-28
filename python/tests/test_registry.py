@@ -1,11 +1,18 @@
+import contextlib
 import hashlib
+import io
+import json
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 from model_maker import pipeline, registry
+
+FETCH_MODELS = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "setup", "fetch_models.py"))
 
 # Files Python or torch would run that a model folder must not hold unlisted: an extension module is imported before
 # the source of the same name (cutout.py imports `birefnet` from its folder), bytecode runs outside `__pycache__` too,
@@ -25,6 +32,16 @@ def planted(folder, name, text="print('planted')\n"):
         file.write(text)
     return path
 
+
+
+def removed_tree(folder):
+    """`folder` removed. Git keeps its objects read-only, and Windows refuses to delete a read-only file until it is
+    made writable."""
+    def writable_then_again(function, path, _):
+        os.chmod(path, stat.S_IWRITE)
+        function(path)
+
+    shutil.rmtree(folder, onerror=writable_then_again)
 
 class TheRegistry(unittest.TestCase):
     def test_every_model_the_pipeline_names_is_listed_with_a_licence_and_its_files(self):
@@ -161,7 +178,9 @@ class TheSumCheck(unittest.TestCase):
         with self.assertRaisesRegex(registry.RefusedFile, "code or a pickle the registry does not list"):
             registry.refuse_unlisted("m", linked, self.registry)
 
-    @unittest.skipIf(os.geteuid() == 0, "the superuser reads every folder")
+    # os.geteuid exists only on Linux and macOS: asked on Windows, it would stop this whole module from importing.
+    @unittest.skipIf(os.name == "nt", "Windows' chmod sets only the read-only flag: a folder cannot be made unlistable")
+    @unittest.skipIf(os.name != "nt" and os.geteuid() == 0, "the superuser reads every folder")
     def test_a_folder_the_check_cannot_read_is_refused(self):
         # A folder that can be entered but not listed: a file in it can still be imported by its name.
         hidden = os.path.join(self.folder, "hidden")
@@ -275,7 +294,7 @@ class TheCodeCheck(unittest.TestCase):
                        'folder = "code" }\nparts = []\n')
 
     def tearDown(self):
-        shutil.rmtree(self.work)
+        removed_tree(self.work)
 
     def git(self, *args):
         return subprocess.run(["git", "-C", self.folder, *args], check=True, capture_output=True, text=True).stdout
@@ -307,9 +326,24 @@ class TheCodeCheck(unittest.TestCase):
             registry.verify_checkout("m", self.folder, self.registry)
 
     def test_a_folder_that_is_not_a_checkout_is_refused(self):
-        shutil.rmtree(os.path.join(self.folder, ".git"))
+        removed_tree(os.path.join(self.folder, ".git"))
         with self.assertRaisesRegex(registry.RefusedFile, "not a git checkout"):
             registry.verify_checkout("m", self.folder, self.registry)
+
+    def test_on_windows_a_files_executable_bit_is_not_compared_its_content_is(self):
+        # A checkout made on Linux and read on Windows (the test of 26 November 2026: 8 files 100755 -> 100644).
+        self.git("config", "core.filemode", "true")
+        os.chmod(os.path.join(self.folder, "package", "__init__.py"), 0o755)
+        with self.subTest("on Linux the bit is compared"):
+            if os.name == "nt":
+                self.skipTest("Windows' chmod sets no executable bit, so there is no changed bit to see")
+            with self.assertRaisesRegex(registry.RefusedFile, "changed"):
+                registry.verify_checkout("m", self.folder, self.registry, platform="linux")
+        registry.verify_checkout("m", self.folder, self.registry, platform="win32")
+        with open(os.path.join(self.folder, "package", "__init__.py"), "a") as file:
+            file.write("import os\n")
+        with self.assertRaisesRegex(registry.RefusedFile, "changed"):
+            registry.verify_checkout("m", self.folder, self.registry, platform="win32")
 
 
 class NoTripoSGCode(unittest.TestCase):
@@ -321,8 +355,7 @@ class NoTripoSGCode(unittest.TestCase):
         import importlib.util
 
         self.work = tempfile.mkdtemp()
-        spec = importlib.util.spec_from_file_location(
-            "fetch_models", os.path.join(os.path.dirname(__file__), "..", "..", "setup", "fetch_models.py"))
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
         self.fetch = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.fetch)
 
@@ -395,8 +428,7 @@ class OptionalParts(unittest.TestCase):
     def test_an_optional_parts_problems_are_said_and_set_aside(self):
         import importlib.util
 
-        spec = importlib.util.spec_from_file_location(
-            "fetch_models", os.path.join(os.path.dirname(__file__), "..", "..", "setup", "fetch_models.py"))
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
         fetch = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(fetch)
         problems = []
@@ -408,3 +440,247 @@ class OptionalParts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SystemTrust(unittest.TestCase):
+    """On Windows setup's downloads are checked by Windows' own verifier (truststore): Python's OpenSSL cannot make a
+    fresh Windows fetch a root it does not hold yet. Elsewhere nothing changes."""
+
+    def setUp(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
+        self.fetch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.fetch)
+
+    def test_not_on_linux_or_macos(self):
+        def no_import(name):
+            raise AssertionError(f"{name} imported")
+
+        for platform in ("linux", "darwin"):
+            self.assertFalse(self.fetch.system_trust(platform, no_import))
+
+    def test_on_windows_truststore_once(self):
+        calls = []
+
+        class Truststore:
+            @staticmethod
+            def inject_into_ssl():
+                calls.append("inject")
+
+        self.assertTrue(self.fetch.system_trust("win32", lambda name: Truststore))
+        self.assertTrue(self.fetch.system_trust("win32", lambda name: Truststore))
+        self.assertEqual(calls, ["inject"])
+
+    def test_on_windows_without_truststore_it_says_so(self):
+        def missing(name):
+            raise ImportError(name)
+
+        with self.assertRaises(self.fetch.Failed) as said:
+            self.fetch.system_trust("win32", missing)
+        self.assertIn("Windows lock", str(said.exception))
+
+    def test_every_download_goes_through_it(self):
+        import inspect
+
+        self.assertIn("system_trust()", inspect.getsource(self.fetch.opened))
+
+    def test_truststore_is_in_the_windows_lock_only(self):
+        repository = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        for lock, wanted in (("python/locks/windows-x86_64-cuda128.lock", True), ("python/requirements.lock", False),
+                             ("python/locks/macos-arm64.lock", False), ("python/locks/linux-x86_64-cpu.lock", False)):
+            with open(os.path.join(repository, lock)) as file:
+                self.assertEqual("\ntruststore==" in file.read(), wanted, lock)
+
+
+class AGatedModelWithoutAToken(unittest.TestCase):
+    """The hub token is for downloading only. The Windows card test of 28 Nov 2026: FLUX.1 [schnell] was complete on a
+    read-only models share (the make had just used it), and setup still stopped on "flux1-schnell: no hub token"."""
+
+    WEIGHTS = b"flux weights"
+
+    def setUp(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
+        self.fetch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.fetch)
+        self.work = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.work)
+        self.models = os.path.join(self.work, "models")
+        flux = next(m for m in self.fetch.models() if m["id"] == "flux1-schnell")
+        self.assertTrue(flux.get("gated"))
+        url = flux["parts"][0]["url"]
+        self.entry = {**flux, "parts": [{"url": url, "sha256": hashlib.sha256(self.WEIGHTS).hexdigest(), "size_mb": 1}]}
+        self.file = self.fetch.fetched_parts(self.entry, self.models)[0][1]
+
+    def run_setup(self):
+        def no_network(*_):
+            raise AssertionError("the hub was asked")
+
+        output = io.StringIO()
+        argv = ["fetch_models.py", "--models", self.models, "--sources", os.path.join(self.work, "sources"), "--yes",
+                "--only", "flux1-schnell"]
+        with mock.patch.object(self.fetch, "models", lambda: [self.entry]), \
+                mock.patch.object(self.fetch, "read_token", lambda _: None), \
+                mock.patch.object(self.fetch, "opened", no_network), \
+                mock.patch.object(self.fetch.sys, "argv", argv), contextlib.redirect_stdout(output):
+            code = self.fetch.main()
+        return code, output.getvalue()
+
+    def placed(self, data):
+        os.makedirs(os.path.dirname(self.file), exist_ok=True)
+        with open(self.file, "wb") as file:
+            file.write(data)
+
+    def test_every_file_already_there_needs_no_token(self):
+        self.placed(self.WEIGHTS)
+        code, said = self.run_setup()
+        self.assertEqual(code, 0, said)
+        self.assertNotIn("PROBLEM", said)
+        self.assertNotIn("no token was given", said)
+        self.assertIn("every file already here with the registry's sum (no hub token needed)", said)
+
+    def test_a_read_only_answer_record_fails_nothing(self):
+        # A directory in the place of .accepted: it can be neither read nor written (also when the test runs as root).
+        self.placed(self.WEIGHTS)
+        os.makedirs(os.path.join(self.models, ".accepted"))
+        code, said = self.run_setup()
+        self.assertEqual(code, 0, said)
+        self.assertIn(".accepted cannot be written: the answer is not kept", said)
+
+    def test_a_missing_or_changed_file_without_a_token_says_what_to_do(self):
+        for data in (None, b"something else"):
+            with self.subTest(data=data):
+                if data is None:
+                    shutil.rmtree(self.models, ignore_errors=True)
+                else:
+                    self.placed(data)
+                code, said = self.run_setup()
+                self.assertEqual(code, 1, said)
+                self.assertIn("1 of its 1 files are not here with the registry's sum", said)
+                self.assertIn("--hf-token-file (see 'A gated model' in docs/setup.md)", said)
+                self.assertIn("PROBLEM: flux1-schnell: no hub token, and 1 of its files are not here", said)
+                if data is not None:
+                    self.assertTrue(os.path.exists(self.file), "a changed file is not removed without a token")
+
+
+class ALicenceTextSetupCarries(unittest.TestCase):
+    """A licence's whole text (SDXL's) comes from the copy in setup/licences/, never from the internet when that copy
+    is there: the Windows card test (28 Nov 2026) ran without internet, on a read-only models share."""
+
+    WEIGHTS = b"sdxl weights"
+
+    def setUp(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
+        self.fetch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.fetch)
+        self.work = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.work)
+        self.models = os.path.join(self.work, "models")
+        sdxl = next(m for m in self.fetch.models() if m["id"] == "sdxl-base-1.0")
+        part = {"url": sdxl["parts"][0]["url"], "sha256": hashlib.sha256(self.WEIGHTS).hexdigest(), "size_mb": 1}
+        self.entry = {**sdxl, "parts": [part]}
+        path = self.fetch.fetched_parts(self.entry, self.models)[0][1]
+        os.makedirs(os.path.dirname(path))
+        with open(path, "wb") as file:
+            file.write(self.WEIGHTS)
+
+    def run_setup(self, opened):
+        output = io.StringIO()
+        argv = ["fetch_models.py", "--models", self.models, "--sources", os.path.join(self.work, "sources"), "--yes",
+                "--only", "sdxl-base-1.0"]
+        with mock.patch.object(self.fetch, "models", lambda: [self.entry]), \
+                mock.patch.object(self.fetch, "read_token", lambda _: None), \
+                mock.patch.object(self.fetch, "opened", opened), \
+                mock.patch.object(self.fetch.sys, "argv", argv), contextlib.redirect_stdout(output):
+            code = self.fetch.main()
+        return code, output.getvalue()
+
+    def test_every_licence_text_of_the_registry_is_carried_with_its_sum(self):
+        for entry in self.fetch.models():
+            if entry.get("licence_text"):
+                copy = os.path.join(self.fetch.LICENCE_TEXTS, f"{entry['id']}-LICENSE.md")
+                self.assertEqual(self.fetch.sha256_of(copy).hexdigest(), entry["licence_text"]["sha256"], copy)
+
+    def test_offline_on_a_read_only_share_with_no_earlier_answer_the_carried_copy_is_shown(self):
+        def offline(*_):
+            raise AssertionError("the internet was asked")
+
+        # Read-only stand-ins (also when the test runs as root): no .accepted can be read or written, no licence
+        # folder can be made in the models folder.
+        os.makedirs(os.path.join(self.models, ".accepted"))
+        with open(os.path.join(self.models, self.fetch.LICENCE_FOLDER), "w") as file:
+            file.write("not a folder")
+        code, said = self.run_setup(offline)
+        self.assertEqual(code, 0, said)
+        copy = os.path.join(self.fetch.LICENCE_TEXTS, "sdxl-base-1.0-LICENSE.md")
+        self.assertIn(f"Read its whole text before you answer: {copy} (checked against the registry's sum)",
+                      " ".join(said.split()))
+
+    def test_only_with_no_copy_anywhere_it_is_fetched_and_kept_with_its_sum(self):
+        with open(os.path.join(self.fetch.LICENCE_TEXTS, "sdxl-base-1.0-LICENSE.md"), "rb") as file:
+            text = file.read()
+        asked = []
+
+        def hub(url, token, start=0):
+            asked.append(url)
+            return io.BytesIO(text)
+
+        with mock.patch.object(self.fetch, "LICENCE_TEXTS", os.path.join(self.work, "no-copies")):
+            code, said = self.run_setup(hub)
+        self.assertEqual(code, 0, said)
+        self.assertEqual(asked, [self.entry["licence_text"]["url"]])
+        kept = os.path.join(self.models, self.fetch.LICENCE_FOLDER, "sdxl-base-1.0-LICENSE.md")
+        self.assertEqual(self.fetch.sha256_of(kept).hexdigest(), self.entry["licence_text"]["sha256"])
+
+
+class TheVerifiedCache(unittest.TestCase):
+    """models/.verified, the stamps of files whose sums passed: keyed inside the models folder, so a folder moved or
+    shared with another computer still matches; a models folder that cannot be written (shared read-only, as in the
+    Windows test of 26 November 2026) is checked without it instead of stopping setup."""
+
+    def setUp(self):
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("fetch_models", FETCH_MODELS)
+        self.fetch = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.fetch)
+        self.work = tempfile.mkdtemp()
+        self.models = os.path.join(self.work, "models")
+        self.file = os.path.join(self.models, "flux", "model.bin")
+        os.makedirs(os.path.dirname(self.file))
+        with open(self.file, "wb") as file:
+            file.write(b"weights")
+        self.sha256 = hashlib.sha256(b"weights").hexdigest()
+
+    def tearDown(self):
+        shutil.rmtree(self.work)
+
+    def checked(self, models):
+        verified = self.fetch.Verified(models)
+        path = os.path.join(models, "flux", "model.bin")
+        return verified, self.fetch.checked_or_fetched([("u", path, self.sha256, 1)], None, verified, verify_only=True)
+
+    def test_keyed_inside_the_models_folder_so_a_moved_folder_still_matches(self):
+        self.assertEqual(self.checked(self.models)[1], [])
+        with open(os.path.join(self.models, ".verified")) as file:
+            self.assertEqual(list(json.load(file)), ["flux/model.bin"])
+        moved = os.path.join(self.work, "elsewhere")
+        shutil.copytree(self.models, moved)
+        self.assertTrue(self.fetch.Verified(moved).holds(os.path.join(moved, "flux", "model.bin"), self.sha256))
+
+    def test_a_folder_that_cannot_be_written_is_checked_without_it(self):
+        # Something that cannot be written in the place of the cache's new copy (so also when the test runs as root).
+        os.makedirs(os.path.join(self.models, ".verified.new"))
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            verified, problems = self.checked(self.models)
+            verified.add(self.file, self.sha256)
+        self.assertEqual(problems, [])
+        self.assertFalse(verified.writable)
+        self.assertFalse(os.path.exists(os.path.join(self.models, ".verified")))
+        self.assertEqual(output.getvalue().count("going on without it"), 1, output.getvalue())
+        self.assertTrue(verified.holds(self.file, self.sha256))

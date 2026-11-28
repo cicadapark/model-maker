@@ -23,6 +23,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import textwrap
 import threading
 import time
@@ -58,7 +59,10 @@ def say(text=""):
 
 
 def wrapped(text, indent="  "):
-    return textwrap.fill(text, width=100, initial_indent=indent, subsequent_indent=indent)
+    # Never inside a word or at a hyphen: a path or an address said here must stay whole to be copied (a long
+    # folder's licence path was cut at "sdxl-").
+    return textwrap.fill(text, width=100, initial_indent=indent, subsequent_indent=indent, break_long_words=False,
+                         break_on_hyphens=False)
 
 
 def human(size):
@@ -121,7 +125,31 @@ def read_token(token_file):
 # Downloads
 
 
+# On Windows the certificates are checked by Windows' own verifier (truststore, MIT, in the Windows lock only): Python's
+# OpenSSL reads Windows' root store but cannot make Windows fetch a root it does not hold yet, which a fresh Windows
+# often does not (the model hub's root was missing on a fresh Windows 11; Windows' verifier fetched it on demand).
+_SYSTEM_TRUST = []
+
+
+def system_trust(platform=sys.platform, importer=None):
+    """Hands TLS checks to the operating system's verifier where that is needed (Windows), once. True if it did."""
+    if platform != "win32":
+        return False
+    if not _SYSTEM_TRUST:
+        import importlib
+
+        try:
+            truststore = (importer or importlib.import_module)("truststore")
+        except ImportError as error:
+            raise Failed("truststore is missing from this environment (it is in the Windows lock): run setup again"
+                         ) from error
+        truststore.inject_into_ssl()
+        _SYSTEM_TRUST.append(truststore)
+    return True
+
+
 def opened(url, token, start=0):
+    system_trust()
     request = urllib.request.Request(url, headers={"User-Agent": "model-maker-setup/1"})
     if start:
         request.add_header("Range", f"bytes={start}-")
@@ -189,16 +217,23 @@ def downloaded(url, path, sha256, token, progress):
 
 
 class Verified:
-    """models/.verified: each file's size and time when its sum last passed, so it is not read again for nothing."""
+    """models/.verified: each file's size and time when its sum last passed, so it is not read again for nothing.
+    Keyed by the file's path inside the models folder (with /), so a folder moved or shared with another computer or
+    system still matches. A models folder that cannot be written (shared read-only) has no cache: every file is read."""
 
     def __init__(self, models_dir):
+        self.models_dir = models_dir
         self.path = os.path.join(models_dir, ".verified")
         self.lock = threading.Lock()
+        self.writable = True
         try:
             with open(self.path) as file:
                 self.known = json.load(file)
         except (OSError, ValueError):
             self.known = {}
+
+    def key(self, path):
+        return os.path.relpath(path, self.models_dir).replace(os.sep, "/")
 
     @staticmethod
     def stamp(path, sha256):
@@ -206,15 +241,22 @@ class Verified:
         return [info.st_size, int(info.st_mtime), sha256]
 
     def holds(self, path, sha256):
-        return os.path.exists(path) and self.known.get(path) == self.stamp(path, sha256)
+        return os.path.exists(path) and self.known.get(self.key(path)) == self.stamp(path, sha256)
 
     def add(self, path, sha256):
         with self.lock:
-            self.known[path] = self.stamp(path, sha256)
-            os.makedirs(os.path.dirname(self.path), exist_ok=True)
-            with open(self.path + ".new", "w") as file:
-                json.dump(self.known, file, indent=0)
-            os.replace(self.path + ".new", self.path)
+            self.known[self.key(path)] = self.stamp(path, sha256)
+            if not self.writable:
+                return
+            try:
+                os.makedirs(self.models_dir, exist_ok=True)
+                with open(self.path + ".new", "w") as file:
+                    json.dump(self.known, file, indent=0)
+                os.replace(self.path + ".new", self.path)
+            except OSError as error:
+                self.writable = False
+                say(f"  {self.path} cannot be written ({error.strerror or error}): going on without it (each file "
+                    "is read again on the next run)")
 
 
 def optional_or_not(entry, found, problems):
@@ -341,13 +383,32 @@ def _removed(folder, source):
 
 
 def licence_text(entry, token):
-    """A licence's full text from the hub at the pinned revision, checked against its sum."""
+    """A licence's full text from the hub at the pinned revision, checked against its sum: its bytes as fetched."""
     text = entry["licence_text"]
     with opened(text["url"], token) as reply:
         data = reply.read()
     if hashlib.sha256(data).hexdigest() != text["sha256"]:
         raise Failed(f"{text['url']}: the licence text's sha256 is not the registry's")
-    return data.decode("utf-8", "replace")
+    return data
+
+
+def licence_file(entry, token, models_dir):
+    """A licence's whole text as a file, checked against the registry's sum: the copy model-maker carries
+    (setup/licences/<id>-LICENSE.md), else one kept in the models folder by an earlier run; only when neither is
+    there, fetched from the hub at its pinned revision and kept (in the models folder, or a folder of this run's own
+    when that is read-only). So setup never needs the internet for a text it carries (the Windows card test, 28 Nov
+    2026: no internet, a read-only models share)."""
+    name = f"{entry['id']}-LICENSE.md"
+    kept = os.path.join(models_dir, LICENCE_FOLDER, name)
+    for path in (os.path.join(LICENCE_TEXTS, name), kept):
+        if os.path.isfile(path) and sha256_of(path).hexdigest() == entry["licence_text"]["sha256"]:
+            return path
+    text = licence_text(entry, token)
+    if not written(kept, text):
+        kept = os.path.join(tempfile.mkdtemp(prefix="model-maker-licence-"), name)
+        with open(kept, "wb") as file:
+            file.write(text)
+    return kept
 
 
 def short_name(entry):
@@ -364,7 +425,7 @@ def shown(entry, size, token, models_dir):
     say(f"  Version:  {entry['version']}")
     say(f"  Licence:  {entry['licence']}   {entry['licence_url']}")
     say(textwrap.fill(entry.get("conditions", ""), width=100, initial_indent="  Terms:    ",
-                      subsequent_indent="            "))
+                      subsequent_indent="            ", break_long_words=False, break_on_hyphens=False))
     if entry.get("source"):
         source = entry["source"]
         say(f"  Its code: {source['url']} at {source['commit'][:12]} ({source['licence']})")
@@ -372,11 +433,8 @@ def shown(entry, size, token, models_dir):
         say(f"  The hub hands it out only to a signed-in account that has accepted its terms on "
             f"https://{HUB}/{next(iter(entry['folders']))}")
     if entry.get("licence_text"):
-        # The whole text is long (SDXL's: 113 lines): written to a file to read, not scrolled past.
-        kept = os.path.join(models_dir, LICENCE_FOLDER, f"{entry['id']}-LICENSE.md")
-        os.makedirs(os.path.dirname(kept), exist_ok=True)
-        with open(kept, "w") as file:
-            file.write(licence_text(entry, token))
+        # The whole text is long (SDXL's: 113 lines): a file to read, not scrolled past.
+        kept = licence_file(entry, token, models_dir)
         say()
         say(wrapped(f"Its licence carries use restrictions that pass on to everything made with it. Read its whole "
                     f"text before you answer: {kept} (checked against the registry's sum), also at "
@@ -386,6 +444,21 @@ def shown(entry, size, token, models_dir):
         if local:
             say(f"  The {entry['licence']} text: {os.path.relpath(local, REPOSITORY)} in model-maker's folder "
                 f"({REPOSITORY})")
+
+
+def written(path, text):
+    """`text` (bytes, or text written as UTF-8) written to `path` (its folder made); False when the folder cannot be
+    written (a read-only share)."""
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        # Bytes as they are, so a licence text kept on Windows keeps its sum: no CRLF, no code page (the Windows CI
+        # run of 28 Nov 2026 kept SDXL's text with another sum).
+        data = text if isinstance(text, bytes) else text.encode("utf-8")
+        with open(path, "wb") as file:
+            file.write(data)
+        return True
+    except OSError:
+        return False
 
 
 def asked(question):
@@ -450,10 +523,18 @@ def main():
             optional_or_not(entry, checked_or_fetched(parts, None, verified, verify_only=True), problems)
             continue
         if entry.get("gated") and not token:
-            say(f"\n{entry['name']}: the hub needs a signed-in account for it and no token was given "
-                "(see 'A gated model' in docs/setup.md)")
-            problems.append(f"{entry['id']}: no hub token")
-            continue
+            # The token is for downloading only: a models folder that already holds every file with its sum needs
+            # none (the Windows card test, 28 Nov 2026: FLUX.1 complete on a read-only share, and setup refused it).
+            absent = checked_or_fetched(parts, None, verified, verify_only=True)
+            if absent:
+                say(f"\n{entry['name']}: {len(absent)} of its {len(parts)} files are not here with the registry's "
+                    "sum, and the hub hands them only to a signed-in account: no token was given. Give one with "
+                    "--hf-token-file (see 'A gated model' in docs/setup.md), or put the files in the models folder")
+                for problem in absent[:5]:
+                    say(f"  {problem}")
+                problems.append(f"{entry['id']}: no hub token, and {len(absent)} of its files are not here")
+                continue
+            say(f"\n{entry['name']}: every file already here with the registry's sum (no hub token needed)")
         key = f"{entry['licence']} {entry['version']}"
         if accepted.get(entry["id"], {}).get("accepted") != key:
             shown(entry, size, token, options.models)
@@ -466,8 +547,8 @@ def main():
             accepted[entry["id"]] = {"accepted": key, "licence": entry["licence"],
                                      "on": datetime.date.today().isoformat(),
                                      "how": "--yes" if options.yes else "asked"}
-            with open(record_path, "w") as file:
-                json.dump(accepted, file, indent=1)
+            if not written(record_path, json.dumps(accepted, indent=1)):
+                say(f"  {record_path} cannot be written: the answer is not kept, and is asked again next time")
         say(f"\n{entry['name']}: {entry['licence']} accepted; {len(parts)} file{'' if len(parts) == 1 else 's'}, "
             f"{human(size)}")
         if entry.get("source"):

@@ -1,0 +1,18 @@
+# Third-party licences
+
+The `model-maker` and `model-maker-simplify` programs in this archive are model-maker's own (Apache-2.0, see LICENSE)
+and contain the following crates, each under the licence whose full text is given below.
+
+{{#each licenses}}
+## {{{name}}}
+
+Used by:
+{{#each used_by}}
+- {{crate.name}} {{crate.version}}
+{{/each}}
+
+```
+{{{text}}}
+```
+
+{{/each}}

@@ -12,7 +12,7 @@ from unittest import mock
 from model_maker import device
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PACKAGE = os.path.join(HERE, "..", "model_maker")
+PACKAGE = os.path.normpath(os.path.join(HERE, "..", "model_maker"))
 
 try:
     import torch
@@ -233,6 +233,34 @@ class WhatCanRun(unittest.TestCase):
         why = device.four_bit_refusal(device.Device("cuda"), version=lambda _: None, found=lambda _: None)
         self.assertIn("bitsandbytes, which is not installed", why)
 
+    def test_four_bits_refused_at_once_when_bitsandbytes_is_older_than_transformers_takes(self):
+        # The Windows card test, 28 Nov 2026: a .venv with bitsandbytes 0.45.3 under transformers 5.10.1 failed only
+        # after the transformer's weights were read ("requires bitsandbytes"); it must be refused before loading.
+        older = {"bitsandbytes": "0.45.3", "transformers": "5.10.1"}.get
+        why = device.four_bit_refusal(device.Device("cuda"), version=older, found=lambda _: object())
+        self.assertIn("bitsandbytes (0.45.3) is older than transformers 5.10.1 takes for that (0.46.1 or newer)", why)
+        self.assertIn("run setup again", why)
+        for fits in ({"bitsandbytes": "0.46.1", "transformers": "5.10.1"},
+                     {"bitsandbytes": "0.50.2", "transformers": "5.10.1"},
+                     {"bitsandbytes": "0.44.1", "transformers": "4.46.3"}):
+            self.assertEqual(device.four_bit_refusal(device.Device("cuda"), version=fits.get,
+                                                     found=lambda _: object()), "", fits)
+
+    def test_the_bitsandbytes_floor_is_the_installed_transformers_own(self):
+        try:
+            from transformers import __version__ as transformers_version
+            from transformers.utils.import_utils import BITSANDBYTES_MIN_VERSION
+        except ImportError:
+            self.skipTest("transformers (or its BITSANDBYTES_MIN_VERSION) is not here")
+        self.assertEqual(device.bitsandbytes_floor(transformers_version), BITSANDBYTES_MIN_VERSION)
+
+    def test_release_numbers_compare_as_versions(self):
+        self.assertEqual(device.release_of("0.46.1"), (0, 46, 1))
+        self.assertEqual(device.release_of("2.10.0+cu128"), (2, 10, 0))
+        self.assertEqual(device.release_of("1.0rc1"), (1, 0))
+        self.assertLess(device.release_of("0.45.3"), device.release_of("0.46.1"))
+        self.assertLess(device.release_of("0.9.0"), device.release_of("0.46.1"))
+
     def test_four_bits_elsewhere_names_what_is_missing(self):
         versions = {"bitsandbytes": "0.44.1", "diffusers": "0.31.0"}
         for backend, words in (("mps", "Apple's Metal"), ("xpu", "An Intel card"), ("cpu", "The processor")):
@@ -397,7 +425,7 @@ class OnlyHere(unittest.TestCase):
         for name in sorted(os.listdir(PACKAGE)):
             if not name.endswith(".py") or name == "device.py":
                 continue
-            with open(os.path.join(PACKAGE, name)) as file:
+            with open(os.path.join(PACKAGE, name), encoding="utf-8") as file:
                 for number, line in enumerate(file, 1):
                     code = line.split("#")[0]
                     if named.search(code) and "sdxl-vae-fp16-fix" not in code:

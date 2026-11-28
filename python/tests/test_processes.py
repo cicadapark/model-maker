@@ -5,6 +5,7 @@ import ctypes
 import os
 import subprocess
 import sys
+import tempfile
 import threading
 import types
 import unittest
@@ -200,6 +201,56 @@ class Memory(unittest.TestCase):
 
 
 class Licences(unittest.TestCase):
+    def test_the_copyleft_dbm_module_is_refused_in_setups_interpreter_only(self):
+        with tempfile.TemporaryDirectory() as repository:
+            base = os.path.join(repository, ".tools", "python", "cpython-3.11.14-linux-x86_64-gnu")
+            modules = check_licences.interpreter_modules_folder(base, "linux")
+            os.makedirs(modules)
+            for name in ("_dbm.cpython-311-x86_64-linux-gnu.so", "_decimal.cpython-311-x86_64-linux-gnu.so"):
+                open(os.path.join(modules, name), "w").close()
+            problems, notes = check_licences.interpreter_findings(base, "linux", repository)
+            self.assertEqual(len(problems), 1)
+            self.assertIn("_dbm.cpython-311", problems[0])
+            self.assertEqual(notes, [])
+            elsewhere = check_licences.interpreter_findings(base, "linux", os.path.join(repository, "other"))
+            self.assertEqual((len(elsewhere[0]), len(elsewhere[1])), (0, 1), "another interpreter: reported only")
+            os.remove(os.path.join(modules, "_dbm.cpython-311-x86_64-linux-gnu.so"))
+            self.assertEqual(check_licences.interpreter_findings(base, "linux", repository), ([], []))
+        self.assertTrue(check_licences.interpreter_modules_folder("C:/p", "win32").endswith("DLLs"))
+
+    def test_the_judges_windows_and_macos_libraries_are_known(self):
+        with tempfile.TemporaryDirectory() as folder:
+            names = ["ggml-base.dll", "ggml-cpu-zen4.dll", "llama.dll", "llama-server-impl.dll", "mtmd.dll",
+                     "libomp.dll", "llama-server.exe", "LICENSE-LLVM-OpenMP"]
+            for name in names:
+                open(os.path.join(folder, name), "w").close()
+            with open(os.path.join(folder, "LICENSE"), "w") as file:
+                file.write("MIT License\n")
+            rows, problems = check_licences.judge_libraries(folder, "win32")
+            self.assertEqual(problems, [])
+            self.assertEqual(len(rows), 6)
+            self.assertIn("LLVM-exception", dict((r[0], r[2]) for r in rows)["libomp.dll"])
+            open(os.path.join(folder, "msvcp140.dll"), "w").close()
+            self.assertEqual(len(check_licences.judge_libraries(folder, "win32")[1]), 1, "an unknown library refuses")
+
+    def test_nothing_imports_dbm(self):
+        """The proof that removing `_dbm` changes nothing: no module of model-maker or of the installed packages
+        imports dbm, shelve (which uses it) or _dbm/_gdbm."""
+        import re as regex
+        pattern = regex.compile(r"^\s*(import|from)\s+(dbm|shelve|_dbm|_gdbm)\b", regex.MULTILINE)
+        roots = [os.path.join(check_licences.REPOSITORY, "python"), os.path.join(check_licences.REPOSITORY, "setup")]
+        roots += [p for p in sys.path if p.endswith("site-packages")]
+        users = []
+        for root in roots:
+            for folder, _, names in os.walk(root):
+                for name in names:
+                    if name.endswith(".py"):
+                        path = os.path.join(folder, name)
+                        with open(path, encoding="utf-8", errors="replace") as file:
+                            if pattern.search(file.read()):
+                                users.append(path)
+        self.assertEqual(users, [])
+
     def test_libraries_are_found_by_each_systems_names(self):
         self.assertTrue(check_licences.is_library("libgomp-a34b3233.so.1", "linux"))
         self.assertFalse(check_licences.is_library("_C.cpython-311-x86_64-linux-gnu.so", "linux"))
@@ -209,13 +260,53 @@ class Licences(unittest.TestCase):
         self.assertFalse(check_licences.is_library("_C.cp311-win_amd64.pyd", "win32"))
 
     def test_the_check_fails_where_it_does_not_know_the_libraries(self):
-        self.assertTrue(check_licences.system_known("linux"))
-        self.assertFalse(check_licences.system_known("win32"))
-        self.assertFalse(check_licences.system_known("darwin"))
+        # Linux, Windows and macOS: every library their locks' wheels bundle is on the allow-list (tools/ci/locks.py
+        # licences reads them all in CI); any other system fails.
+        for system in ("linux", "win32", "darwin"):
+            self.assertTrue(check_licences.system_known(system), system)
+        self.assertFalse(check_licences.system_known("freebsd14"))
+        self.assertFalse(check_licences.system_known("cygwin"))
         with mock.patch.object(check_licences.importlib.metadata, "distributions", lambda: []), \
                 mock.patch.object(check_licences, "judge_libraries", lambda folder: ([], [])), \
                 mock.patch.object(check_licences, "system_known", lambda: False), mock.patch("builtins.print"):
             self.assertEqual(check_licences.main([]), 1)
+
+
+    def test_the_windows_and_macos_libraries_are_judged_by_their_own_names(self):
+        for path in ("torch/lib/torch_cuda.dll", "torch/lib/cudnn_ops64_9.dll", "numpy.libs/msvcp140-a4c2229b.dll",
+                     "torch/lib/libiomp5md.dll", "c2pa/libs/c2pa_c.dll", "torch/lib/libomp.dylib",
+                     "scipy/.dylibs/libgcc_s.1.1.dylib", "numpy/.dylibs/libquadmath.0.dylib"):
+            name = path.rsplit("/", 1)[1]
+            self.assertEqual(check_licences.judged_library(path, name)[0], "allowed", name)
+        # Windows' libjpeg.dll (torchvision) is the IJG's libjpeg 9f: its own row, not libjpeg-turbo's by its start.
+        self.assertIn("Independent JPEG Group", check_licences.judged_library("torchvision/libjpeg.dll",
+                                                                              "libjpeg.dll")[1])
+        self.assertIn("libjpeg-turbo", check_licences.judged_library("PIL/libjpeg.so.62", "libjpeg.so.62")[1])
+        # What PyTorch's ROCm build bundles under the LGPL is not (tools/ci/locks.py, the ROCm lock is refused).
+        for name in ("libnuma.so", "libelf.so", "libcholmod.so"):
+            self.assertEqual(check_licences.judged_library(f"torch/lib/{name}", name)[0], "unknown", name)
+
+
+    def test_a_record_written_with_windows_paths_is_read_by_each_files_own_name(self):
+        # torchvision 0.25's Windows wheel writes its RECORD with backslashes; importlib's paths are posix paths, so
+        # `.name` keeps the folder in: every library there was "not on the allow-list" on an installed Windows.
+        from importlib.metadata import PackagePath
+
+        record = ["torchvision\\cudart64_12.dll", "torchvision\\nvjpeg64_12.dll", "torchvision\\jpeg8.dll",
+                  "torchvision\\libjpeg.dll", "torchvision\\libpng16.dll", "torchvision\\libsharpyuv.dll",
+                  "torchvision\\libwebp.dll", "torchvision\\python311.dll", "torchvision\\zlib.dll",
+                  "torchvision\\_C.pyd", "torch/lib/nvperf_host.dll"]
+        from email.message import Message
+
+        metadata = Message()
+        metadata["Name"], metadata["License"] = "torchvision", "BSD"
+        distribution = types.SimpleNamespace(files=[PackagePath(path) for path in record], metadata=metadata)
+        with mock.patch.object(check_licences.is_library, "__defaults__", ("win32",)):
+            found = list(check_licences.bundled_libraries(distribution))
+            problems = list(check_licences.problems_of(distribution))
+        self.assertEqual([name for _, name in found], [path.replace("\\", "/").rsplit("/", 1)[1]
+                                                       for path in record if path.endswith(".dll")])
+        self.assertEqual(problems, [])
 
 
 class UserNames(unittest.TestCase):
@@ -242,7 +333,31 @@ class SimplifyTool(unittest.TestCase):
             with mock.patch.object(simplify.os, "name", "nt"):
                 self.assertTrue(simplify.tool().endswith("model-maker-simplify.exe"))
             with mock.patch.object(simplify.os, "name", "posix"):
-                self.assertTrue(simplify.tool().endswith(os.path.join("release", "model-maker-simplify")))
+                self.assertEqual(simplify.tool(), os.path.join(simplify.REPOSITORY, "model-maker-simplify"))
+
+    def test_the_shipped_simplify_tool_comes_before_a_build(self):
+        from model_maker import simplify
+
+        name = "model-maker-simplify"
+        with tempfile.TemporaryDirectory() as repository:
+            def made(*parts):
+                path = os.path.join(repository, *parts)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                open(path, "w").close()
+                return path
+
+            def found():
+                return next((p for p in simplify.candidates(repository, name) if os.path.exists(p)), None)
+
+            self.assertIsNone(found())
+            built = made("target", "release", name)
+            self.assertEqual(found(), built)
+            linux_archive = made("bin", name)
+            self.assertEqual(found(), linux_archive, "the Linux archive's bin/ before a build")
+            top = made(name)
+            self.assertEqual(found(), top, "the Windows and macOS archives' top folder first")
+        with mock.patch.dict(os.environ, {"MODEL_MAKER_SIMPLIFY": "/the/launchers/choice"}):
+            self.assertEqual(simplify.tool(), "/the/launchers/choice")
 
 
 if __name__ == "__main__":

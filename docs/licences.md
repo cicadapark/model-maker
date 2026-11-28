@@ -9,6 +9,11 @@ everything made with it, and so to every object model-maker makes (each sidecar 
 
 We claim no rights in what you make; the models' terms apply ([`NOTICE`](../NOTICE)).
 
+The Python setup installs (CPython from the standalone builds uv fetches) has one module under a copyleft licence: `_dbm`,
+which links Berkeley DB (Sleepycat licence). Nothing in model-maker or in the packages it installs imports `dbm` (a
+test checks this), so setup removes `_dbm` (and `_gdbm`, which no build has today) right after installing the
+interpreter, on every system, and the licence check refuses them in that interpreter.
+
 The code was written with AI (Claude); the commits name each model that helped.
 
 ## Content credentials

@@ -1,2 +1,4 @@
 # A release tarball made by git archive carries its commit (python/model_maker/pipeline.py, repository_version).
 python/model_maker/version.txt export-subst
+# The licence texts setup carries are checked by their sha256 (setup/fetch_models.py): never converted to CRLF.
+setup/licences/* -text

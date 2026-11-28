@@ -1,0 +1,14 @@
+# What the parity check (tools/ci/parity.py) leaves out when it compares a repository set up by setup.sh with the
+# same repository set up by the `model-maker` launcher. Written before the first comparison was run; anything not
+# listed here that differs fails the check. One pattern a line (relative to the repository, "/" between parts; "**"
+# any number of parts, "*" within one part), then why. Besides these, every text file is compared with the
+# repository's own path written as <REPOSITORY> (script wrappers' first line, pyvenv.cfg, the activate scripts).
+**/__pycache__/**           bytecode Python writes as it first imports a module; what and when it compiles differs
+**/*.pyc                    bytecode outside __pycache__ (written by some installers): differs run to run
+.tools/uv-cache/**          uv's download cache: what it keeps depends on what was fetched before, not what is installed
+.tools/python/.lock         uv's own lock for its Python folder
+.tools/python/.cache/**     uv's own bookkeeping of its Python downloads
+.tools/python/.temp/**      uv's own scratch space while it unpacks a Python
+.tools/c2pa-test/**         the test certificate: a new key and certificate are made each time, by design
+.tools/self-test.log        the self-test's output, which carries times
+target/**                   build output; model-maker-simplify itself is compared (parity.py names it)

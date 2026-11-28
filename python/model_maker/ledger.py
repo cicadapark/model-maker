@@ -39,7 +39,8 @@ NOT_THE_STAGES = "not_the_stage_s"
 def folder():
     """Where the ledgers are kept: MODEL_MAKER_LEDGER, else the repository's metrics/ folder."""
     here = os.path.dirname(os.path.abspath(__file__))
-    return os.environ.get("MODEL_MAKER_LEDGER") or os.path.join(here, "..", "..", "metrics")
+    # Normalised: Windows refuses a ".." inside a `\\?\` path (the Windows card test, 28 Nov 2026).
+    return os.environ.get("MODEL_MAKER_LEDGER") or os.path.normpath(os.path.join(here, "..", "..", "metrics"))
 
 
 def now():

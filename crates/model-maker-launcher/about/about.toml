@@ -1,0 +1,7 @@
+# cargo-about: the licence texts of every crate compiled into the release's programs (model-maker,
+# model-maker-simplify and model-maker-companion), shipped beside them as THIRD-PARTY-LICENCES.md (MIT and Apache-2.0 ask for this). The
+# accepted licences are deny.toml's; cargo deny refuses any other first.
+accepted = ["MIT", "Apache-2.0", "Unicode-3.0", "ISC", "BSD-3-Clause", "Zlib", "BSD-2-Clause", "BSL-1.0"]
+targets = ["x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "aarch64-apple-darwin"]
+ignore-build-dependencies = true
+ignore-dev-dependencies = true

@@ -4,8 +4,15 @@ Each version's full note is on its release page (github.com/cicadapark/model-mak
 each are in [`docs/results.md`](docs/results.md), [`docs/objects.md`](docs/objects.md) and
 [`docs/history/`](docs/history/README.md).
 
-## Unreleased
+## 0.4.0
 
+- **Windows is supported**, with an NVIDIA card of 12 GB or more and 32 GB of memory: a one-line install
+  (`install.ps1`), then `model-maker.exe`, which does what `setup.sh` and the bash `model-maker` do on Linux. The
+  builds are not signed; the archive's SHA-256 is published in two places. [`docs/setup.md`](docs/setup.md#windows)
+- **A small window**, `model-maker-companion.exe`: it checks the PC, sets it up, makes one object and can cancel it.
+  [`docs/companion.md`](docs/companion.md)
+- One module now chooses where the models run (an NVIDIA card, Apple's Metal, an Intel card or the processor) and
+  each model's float type there; the ledger also records the backend. What model-maker makes on Linux is the same.
 - `make` and `batch` no longer take `--shape-tries`, `--triangles`, `--lead`, `--picture-rounds`, `--paint-steps`,
   `--touch-up-views` and `--touch-up-strength`. They were trial settings outside the job folder's name: a second run
   with another value found the stages done and returned the first object unchanged. The defaults, which every
@@ -16,8 +23,6 @@ each are in [`docs/results.md`](docs/results.md), [`docs/objects.md`](docs/objec
 - A `make` or `batch` with another `--tries` than a job's painted pictures were made with is refused, with the ways
   on (the same `--tries`, `--attempt N`, another `--out`); before, it returned the first object as made with the new
   value. A `batch` run again with another `--texture` bakes again; before, it kept the first bake.
-- One module now chooses where the models run (an NVIDIA card, Apple's Metal, an Intel card or the processor) and
-  each model's float type there; the ledger also records the backend. What model-maker makes on Linux is the same.
 
 ## 0.3.4
 
