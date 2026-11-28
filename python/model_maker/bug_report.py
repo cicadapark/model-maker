@@ -319,12 +319,16 @@ def file_sha256(path):
 
 def about_this_machine(machine=None):
     machine = ledger.machine() if machine is None else machine
-    return {"code_version": code_version(), "models": registry_models(),
-            "registry_sha256": file_sha256(registry.REGISTRY),
-            "python": platform.python_version(), "torch": package_versions(("torch",))["torch"],
-            "packages": package_versions(), "system": f"{platform.system()} {platform.release()} {platform.machine()}",
-            "card": {"name": machine.get("card"), "memory_mb": machine.get("card_mb"), "driver": machine.get("driver")},
-            "cpu_threads": machine.get("cpu_threads")}
+    about = {"code_version": code_version(), "models": registry_models(),
+             "registry_sha256": file_sha256(registry.REGISTRY),
+             "python": platform.python_version(), "torch": package_versions(("torch",))["torch"],
+             "packages": package_versions(), "system": f"{platform.system()} {platform.release()} {platform.machine()}",
+             "card": {"name": machine.get("card"), "memory_mb": machine.get("card_mb"), "driver": machine.get("driver"),
+                      "backend": machine.get("backend")},
+             "cpu_threads": machine.get("cpu_threads")}
+    if machine.get("tier"):
+        about["tier"] = machine["tier"]
+    return about
 
 
 # --- the report file -----------------------------------------------------------------------------------------------
@@ -887,7 +891,7 @@ def number(value):
 def comparison_lines(comparison):
     machine = comparison["remade_on"] or {}
     card = (f"{machine.get('card')} (driver {machine.get('driver')})" if machine.get("card")
-            else "no card found (nvidia-smi gave none)")
+            else "no card found (the processor ran it)")
     version = comparison["version"]
     lines = [f"remade on: {card}",
              f"version: reported {version['reported']}, remade with {version['remade']}"

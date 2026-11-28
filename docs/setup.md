@@ -196,6 +196,18 @@ What else was found on the clean PC:
 * Another program holding part of a 12 GB card (on the PC tried, another program held 6 GB) must be stopped for a
   make: 6 + 10 GB does not fit.
 
+## Which device the models run on
+
+`python/model_maker/device.py` is the one place that names a device. It takes an NVIDIA card (CUDA) when PyTorch
+has one, else Apple's Metal, else an Intel card (XPU), else the processor; `MODEL_MAKER_DEVICE=cuda`, `mps`, `xpu`
+or `cpu` names one instead. On an NVIDIA card everything is as measured: fp16 for the cut-out, the shape model and
+both SDXL painters, bf16 for FLUX.1's compute, float32 for the state judge, the view painter's blocks offloaded on a
+card under 15 GB. On the processor every model runs in float32 (fp16 and bf16 were many times slower there), and
+the card stages run only when `MODEL_MAKER_DEVICE=cpu` is set, as they are very slow: about half an hour a shape try
+on 16 threads. The picture stage needs FLUX.1 in 4 bits, which the pinned bitsandbytes and diffusers do only on
+CUDA; elsewhere it stops before loading and says what is missing. The ledger records the device's
+backend with every line, and `"tier": "measured"` on Linux with an NVIDIA card, where every published number was made.
+
 ## Tried on a clean PC
 
 

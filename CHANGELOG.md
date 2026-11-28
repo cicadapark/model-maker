@@ -16,6 +16,8 @@ each are in [`docs/results.md`](docs/results.md), [`docs/objects.md`](docs/objec
 - A `make` or `batch` with another `--tries` than a job's painted pictures were made with is refused, with the ways
   on (the same `--tries`, `--attempt N`, another `--out`); before, it returned the first object as made with the new
   value. A `batch` run again with another `--texture` bakes again; before, it kept the first bake.
+- One module now chooses where the models run (an NVIDIA card, Apple's Metal, an Intel card or the processor) and
+  each model's float type there; the ledger also records the backend. What model-maker makes on Linux is the same.
 
 ## 0.3.4
 

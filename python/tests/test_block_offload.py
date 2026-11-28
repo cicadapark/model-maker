@@ -126,7 +126,11 @@ class BlockOffloadPinnedOnce(unittest.TestCase):
             self.registered.append((pointer, size))
             return registers
 
-        with mock.patch.object(paint, "_register", register), \
+        from model_maker import device
+
+        # The processor stands in for the card: its blocks are page-locked as a CUDA card's are (device.pins_memory).
+        with mock.patch.object(device, "PINNING_BACKENDS", ("cuda", "cpu")), \
+                mock.patch.object(paint, "_register", register), \
                 mock.patch.object(paint, "_unregister", self.unregistered.append), \
                 mock.patch.object(paint, "_pinned_alone", lambda tensor: tensor.clone()):
             offload = paint.BlockOffload([self.model[0], self.model[1]], "cpu")
@@ -203,12 +207,12 @@ class BlocksTakeTurnsOnlyOnASmallCard(unittest.TestCase):
 
         import torch
 
-        from model_maker import paint
+        from model_maker import device, paint
 
         card = mock.Mock(total_memory=gib * 2 ** 30)
         with mock.patch.dict(os.environ), mock.patch.object(torch.cuda, "get_device_properties", return_value=card):
             os.environ.pop("MODEL_MAKER_VIEW_OFFLOAD", None)
-            return paint.offload_wanted()
+            return paint.offload_wanted(device.Device("cuda"))
 
     def test_a_16_gib_card_keeps_the_unet_whole(self):
         self.assertFalse(self.wanted_with_card_of(16))

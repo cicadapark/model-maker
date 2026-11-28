@@ -36,8 +36,11 @@ class Cutter:
         sys.modules["birefnet_folder"] = package
         from birefnet_folder.birefnet import BiRefNet
 
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.dtype = torch.float16 if self.device == "cuda" else torch.float32
+        from . import device as devices
+
+        chosen = devices.Device.of(device) if device else devices.current()
+        self.device = device or chosen.name
+        self.dtype = chosen.dtype("cutter")
         self.model = BiRefNet.from_pretrained(folder).to(self.device, self.dtype).eval()
 
     def mask(self, image):

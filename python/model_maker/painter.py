@@ -1,6 +1,7 @@
 """The object's pictures painted by FLUX.1 [schnell] (Apache-2.0): several tries from consecutive seeds, each
 checked (`picture_checks`), the best kept. Needs an NVIDIA card; the transformer and the second text encoder are
-quantised to 4 bits so it fits a 12 GB card, and moved to the card only while they work.
+quantised to 4 bits so it fits a 12 GB card, and moved to the card only while they work. Elsewhere it refuses before
+loading, saying what is missing (`device.four_bit_refusal`).
 """
 
 import numpy as np
@@ -12,27 +13,33 @@ MOST_TOKENS = 256
 
 class Painter:
     def __init__(self, folder):
-        import torch
         from diffusers import BitsAndBytesConfig as DiffusersBnb
         from diffusers import FluxPipeline, FluxTransformer2DModel
         from transformers import BitsAndBytesConfig as TransformersBnb
         from transformers import T5EncoderModel
 
-        nf4 = dict(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.bfloat16)
+        from . import device
+
+        self.device = device.current()
+        refused = device.four_bit_refusal(self.device)
+        if refused:
+            raise RuntimeError(refused)
+        dtype = self.device.dtype("picture painter")
+        nf4 = dict(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=dtype)
         # Each part is quantised on the card as it loads and sent to the computer's memory at once (the offload below
         # brings it back only while it works): on a 12 GB card the two do not fit on it together (the first clean
         # install on one ran out of memory loading the second). The same 4-bit weights, so the same pictures.
         transformer = FluxTransformer2DModel.from_pretrained(
-            folder, subfolder="transformer", quantization_config=DiffusersBnb(**nf4), torch_dtype=torch.bfloat16)
+            folder, subfolder="transformer", quantization_config=DiffusersBnb(**nf4), torch_dtype=dtype)
         transformer.to("cpu")
-        torch.cuda.empty_cache()
+        self.device.empty_cache()
         encoder = T5EncoderModel.from_pretrained(
-            folder, subfolder="text_encoder_2", quantization_config=TransformersBnb(**nf4), torch_dtype=torch.bfloat16)
+            folder, subfolder="text_encoder_2", quantization_config=TransformersBnb(**nf4), torch_dtype=dtype)
         encoder.to("cpu")
-        torch.cuda.empty_cache()
+        self.device.empty_cache()
         self.pipe = FluxPipeline.from_pretrained(folder, transformer=transformer, text_encoder_2=encoder,
-                                                 torch_dtype=torch.bfloat16)
-        self.pipe.enable_model_cpu_offload()
+                                                 torch_dtype=dtype)
+        self.pipe.enable_model_cpu_offload(device=self.device.name)
         self.pipe.set_progress_bar_config(disable=True)
 
     def paint(self, prompt, seed):
@@ -43,10 +50,8 @@ class Painter:
                          generator=torch.Generator("cpu").manual_seed(seed)).images[0]
 
     def close(self):
-        import torch
-
         del self.pipe
-        torch.cuda.empty_cache()
+        self.device.empty_cache()
 
 
 def seed_of(text):

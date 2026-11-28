@@ -68,12 +68,11 @@ class Kept:
 
     def shape_models(self, settings):
         def load(folders):
-            import torch
-
             os.environ["TRIPOSG_WEIGHTS"] = folders[0]
-            from . import shape_net
+            from . import device, shape_net
 
-            shape_net.kept_models(torch.float16)
+            # The float type `shape_net.make` asks for on this device, so it finds them loaded.
+            shape_net.kept_models(device.current().dtype("shape"))
             return shape_net
 
         return self._model("shape", lambda: settings.verified("triposg", "triposg", checked=self.checked), load)
@@ -147,8 +146,6 @@ def close(model):
 
 
 def empty_card_cache():
-    import sys
+    from . import device
 
-    torch = sys.modules.get("torch")
-    if torch is not None and torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    device.release_cached()

@@ -49,11 +49,14 @@ class StateJudge:
         import torch
         from transformers import GemmaTokenizerFast, SiglipModel
 
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        from . import device as devices
+
+        chosen = devices.Device.of(device) if device else devices.current()
+        self.device = device or chosen.name
         # 32-bit floats on the card too, as the regression judges on the CPU: in 16 bits a picture near the limit
         # could be judged one way when made and the other way in the regression. The
         # model is 1.6 GB in 32 bits and judges a few pictures a job.
-        self.dtype = torch.float32
+        self.dtype = chosen.dtype("state judge")
         self.model = SiglipModel.from_pretrained(folder, torch_dtype=self.dtype).to(self.device).eval()
         self.tokenizer = GemmaTokenizerFast.from_pretrained(folder)
         self.pixels = PicturePixels(folder)
@@ -85,11 +88,10 @@ class StateJudge:
         return float(np.mean([asked_share(self.features(image=view)[0], wanted, unwanted, scale) for view in views]))
 
     def close(self):
-        import torch
+        from . import device as devices
 
         del self.model
-        if self.device == "cuda":
-            torch.cuda.empty_cache()
+        devices.Device.of(self.device).empty_cache()
 
 
 class PicturePixels:

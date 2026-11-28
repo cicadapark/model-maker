@@ -23,8 +23,6 @@ import contextlib
 import datetime
 import json
 import os
-import subprocess
-import sys
 import time
 import uuid
 
@@ -49,20 +47,17 @@ def now():
 
 
 def machine():
-    """The card (from nvidia-smi, so the finish stage needs no torch), its driver and the CPU's threads."""
+    """The card the models run on (on an NVIDIA card from nvidia-smi, so the finish stage needs no torch; none when
+    MODEL_MAKER_DEVICE says cpu or CUDA_VISIBLE_DEVICES hides every card), its driver, its backend (cuda, mps, xpu or
+    cpu), "tier": "measured" where every published number was made (device.tier; no tier elsewhere) and the CPU's
+    threads."""
     global _MACHINE
     if _MACHINE is None:
-        card = {"card": None, "card_mb": None, "driver": None}
-        try:
-            done = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
-                                   "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=10,
-                                  check=True)
-            first = done.stdout.strip().splitlines()[0]
-            name, mb, driver = (part.strip() for part in first.split(","))
-            card = {"card": name, "card_mb": int(float(mb)), "driver": driver}
-        except (OSError, subprocess.SubprocessError, IndexError, ValueError):
-            pass
-        _MACHINE = {**card, "cpu_threads": os.cpu_count()}
+        from . import device
+
+        card = device.card()
+        found_tier = device.tier(card["backend"])
+        _MACHINE = {**card, **({"tier": found_tier} if found_tier else {}), "cpu_threads": os.cpu_count()}
     return _MACHINE
 
 
@@ -108,16 +103,15 @@ def settings_of(settings):
 
 
 def _card_peak_reset():
-    torch = sys.modules.get("torch")
-    if torch is not None and torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
+    from . import device
+
+    device.reset_peak()
 
 
 def _card_peak_mb():
-    torch = sys.modules.get("torch")
-    if torch is not None and torch.cuda.is_available():
-        return round(torch.cuda.max_memory_allocated() / 2 ** 20)
-    return None
+    from . import device
+
+    return device.peak_mb()
 
 
 @contextlib.contextmanager
