@@ -256,7 +256,8 @@ class OptionsOutsideTheFolder(unittest.TestCase):
     """The job folder's hash holds the prompt, size, stands, symmetric and attempt only, and a card stage whose file is
     there is not run again: a second `make` of a prompt with another --paint-steps (or any setting outside the hash)
     found its stages done and returned the first object as the new one. The seven trial settings below are no longer
-    options of `make` and `batch`: each is refused."""
+    options of `make` and `batch`: each is refused. The two options left outside the hash act or refuse: a run with
+    another --tries than the painted pictures' is refused, and a batch run again with another --texture bakes again."""
 
     # Each with a value other than its default.
     OUTSIDE = (("--shape-tries", "4"), ("--triangles", "5000"), ("--lead", "isolated"), ("--picture-rounds", "1"),
@@ -324,6 +325,75 @@ class OptionsOutsideTheFolder(unittest.TestCase):
                         self.assertNotEqual(other, plain, f"{option} {value} would return the default's objects")
         finally:
             shutil.rmtree(out)
+
+    def test_another_tries_than_the_painted_pictures_is_refused(self):
+        from unittest import mock
+
+        out = tempfile.mkdtemp()
+        try:
+            prompt, other = "an old looking chair", str(pipeline.DEFAULT_TRIES * 2)
+            job = pipeline.Job(pipeline.job_folder(out, prompt), prompt, settings=pipeline.Settings())
+            Image.new("RGB", (8, 8)).save(job.path("picture.png"))
+            prompts = os.path.join(out, "prompts.txt")
+            with open(prompts, "w") as file:
+                file.write(prompt + "\n")
+
+            def ran(*argv):
+                said = io.StringIO()
+                with mock.patch.object(pipeline, "run", lambda *_, **__: None), contextlib.redirect_stderr(said), \
+                        contextlib.redirect_stdout(io.StringIO()):
+                    return command.main(list(argv)), said.getvalue()
+
+            for argv in (["make", prompt, "--out", out, "--tries", other],
+                         ["batch", prompts, "--out", out, "--tries", other]):
+                with self.subTest(step=argv[0]):
+                    code, said = ran(*argv)
+                    self.assertEqual(code, 2, f"{argv[0]} --tries {other} would return the first pictures' object")
+                    for way_out in (f"--tries {pipeline.DEFAULT_TRIES}", "--attempt N", "another --out"):
+                        self.assertIn(way_out, said)
+            # The same tries goes on with the job; a later attempt is a folder of its own.
+            self.assertNotEqual(ran("make", prompt, "--out", out, "--tries", str(pipeline.DEFAULT_TRIES))[0], 2)
+            self.assertNotEqual(ran("make", prompt, "--out", out, "--tries", other, "--attempt", "1")[0], 2)
+            # A record made before the settings were kept is taken as it is.
+            old = pipeline.Job(job.folder)
+            del old.record["settings"]
+            old.save()
+            self.assertNotEqual(ran("make", prompt, "--out", out, "--tries", other)[0], 2)
+        finally:
+            shutil.rmtree(out)
+
+    def test_a_batch_run_again_with_another_texture_bakes_again(self):
+        import json
+
+        folder = tempfile.mkdtemp()
+        try:
+            prompt = "an old iron sword"
+            job = made_up_job(folder, prompt, *shapes.sword())
+            prompts = os.path.join(folder, "prompts.txt")
+            with open(prompts, "w") as file:
+                file.write(prompt + "\n")
+            sidecar = job.path(f"{job['slug']}.provenance.json")
+
+            def batch_at(side):
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    command.main(["batch", prompts, "--out", folder, "--stages", "finish", "--texture", str(side),
+                                  "--no-verify"])
+                with open(sidecar) as file:
+                    return json.load(file)["measures"]["bake"]["side"], os.stat(sidecar).st_mtime_ns
+
+            first_side, first_time = batch_at(256)
+            self.assertEqual(first_side, 256)
+            self.assertEqual(batch_at(256), (256, first_time), "the same texture: the finish is kept")
+            self.assertEqual(batch_at(512)[0], 512, "another --texture: baked again")
+            # A finish whose side is not known is kept, not taken for another.
+            with open(sidecar) as file:
+                record = json.load(file)
+            del record["measures"]["bake"]["side"]
+            with open(sidecar, "w") as file:
+                json.dump(record, file)
+            self.assertFalse(pipeline.stage_wanted(pipeline.Job(job.folder), "finish", 1024))
+        finally:
+            shutil.rmtree(folder)
 
     def test_the_default_settings_are_the_ones_the_options_gave(self):
         # Taking the options off changes no job made at the defaults: the settings recorded are the same values.

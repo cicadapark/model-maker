@@ -38,6 +38,10 @@ and views from seeds after every seed the attempts before it used; 0, the defaul
 `--require-lettering` (every picture must be read for painted
 lettering: without a usable tesseract no job is made; the measured runs use it).
 
+`--tries` and `--texture` are not in the job folder's name either. A run with another `--tries` on a folder whose
+pictures are painted is refused, saying how to go on (the same `--tries`, `--attempt N` or another `--out`); a `batch`
+run again with another `--texture` bakes again, as `make` does every time.
+
 The trials' settings are not options of `make` and `batch`: the lead words, the view painter's steps (20), the shape
 tries, the picture rounds, the triangle budget and the touch-up's views and strength. They are not in the job folder's
 name, so as options a second run with another value found its stages done and returned the first object. Every

@@ -117,6 +117,7 @@ class Job:
                 self.record = json.load(file)
             if prompt is not None:
                 self.same_order(prompt, size_m, stands, symmetric)
+                self.same_tries(settings)
             return
         if prompt is None:
             raise FileNotFoundError(f"{path}: no job here")
@@ -149,6 +150,17 @@ class Job:
             kept["size_m"] = self.record["size_m"]
         if asked != kept:
             raise JobMismatch(f"{self.folder} holds the job {kept}, not {asked}: give another --out")
+
+    def same_tries(self, settings):
+        """Refuses a folder whose pictures were painted with another --tries. The tries are not in the folder's name
+        and a stage done is not run again, so the run would return the object of the first pictures as made with
+        these. A record made before the settings were kept is taken as it is."""
+        recorded = self.record.get("settings", {}).get("tries")
+        if settings is None or recorded is None or recorded == settings.tries or not self.has("picture.png"):
+            return
+        raise JobMismatch(f"{self.folder} was made with --tries {recorded}, not {settings.tries}, and its pictures "
+                          f"are painted: give --tries {recorded} to go on with it, --attempt N to make it again from "
+                          f"new seeds, or another --out")
 
     def __getitem__(self, key):
         return self.record[key]
@@ -949,16 +961,30 @@ def made_stamp(job):
     return None
 
 
-def finished_since_paint(job):
-    """Whether the job was finished from the paint (or shape) it has now, its model written."""
-    return (job.record.get("finished_from") is not None and job.record.get("finished_from") == made_stamp(job)
-            and job.has(f"{job['slug']}.glb"))
+def baked_side(job):
+    """The texture side the job's finish baked, from its sidecar; None when that is not known."""
+    try:
+        with open(job.path(f"{job['slug']}.provenance.json")) as file:
+            return json.load(file).get("measures", {}).get("bake", {}).get("side")
+    except (OSError, ValueError, AttributeError):
+        return None
 
 
-def stage_wanted(job, stage):
+def finished_since_paint(job, texture=None):
+    """Whether the job was finished from the paint (or shape) it has now, its model written, and (`texture` given)
+    baked at that side: a batch run again with another --texture bakes again, as `make` does. A finish whose side is
+    not known is kept."""
+    if not (job.record.get("finished_from") is not None and job.record.get("finished_from") == made_stamp(job)
+            and job.has(f"{job['slug']}.glb")):
+        return False
+    side = baked_side(job) if texture is not None else None
+    return side is None or side == texture
+
+
+def stage_wanted(job, stage, texture=None):
     if stage in STAGE_FILES:
         return not job.has(STAGE_FILES[stage])
-    return not finished_since_paint(job)
+    return not finished_since_paint(job, texture)
 
 
 def check_memory(stage, out, report):
@@ -1029,15 +1055,16 @@ def run(jobs, settings, report=print, stages=("pictures", "shape", "paint", "fin
                 if not job.has("shape.npz") and job.record.get("picture", {}).get("passed") is False:
                     no_picture_passed(job, settings, report)
             jobs = [job for job in jobs if not job.set_aside]
-        if not any(stage_wanted(job, stage) or (stage == "finish" and not keep_going) for job in jobs):
+        if not any(stage_wanted(job, stage, settings.texture) or (stage == "finish" and not keep_going)
+                   for job in jobs):
             continue
         check_memory(stage, out, report)
         memory.reset_peak()
         if stage == "finish":
-            # A batch started again finishes only the jobs not finished from their present paint; `make` finishes
-            # its job every time (it is quick, and the command a user runs again to see a change).
-            finish_stage([job for job in jobs if not keep_going or stage_wanted(job, "finish")], settings, report,
-                         keep_going)
+            # A batch started again finishes only the jobs not finished from their present paint at this texture
+            # side; `make` finishes its job every time (it is quick, and the command a user runs again to see a change).
+            wanted = [job for job in jobs if not keep_going or stage_wanted(job, "finish", settings.texture)]
+            finish_stage(wanted, settings, report, keep_going)
         else:
             {"pictures": pictures_stage, "shape": shape_stage, "paint": paint_stage}[stage](jobs, settings, report, kept,
                                                                                          keep_going)
