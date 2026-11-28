@@ -343,20 +343,27 @@ class on_the_card:
         return self.model
 
     def __exit__(self, *_):
+        from . import device as devices
+
         self.model.to("cpu")
-        torch.cuda.empty_cache()
+        devices.Device.of(self.device).empty_cache()
 
 
 # The denoiser's choices as measured (see the module's note).
 CHOICES = dict(time_as_token=True, flip_sin_to_cos=False, freq_shift=0.0, skip_first=True)
 
 
-def make(picture_rgb, mask, seed=42, steps=50, guidance=7.0, device="cuda", choices=None):
+def make(picture_rgb, mask, seed=42, steps=50, guidance=7.0, device=None, choices=None):
     """The object's surface from its picture (H x W x 3, uint8) and its cut-out (bool): (corners, triangles, the
-    specks left out), in TripoSG's frame (+Y up, facing +Z, within the unit cube)."""
+    specks left out), in TripoSG's frame (+Y up, facing +Z, within the unit cube). On `device` (a name torch takes),
+    else the one `device.current()` chose: fp16 on a card, float32 on the processor."""
     from PIL import Image
 
-    dtype = torch.float16
+    from . import device as devices
+
+    chosen = devices.Device.of(device) if device else devices.current()
+    device = device or chosen.name
+    dtype = chosen.dtype("shape")
     started = time.time()
     loaded = kept_models(dtype, choices)
     processor, encoder = loaded["encoder"]

@@ -15,6 +15,7 @@ stage start, saying the memory is not known.
 
 import json
 import os
+import sys
 
 # Each stage's peak, measured on the 16 GB card's batch of eight (2026-11-12-030-batch, the process's resident memory,
 # MB, rounded up): the picture model (FLUX.1 kept in the computer's memory between its steps on the card), the shape
@@ -115,17 +116,13 @@ def give_back():
     its next copy to the card: measured, closing the shape model left 3.5 of its 4.6 GB held, and malloc_trim gave all
     but 0.3 GB back (docs/history/long-batch.md). Elsewhere than glibc, the trim is skipped."""
     import gc
-    import sys
+
+    from . import device
 
     gc.collect()
-    torch = sys.modules.get("torch")
-    if torch is not None:
-        try:
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-                torch._C._host_emptyCache()
-        except (AttributeError, RuntimeError):
-            pass
+    device.release_cached(host_too=True)
+    if not sys.platform.startswith("linux"):
+        return
     try:
         import ctypes
 

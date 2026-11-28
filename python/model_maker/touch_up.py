@@ -598,15 +598,18 @@ def fill_picture(corners, triangles, cloud, sources, turn, tilt, side=360, least
 class Inpainter:
     """SDXL's base model painting the masked pixels of a picture (diffusers' SDXL inpainting pipeline on the base
     weights: the masked latents denoised from a partly noised start, the rest held to the picture at every step).
-    Needs an NVIDIA card."""
+    Made for an NVIDIA card (fp16); on the processor float32 (`device`)."""
 
     def __init__(self, sdxl_dir, vae_dir, steps=30, guidance=6.0, strength=STRENGTH):
-        import torch
         from diffusers import AutoencoderKL, StableDiffusionXLInpaintPipeline
 
-        vae = AutoencoderKL.from_pretrained(vae_dir, torch_dtype=torch.float16)
+        from . import device as devices
+
+        self.device = devices.current()
+        dtype = self.device.dtype("inpainter")
+        vae = AutoencoderKL.from_pretrained(vae_dir, torch_dtype=dtype)
         self.pipe = StableDiffusionXLInpaintPipeline.from_pretrained(sdxl_dir, vae=vae, variant="fp16",
-                                                                     torch_dtype=torch.float16)
+                                                                     torch_dtype=dtype)
         self.steps, self.guidance, self.strength = steps, guidance, strength
 
     def __call__(self, picture, mask, text, seed):
@@ -614,7 +617,7 @@ class Inpainter:
 
         from .paint import NEGATIVE
 
-        self.pipe.to("cuda")
+        self.pipe.to(self.device.name)
         try:
             return self.pipe(prompt=f"{text}, {FILL_WORDS}", negative_prompt=f"{NEGATIVE}, {FILL_NEGATIVE}",
                              image=picture, mask_image=mask, height=SIDE, width=SIDE, strength=self.strength,
@@ -623,4 +626,4 @@ class Inpainter:
                              generator=torch.Generator(device="cpu").manual_seed(seed)).images[0]
         finally:
             self.pipe.to("cpu")
-            torch.cuda.empty_cache()
+            self.device.empty_cache()

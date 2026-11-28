@@ -229,11 +229,17 @@ def same_random_state():
     torch.manual_seed(JOB_RANDOM_SEED)
 
 
-def needs_card():
-    import torch
+def needs_card(stage):
+    """Stops a card stage ("pictures", "shape", "paint") that cannot run on this computer's device, saying why (no
+    card; the picture model's 4-bit loading only on CUDA): `device.stage_refusal`."""
+    from . import device
 
-    if not torch.cuda.is_available():
-        raise SystemExit("this stage needs an NVIDIA card (CUDA); the finish stage runs without one")
+    try:
+        why = device.stage_refusal(stage, device.current())
+    except device.DeviceError as error:
+        raise SystemExit(str(error)) from None
+    if why:
+        raise SystemExit(why)
 
 
 def loaded(models, stage, what, report):
@@ -297,7 +303,7 @@ def pictures_stage(jobs, settings, report=print, kept=None, keep_going=False):
     todo = [j for j in jobs if not j.has("picture.png")]
     if not todo:
         return
-    needs_card()
+    needs_card("pictures")
     # A cold run's models are this stage's alone; a warm process's are kept between jobs (see kept).
     models = (kept or Kept()).counting()
 
@@ -405,7 +411,7 @@ def shape_stage(jobs, settings, report=print, kept=None, keep_going=False):
     todo = [j for j in jobs if not j.has("shape.npz")]
     if not todo:
         return
-    needs_card()
+    needs_card("shape")
     # Loaded before the first job's stage, so its time is a load, not counted in the first shape's time.
     models = (kept or Kept()).counting()
     shape_net = loading(todo, "shape", settings, report, keep_going, lambda: models.shape_models(settings))
@@ -462,7 +468,7 @@ def paint_stage(jobs, settings, report=print, kept=None, keep_going=False):
     todo = [j for j in jobs if not j.has("painted.npz")]
     if not todo:
         return
-    needs_card()
+    needs_card("paint")
     models = (kept or Kept()).counting()
     painter = loading(todo, "paint", settings, report, keep_going, lambda: models.view_painter(settings))
     if painter is None:

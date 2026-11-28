@@ -14,6 +14,7 @@ repository's root:
 | `render`, `bake`, `glb`, `report` | our rasteriser, the texture bake, the `.glb` with its marks, the report page |
 | `pipeline` | the stages and each object's folder |
 | `registry` | the models' licences and file sums, checked before loading |
+| `device` | where the models run (an NVIDIA card, Apple's Metal, an Intel card or the processor) and each model's float type there; the one place that names a backend |
 | `processes`, `parent` | programs started and stopped on each system (the question judge's server), and the pipeline tied to the program that started it |
 
 `tests/` holds the tests of everything that runs without a card:

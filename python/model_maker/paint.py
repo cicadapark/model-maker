@@ -150,14 +150,18 @@ class BlockOffload:
     2026). Where the CUDA runtime refuses to page-lock a buffer, that block's tensors are pinned one by one instead."""
 
     def __init__(self, blocks, device):
+        from . import device as devices
+
         self.device = device
         self.kept = {}
+        pinned = devices.Device.of(device).pins_memory
         # The page-locked ranges' starts, given back by `close` (or when this is collected, before its buffers are).
         self.registered = []
         self._release = weakref.finalize(self, _unregister_all, self.registered)
         for block in blocks:
             tensors = list(block.parameters()) + list(block.buffers())
-            for tensor, kept in zip(tensors, self._pinned(tensors)):
+            kept_tensors = self._pinned(tensors) if pinned else [tensor.data.to("cpu") for tensor in tensors]
+            for tensor, kept in zip(tensors, kept_tensors):
                 tensor.data = kept
                 self.kept[tensor] = kept
             block.register_forward_pre_hook(self._on(tensors))
@@ -213,50 +217,32 @@ def packed(tensors, align=PINNED_ALIGN, page=mmap.PAGESIZE):
 
 
 def _register(pointer, size):
-    """Whether the CUDA runtime page-locked [pointer, pointer + size) for the card's copies."""
-    import torch
+    """Whether [pointer, pointer + size) was page-locked for the card's copies (device.lock_pages)."""
+    from . import device as devices
 
-    try:
-        cudart = torch.cuda.cudart()
-        if cudart.cudaHostRegister(pointer, size, 0) == cudart.cudaError.success:
-            return True
-    except (AttributeError, RuntimeError):
-        return False
-    _forget_runtime_error()
-    return False
+    return devices.lock_pages(pointer, size)
 
 
 def _unregister_all(pointers):
     """Each page-locked range given back, once the card has finished the copies from it."""
-    import torch
+    from . import device as devices
 
-    if pointers and torch.cuda.is_available():
-        torch.cuda.synchronize()
+    if pointers:
+        devices.wait_for_card_copies()
     while pointers:
         _unregister(pointers.pop())
 
 
 def _unregister(pointer):
-    import torch
+    from . import device as devices
 
-    torch.cuda.cudart().cudaHostUnregister(pointer)
+    devices.unlock_pages(pointer)
 
 
 def _pinned_alone(tensor):
-    return tensor.to("cpu").pin_memory()
+    from . import device as devices
 
-
-def _forget_runtime_error():
-    """A refused registration stays the CUDA runtime's last error, which PyTorch's check after its next kernel would
-    raise as that kernel's: read once, which clears it (the runtime PyTorch loaded, found by its name)."""
-    import ctypes
-
-    for name in ("libcudart.so.12", "libcudart.so.13", "cudart64_12.dll", "cudart64_13.dll"):
-        try:
-            ctypes.CDLL(name).cudaGetLastError()
-            return
-        except (OSError, AttributeError):
-            continue
+    return devices.pinned_copy(tensor)
 
 
 BLOCK_LISTS = ("down_blocks", "mid_block", "up_blocks")
@@ -267,13 +253,18 @@ def unet_blocks(unet):
     return [*unet.down_blocks, unet.mid_block, *unet.up_blocks]
 
 
-def offload_wanted():
-    import torch
+def offload_wanted(chosen=None):
+    """Whether the UNet's blocks are offloaded: MODEL_MAKER_VIEW_OFFLOAD (0 or 1) if set, else on a card with memory
+    of its own under WHOLE_UNET_LEAST_GIB; never where offloading saves nothing (Metal's shared memory, the processor)."""
+    from . import device as devices
 
     named = os.environ.get("MODEL_MAKER_VIEW_OFFLOAD")
     if named in ("0", "1"):
         return named == "1"
-    return torch.cuda.get_device_properties(0).total_memory / 2 ** 30 < WHOLE_UNET_LEAST_GIB
+    chosen = chosen or devices.current()
+    if not chosen.offloads:
+        return False
+    return chosen.total_memory_gib() < WHOLE_UNET_LEAST_GIB
 
 
 class ViewPainter:
@@ -281,21 +272,25 @@ class ViewPainter:
     each painting."""
 
     def __init__(self, sdxl_dir, vae_dir, adapter_dir):
-        import torch
         from diffusers import AutoencoderKL
+
+        from . import device as devices
 
         _mv_adapter_on_path()
         from mvadapter.models.attention_processor import DecoupledMVRowColSelfAttnProcessor2_0
         from mvadapter.pipelines.pipeline_mvadapter_i2mv_sdxl import MVAdapterI2MVSDXLPipeline
         from mvadapter.schedulers.scheduling_shift_snr import ShiftSNRScheduler
 
+        self.device = devices.current()
+        self.dtype = self.device.dtype("view painter")
         vae = AutoencoderKL.from_pretrained(vae_dir)
-        pipe = MVAdapterI2MVSDXLPipeline.from_pretrained(sdxl_dir, vae=vae, variant="fp16", torch_dtype=torch.float16)
+        # The fp16 files whatever the float type: they are the ones installed (upcast on the processor).
+        pipe = MVAdapterI2MVSDXLPipeline.from_pretrained(sdxl_dir, vae=vae, variant="fp16", torch_dtype=self.dtype)
         pipe.scheduler = ShiftSNRScheduler.from_scheduler(pipe.scheduler, shift_mode="interpolated", shift_scale=8.0)
         pipe.init_custom_adapter(num_views=6, self_attn_processor=DecoupledMVRowColSelfAttnProcessor2_0)
         pipe.load_custom_adapter(adapter_dir, weight_name="mvadapter_ig2mv_sdxl.safetensors")
-        pipe.to(device="cpu", dtype=torch.float16)
-        pipe.cond_encoder.to(device="cpu", dtype=torch.float16)
+        pipe.to(device="cpu", dtype=self.dtype)
+        pipe.cond_encoder.to(device="cpu", dtype=self.dtype)
         # The feed-forward layers in chunks (the same sums in smaller pieces) and the views decoded one at a time:
         # it fits a 16 GB card another program holds a little of.
         for block in pipe.unet.modules():
@@ -304,30 +299,31 @@ class ViewPainter:
         pipe.vae.enable_slicing()
         self.pipe = pipe
         self.offload = None
-        if offload_wanted():
-            self.offload = BlockOffload(unet_blocks(pipe.unet), "cuda")
+        if offload_wanted(self.device):
+            self.offload = BlockOffload(unet_blocks(pipe.unet), self.device.name)
 
     def views(self, control, text, reference_image, seed, steps=STEPS):
         import torch
 
         pipe = self.pipe
+        on = self.device.name
         # With the blocks offloaded only the UNet's small parts move; each block comes onto the card as it runs.
-        self._unet_to("cuda")
-        pipe.vae.to("cuda")
-        pipe.cond_encoder.to("cuda")
+        self._unet_to(on)
+        pipe.vae.to(on)
+        pipe.cond_encoder.to(on)
         # The words' embeddings first, then both text encoders off the card.
-        pipe.text_encoder.to("cuda")
-        pipe.text_encoder_2.to("cuda")
+        pipe.text_encoder.to(on)
+        pipe.text_encoder_2.to(on)
         with torch.no_grad():
             embeds, negative_embeds, pooled, negative_pooled = pipe.encode_prompt(
-                prompt=text, device="cuda", num_images_per_prompt=1, do_classifier_free_guidance=True,
+                prompt=text, device=on, num_images_per_prompt=1, do_classifier_free_guidance=True,
                 negative_prompt=NEGATIVE)
         pipe.text_encoder.to("cpu")
         pipe.text_encoder_2.to("cpu")
-        torch.cuda.empty_cache()
+        self.device.empty_cache()
         # It judges its device by its parts; with the encoders away it would think the CPU.
-        type(pipe)._execution_device = property(lambda self: torch.device("cuda"))
-        control = torch.from_numpy(control.clip(0, 1)).permute(0, 3, 1, 2).to("cuda", torch.float16)
+        type(pipe)._execution_device = property(lambda self: torch.device(on))
+        control = torch.from_numpy(control.clip(0, 1)).permute(0, 3, 1, 2).to(on, self.dtype)
         made = pipe(prompt_embeds=embeds, negative_prompt_embeds=negative_embeds, pooled_prompt_embeds=pooled,
                     negative_pooled_prompt_embeds=negative_pooled, height=SIDE, width=SIDE,
                     num_inference_steps=steps, guidance_scale=GUIDANCE, num_images_per_prompt=6,
@@ -339,7 +335,7 @@ class ViewPainter:
         self._unet_to("cpu")
         pipe.vae.to("cpu")
         pipe.cond_encoder.to("cpu")
-        torch.cuda.empty_cache()
+        self.device.empty_cache()
         return made
 
     def close(self):
