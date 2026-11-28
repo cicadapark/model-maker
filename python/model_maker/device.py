@@ -18,6 +18,7 @@ import importlib.metadata
 import importlib.util
 import os
 import platform
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -44,6 +45,10 @@ PINNING_BACKENDS = ("cuda",)
 # diffusers 0.38 refuses it without a CUDA or XPU card ("No GPU found. A GPU is needed for quantization."), and the
 # locked bitsandbytes (0.46.1) is built for CUDA only, so XPU is refused here too until a lock with an XPU build.
 FOUR_BIT_BACKENDS = ("cuda",)
+# The oldest bitsandbytes each transformers major version loads in 4 bits (its BITSANDBYTES_MIN_VERSION): below it,
+# transformers refuses only after the transformer's weights are read ("requires bitsandbytes"; the Windows card
+# test of 28 Nov 2026 lost 10 minutes to a .venv behind the lock). Majors not named have no such floor.
+BITSANDBYTES_FLOOR = {5: "0.46.1"}
 
 
 class DeviceError(RuntimeError):
@@ -276,6 +281,26 @@ def version_of(package):
         return None
 
 
+def release_of(text):
+    """A version's release numbers ("0.46.1" -> (0, 46, 1); "2.10.0+cu128" -> (2, 10, 0); "1.0rc1" -> (1, 0)), for
+    comparing."""
+    numbers = []
+    for part in text.split("+")[0].split("."):
+        digits = re.match(r"\d+", part)
+        if digits is None:
+            break
+        numbers.append(int(digits.group()))
+        if digits.end() < len(part):
+            break
+    return tuple(numbers)
+
+
+def bitsandbytes_floor(transformers):
+    """The oldest bitsandbytes `transformers` (its version, or None) loads in 4 bits, or None when it names none."""
+    major = release_of(transformers)[:1] if transformers else ()
+    return BITSANDBYTES_FLOOR.get(major[0]) if major else None
+
+
 def four_bit_refusal(device, version=version_of, found=importlib.util.find_spec):
     """Why FLUX.1 cannot be loaded in 4 bits on `device` ("" when it can): the 4-bit route is bitsandbytes NF4 through
     the pinned diffusers, which quantises only on CUDA."""
@@ -284,6 +309,12 @@ def four_bit_refusal(device, version=version_of, found=importlib.util.find_spec)
         if bitsandbytes is None or found("bitsandbytes") is None:
             return ("the picture model (FLUX.1 [schnell]) is loaded in 4 bits by bitsandbytes, which is not installed "
                     "(it is in python/requirements.txt: run ./setup.sh)")
+        transformers = version("transformers")
+        floor = bitsandbytes_floor(transformers)
+        if floor and release_of(bitsandbytes) < release_of(floor):
+            return (f"the picture model (FLUX.1 [schnell]) is loaded in 4 bits by bitsandbytes, and the installed "
+                    f"bitsandbytes ({bitsandbytes}) is older than transformers {transformers} takes for that ({floor} "
+                    f"or newer): this Python environment is behind the lock; run setup again")
         return ""
     return (f"the picture model (FLUX.1 [schnell]) is loaded in 4 bits by bitsandbytes, and this release's "
             f"bitsandbytes ({bitsandbytes or 'not installed'}) with diffusers ({version('diffusers') or 'not installed'})"
@@ -294,8 +325,9 @@ def four_bit_refusal(device, version=version_of, found=importlib.util.find_spec)
 CARD_STAGES = ("pictures", "shape", "paint")
 
 
-def stage_refusal(stage, device, four_bit=four_bit_refusal):
-    """Why a card stage ("pictures", "shape", "paint") cannot run on `device` ("" when it can)."""
+def stage_refusal(stage, device, four_bit=None):
+    """Why a card stage ("pictures", "shape", "paint") cannot run on `device` ("" when it can). `four_bit` defaults to
+    four_bit_refusal as it is when called (so a test's stand-in for it is the one asked)."""
     if stage not in CARD_STAGES:
         raise KeyError(f"{stage!r} is not a card stage")
     if device.backend == "cpu" and not device.named:
@@ -303,7 +335,7 @@ def stage_refusal(stage, device, four_bit=four_bit_refusal):
                 f"with CUDA); the finish stage runs without one. {VARIABLE}=cpu runs the shape and paint stages on "
                 f"the processor in float32, very slowly (about half an hour a shape try on 16 threads)")
     if stage == "pictures":
-        why = four_bit(device)
+        why = (four_bit or four_bit_refusal)(device)
         if why:
             return f"the pictures stage cannot run on {WHAT[device.backend]}: {why}"
     return ""

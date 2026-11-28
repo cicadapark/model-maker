@@ -9,6 +9,7 @@ object made names each model used with its version and licence.
 import hashlib
 import os
 import subprocess
+import sys
 import tomllib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -159,16 +160,25 @@ def verify_folder(model_id, folder, path=REGISTRY, checked=None):
     return present
 
 
-def verify_checkout(model_id, folder, path=REGISTRY):
+def checkout_git_settings(platform=sys.platform):
+    """git's settings for reading a model's checkout: on Windows its files' executable bits are not compared, as
+    Windows has none (a checkout made on Linux and read from a share shows every executable file as changed there,
+    since the checkout's own .git/config says core.filemode=true). The files' contents are compared everywhere."""
+    return ["-c", "core.filemode=false"] if platform == "win32" else []
+
+
+def verify_checkout(model_id, folder, path=REGISTRY, platform=sys.platform):
     """A model's own code (its registry entry's `source`) checked before it is imported: the folder is a git checkout
     at the commit the registry names, with nothing changed, added or left over (a cached `.pyc` is removed first).
     Raises RefusedFile otherwise."""
     source = models(path)[model_id]["source"]
     without_bytecode(folder)
+    settings = checkout_git_settings(platform)
 
     def git(*args):
         try:
-            return subprocess.run(["git", "-C", folder, *args], check=True, capture_output=True, text=True).stdout
+            return subprocess.run(["git", *settings, "-C", folder, *args], check=True, capture_output=True,
+                                  text=True).stdout
         except (OSError, subprocess.CalledProcessError) as error:
             raise RefusedFile(f"{folder}: not a git checkout of {model_id}'s code ({error}); run ./setup.sh")
 

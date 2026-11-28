@@ -19,9 +19,10 @@
 #   .tools/uv, .tools/python    uv (a pinned release, its sha256 checked) and the CPython 3.11 it installs
 #   .venv/                      the Python environment, from python/requirements.lock (every wheel's sha256 checked),
 #                               then every package's licence checked (python/model_maker/check_licences.py)
-#   .tools/c2pa-test/           a test certificate made here, which signs the pictures' content credentials (C2PA)
-#                               unless you give your own (docs/objects.md, "Content credentials"); its key is yours
-#                               alone (mode 600) and never leaves this folder
+#   ~/.local/share/model-maker/c2pa-test/   a test certificate made for you ($XDG_DATA_HOME if set; an install's
+#                               .tools/c2pa-test from before is still used), which signs the pictures' content
+#                               credentials (C2PA) unless you give your own (docs/objects.md, "Content credentials");
+#                               its key is yours alone (mode 600) and never leaves that folder
 #   .tools/rust/                Rust (rustup, pinned and checked), only when this PC has neither rustup nor a cargo
 #                               as new as Cargo.toml's rust-version
 #   target/release/             model-maker-simplify, built from this repository
@@ -45,6 +46,7 @@ readonly MEMORY_GOOD_GIB=24      # the computer's memory (loading the picture mo
 readonly MEMORY_LEAST_GIB=16
 readonly MEMORY_GOOD_GIB_SMALL_CARD=32  # with a card under 16 GB (the view painter's blocks take turns): 0.3.3
                                         # peaked at 25.5 GB there, and less was not tried (docs/results.md)
+readonly SELF_TEST_WORKERS=4     # test modules run at once in the self-test (as on CI's four-processor machines)
 readonly DISK_GB=77              # model weights about 57 GB, the Python environment about 7.5 GB, builds
 readonly PYTHON_VERSION=3.11.14  # the CPython uv installs for the environment (what the pipeline is tried on: 3.11)
 readonly UV_VERSION=0.13.5
@@ -103,7 +105,8 @@ check_gpu() {
     fi
 
     local cuda
-    cuda=$(nvidia-smi 2>/dev/null | sed -n 's/.*CUDA Version: *\([0-9][0-9.]*\).*/\1/p' | head -n 1)
+    # "CUDA Version: 12.8", or "CUDA UMD Version: 13.5" in newer drivers' header.
+    cuda=$(nvidia-smi 2>/dev/null | sed -n -E 's/.*CUDA (UMD )?Version: *([0-9][0-9.]*).*/\2/p' | head -n 1)
     if [ -z "$cuda" ]; then
         missing "CUDA" "not reported" "a driver with CUDA ${CUDA_MAJOR}.x"
     elif [ "${cuda%%.*}" -ge "$CUDA_MAJOR" ]; then
@@ -351,6 +354,10 @@ install_python() {
         "$uv" venv --quiet --python "$PYTHON_VERSION" "$venv"
         echo "Python $PYTHON_VERSION: .venv made"
     fi
+    # The standalone CPython's _dbm links Berkeley DB (Sleepycat, a copyleft licence); nothing here imports dbm
+    # (docs/licences.md), so it is removed, with _gdbm (GNU dbm, GPL) should a build ever carry it.
+    rm -f "$tools"/python/cpython-"$PYTHON_VERSION"-*/lib/python3.*/lib-dynload/_dbm.* \
+          "$tools"/python/cpython-"$PYTHON_VERSION"-*/lib/python3.*/lib-dynload/_gdbm.*
     # Exactly the lock: what is not in it is removed, and every wheel must match one of its sums.
     "$uv" pip sync --quiet --python "$venv/bin/python" --require-hashes --only-binary :all: python/requirements.lock
     "$uv" pip check --quiet --python "$venv/bin/python"
@@ -448,18 +455,23 @@ fetch_models() {
     "$venv/bin/python" -I setup/fetch_models.py --models "$here/models" --sources "$here/sources" "${args[@]}"
 }
 
+# 1 when the self-test's Python tests failed: setup then writes no record of a good end.
+self_test_failed=0
+
 self_test() {
     local started=$SECONDS
     # The checks, the bake, the export and the report on made-up shapes (no card, about 2 to 11 minutes). The tests
     # make made-up jobs whose lines ("fails: paint covers the surface", a bow refused) are what those tests expect,
-    # so only the result is shown; on a failure, the end of the log.
+    # so only each test module's verdict is shown, as it ends, and the totals; on a failure, the end of the log. The
+    # modules run in processes of their own, SELF_TEST_WORKERS at once (in one process, with nothing shown, they had
+    # not ended after 19 minutes on 8 processors in the Windows test of 26 November 2026).
     local log="$here/.tools/self-test.log" status=0
     echo "self-test: the Python tests (made-up objects, no card; their own output goes to .tools/self-test.log)"
-    (cd python && "$venv/bin/python" -m unittest discover -q -s tests -t . > "$log" 2>&1) || status=$?
-    grep -E "^Ran [0-9]+ tests|^OK" "$log" || true
+    "$venv/bin/python" -I tools/ci/run_tests.py --workers "$SELF_TEST_WORKERS" --log "$log" || status=$?
     if [ "$status" -ne 0 ]; then
         tail -n 40 "$log"
         echo "self-test: the Python tests FAILED (the whole log: .tools/self-test.log)"
+        self_test_failed=1
     fi
     if [ "$skip_models" -eq 0 ]; then
         # Every model file present and its sum the registry's, every stage's code importing, the card seen.
@@ -478,6 +490,10 @@ setup() {
         echo "$problems thing(s) missing; see MISSING above. Nothing was changed."
         exit 1
     fi
+    # The record of a good end, as the `model-maker` launcher writes it (crates/model-maker-launcher/src/setup.rs,
+    # DONE_FILE): gone while setup runs, written at its end; the companion window reads it ("This PC is ready").
+    mkdir -p "$tools"
+    rm -f "$tools/setup-done.json"
     step "uv and Python"
     install_uv
     install_python
@@ -498,6 +514,11 @@ setup() {
     if [ "$skip_tests" -eq 0 ]; then
         step "Self-test"
         self_test
+    fi
+    if [ "$self_test_failed" -eq 0 ]; then
+        local models=true
+        [ "$skip_models" -eq 1 ] && models=false
+        printf '{"schema":1,"models":%s}\n' "$models" > "$tools/setup-done.json"
     fi
     echo
     echo "Set up in $((SECONDS - started)) s. Make an object:"

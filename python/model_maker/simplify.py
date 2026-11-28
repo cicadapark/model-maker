@@ -14,14 +14,23 @@ REPOSITORY = os.path.normpath(os.path.join(HERE, "..", ".."))
 FORMAT_VERSION = 1
 
 
+def candidates(repository=REPOSITORY, name=None):
+    """Where the tool may be, first found wins: the one shipped with the `model-maker` program (beside it at the
+    repository's top in the Windows and macOS release archives, in bin/ in the Linux one), then one built here."""
+    name = name or "model-maker-simplify" + (".exe" if os.name == "nt" else "")
+    return [os.path.join(repository, name), os.path.join(repository, "bin", name),
+            os.path.join(repository, "target", "release", name)]
+
+
 def tool():
-    """The built tool: `MODEL_MAKER_SIMPLIFY`, else the repository's release build, else one on the PATH."""
+    """The tool: `MODEL_MAKER_SIMPLIFY` (the launcher sets it), else the shipped one, else the repository's release
+    build, else one on the PATH."""
     named = os.environ.get("MODEL_MAKER_SIMPLIFY")
     if named:
         return named
-    built = os.path.join(REPOSITORY, "target", "release", "model-maker-simplify" + (".exe" if os.name == "nt" else ""))
-    if os.path.exists(built):
-        return built
+    for path in candidates():
+        if os.path.exists(path):
+            return path
     found = shutil.which("model-maker-simplify")
     if found:
         return found

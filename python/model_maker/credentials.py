@@ -13,8 +13,9 @@ signed: what is in it cannot be taken out without breaking it. So the picture sa
 what, and the sidecar says from which words.
 
 The manifest is signed with the key and certificate the user gives (`--signing-key` and `--signing-cert`, or
-MODEL_MAKER_SIGNING_KEY and MODEL_MAKER_SIGNING_CERT), else with a test certificate setup.sh makes on this computer
-(.tools/c2pa-test, or MODEL_MAKER_TEST_CREDENTIALS). Checkers call a picture signed with the test certificate
+MODEL_MAKER_SIGNING_KEY and MODEL_MAKER_SIGNING_CERT), else with a test certificate setup makes on this computer for
+this user (MODEL_MAKER_TEST_CREDENTIALS, else c2pa-test in model-maker's folder of the user's own data; an install's
+.tools/c2pa-test from before 28 Nov 2026 is still used while this user can read it: `test_folder`). Checkers call a picture signed with the test certificate
 untrusted, which it is: the mark is still there and still machine-readable. docs/setup.md says how to get a
 certificate checkers trust.
 
@@ -29,6 +30,7 @@ import io
 import json
 import os
 import stat
+import sys
 
 # The IPTC digital source types (http://cv.iptc.org/newscodes/digitalsourcetype/).
 IPTC = "http://cv.iptc.org/newscodes/digitalsourcetype/"
@@ -58,8 +60,11 @@ KEY_VARIABLE = "MODEL_MAKER_SIGNING_KEY"
 CERT_VARIABLE = "MODEL_MAKER_SIGNING_CERT"
 TIMESTAMP_VARIABLE = "MODEL_MAKER_TIMESTAMP_URL"
 TEST_FOLDER_VARIABLE = "MODEL_MAKER_TEST_CREDENTIALS"
-TEST_FOLDER = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".tools",
-                                            "c2pa-test"))
+# Where setup made the test certificate until 28 Nov 2026: inside the install, so a person who did not make the install
+# (installed by an administrator's run, used by a plain one: the Windows card test) could not use it.
+INSTALL_TEST_FOLDER = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".tools",
+                                                    "c2pa-test"))
+TEST_SUBFOLDER = "c2pa-test"
 TEST_KEY, TEST_CHAIN = "signer.key", "signer-chain.pem"
 # The test certificate's names: the same on every computer, so they say nothing about the one that made them.
 TEST_ORGANISATION = "model-maker test certificate (untrusted)"
@@ -149,16 +154,63 @@ def algorithm_of(key_pem):
     raise NotSigned("the signing key is of a kind C2PA does not sign with (EC P-256/384/521, Ed25519 or RSA)")
 
 
-def test_folder():
-    return os.environ.get(TEST_FOLDER_VARIABLE) or TEST_FOLDER
+def user_data_folder(platform=sys.platform, environment=None, home=None):
+    """model-maker's folder in this user's own data, private to the user by default: %LOCALAPPDATA%\\model-maker on
+    Windows, ~/Library/Application Support/model-maker on macOS, $XDG_DATA_HOME/model-maker (else
+    ~/.local/share/model-maker) elsewhere."""
+    environment = os.environ if environment is None else environment
+    home = home or os.path.expanduser("~")
+    if platform == "win32":
+        base = environment.get("LOCALAPPDATA") or os.path.join(home, "AppData", "Local")
+    elif platform == "darwin":
+        base = os.path.join(home, "Library", "Application Support")
+    else:
+        base = environment.get("XDG_DATA_HOME") or os.path.join(home, ".local", "share")
+    return os.path.join(base, "model-maker")
 
 
-def made_test_certificate(folder=None):
+def readable_pair(folder):
+    """Whether this user can read the test key and chain in `folder` (both there)."""
+    try:
+        for name in (TEST_KEY, TEST_CHAIN):
+            with open(os.path.join(folder, name), "rb") as file:
+                file.read(1)
+        return True
+    except OSError:
+        return False
+
+
+def test_folder(environment=None, platform=sys.platform, home=None, install_folder=None):
+    """Where the test certificate is: MODEL_MAKER_TEST_CREDENTIALS; else the install's .tools/c2pa-test when this user
+    can read the key and chain there (installs set up before 28 Nov 2026 keep their certificate); else c2pa-test in
+    model-maker's folder of this user's own data (made there on first use), so whoever runs model-maker has one."""
+    environment = os.environ if environment is None else environment
+    given = environment.get(TEST_FOLDER_VARIABLE)
+    if given:
+        return given
+    install_folder = install_folder or INSTALL_TEST_FOLDER
+    if readable_pair(install_folder):
+        return install_folder
+    return os.path.join(user_data_folder(platform, environment, home), TEST_SUBFOLDER)
+
+
+def made_test_certificate(folder=None, platform=sys.platform):
     """The test certificate's key and chain in `folder` (made if missing or near its end): a root of its own and a
     signer under it, the names the same on every computer. Only the user who made the key can read it (on Linux and
     macOS by the folder's and the file's modes; on Windows, where chmod cannot narrow a folder, by the access list the
-    folder inherits from where the repository is, private when that is under the user's own profile)."""
+    folder inherits from where the repository is, private when that is under the user's own profile).
+    A folder this user may not read or write (made by an administrator's run, used by a plain one: the Windows card
+    test of 28 Nov 2026) is said in words, with what to do, never shown as a traceback."""
     folder = folder or test_folder()
+    try:
+        return _made_test_certificate(folder, platform)
+    except PermissionError as error:
+        raise NotSigned(f"the test certificate's folder {folder} cannot be used by this user ({error.strerror or error}"
+                        f"): it was likely made by another user or an administrator's run. Run setup again as "
+                        f"yourself, or set {TEST_FOLDER_VARIABLE} to a folder of your own") from None
+
+
+def _made_test_certificate(folder, platform):
     key_path, chain_path = os.path.join(folder, TEST_KEY), os.path.join(folder, TEST_CHAIN)
     if os.path.isfile(key_path) and os.path.isfile(chain_path) and not test_certificate_ending(chain_path):
         return key_path, chain_path
@@ -199,7 +251,10 @@ def made_test_certificate(folder=None):
                              critical=False)
               .sign(root_key, hashes.SHA256()))
     os.makedirs(folder, mode=0o700, exist_ok=True)
-    os.chmod(folder, stat.S_IRWXU)
+    if platform != "win32":
+        # On Windows chmod only sets a folder's read-only flag, which narrows nothing (see above), and needs the right
+        # to change the folder's attributes, which the folder's user may lack.
+        os.chmod(folder, stat.S_IRWXU)
     key_pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
                                 serialization.NoEncryption())
     descriptor = os.open(key_path + ".new", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)

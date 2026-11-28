@@ -95,6 +95,21 @@ def found(root, models):
     return Found(True, server, model, vision, "")
 
 
+def removed(path, tries=20, pause=0.1):
+    """`path` removed, tried again for up to two seconds: on Windows a file stays in use for a moment after the
+    process that wrote it ended (its last handles closing, a virus scanner reading it). Left in place if it cannot be
+    (a log in the system's temporary folder)."""
+    for _ in range(tries):
+        try:
+            os.remove(path)
+            return True
+        except FileNotFoundError:
+            return True
+        except OSError:
+            time.sleep(pause)
+    return False
+
+
 # What a question can fail with: the server gone or wrong (refused, cut off mid-answer, an answer of another shape).
 ASK_ERRORS = (OSError, ValueError, KeyError, IndexError, TypeError, http.client.HTTPException)
 _PR_SET_PDEATHSIG = 1
@@ -214,10 +229,7 @@ class Judge:
             except subprocess.TimeoutExpired:
                 pass
         if self.log is not None:
-            try:
-                os.remove(self.log)
-            except OSError:
-                pass
+            removed(self.log)
             self.log = None
 
     def identity(self):
