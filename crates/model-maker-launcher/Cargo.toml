@@ -1,0 +1,35 @@
+[package]
+name = "model-maker-launcher"
+description = "model-maker's command and installer: sets a PC up (uv, Python, the locked environment, the tools) and runs the Python side."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "model-maker"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "=4.6.7", features = ["derive"] }
+sysinfo = { version = "=0.40.3", default-features = false, features = ["system", "disk"] }
+# Downloads: TLS checked by the operating system's own verifier (no bundled root list), ring as the only crypto.
+ureq = { version = "=3.5.1", default-features = false, features = ["rustls-no-provider", "platform-verifier"] }
+rustls = { version = "=0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
+sha2 = "=0.11.1"
+# Archives: tar.gz with flate2's pure-Rust inflate; zip with deflate only (no other codecs, no zlib-rs, no zopfli).
+flate2 = { version = "=1.1.11", default-features = false, features = ["rust_backend"] }
+tar = { version = "=0.4.46", default-features = false }
+zip = { version = "=9.5.1", default-features = false, features = ["deflate-flate2"] }
+
+[target.'cfg(windows)'.dependencies]
+# The launcher's own job object, so the programs it starts end with it (src/run.rs); 2.1.0's source was read
+# (25 Nov 2026: thin safe wrappers over five Win32 calls; no build script, no network, no process start).
+win32job = "=2.1.0"
+# Ignoring Ctrl+C in the launcher while Python, in the same console, gets it.
+ctrlc = "=3.5.2"

@@ -1,10 +1,12 @@
 # cargo-deny: which licences and sources a dependency may have.
-# Allowed: what Cargo.lock's crates need (MIT, Apache-2.0, and Unicode-3.0 for unicode-ident's tables). A new
-# dependency's licence is read before it is added here, and only a permissive one is.
+# Allowed: what Cargo.lock's crates need (MIT, Apache-2.0, Unicode-3.0 for unicode-ident's tables, ISC and BSD-3-Clause
+# for the launcher's TLS, Zlib and BSD-2-Clause for the companion's window). A new dependency's licence is read before it is added here, and only a permissive one is.
 # Refused: GPL, AGPL, LGPL, non-commercial — never added below.
 
 [graph]
 all-features = true
+# The systems model-maker is built for: a dependency used only elsewhere (wasm32, UEFI) is not ours.
+targets = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "x86_64-pc-windows-msvc", "aarch64-apple-darwin"]
 
 [licenses]
 confidence-threshold = 0.9
@@ -13,6 +15,17 @@ allow = [
     "MIT",
     "Apache-2.0",
     "Unicode-3.0",
+    # ring, rustls-webpki and untrusted (the launcher's TLS): the ISC licence, permissive, read 25 Nov 2026.
+    "ISC",
+    # subtle (rustls' constant-time comparisons): BSD-3-Clause, permissive, read 25 Nov 2026.
+    "BSD-3-Clause",
+    # foldhash and slotmap (the companion's egui and AccessKit): the zlib licence, permissive, read 27 Nov 2026.
+    "Zlib",
+    # arrayref (winit's Wayland window frame, through tiny-skia): BSD-2-Clause, permissive, read 27 Nov 2026.
+    "BSD-2-Clause",
+    # clipboard-win and error-code (the companion's clipboard on Windows): the Boost licence, OSI-approved and
+    # permissive, commercial use without a fee; it asks only that its text stay in source copies. Read 27 Nov 2026.
+    "BSL-1.0",
 ]
 # This repository's own crates are not published to crates.io.
 [licenses.private]
