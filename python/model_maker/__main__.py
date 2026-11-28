@@ -361,6 +361,10 @@ def main(argv=None):
     except ModelMissing as missing:
         print(f"model-maker: {missing}", file=sys.stderr)
         return MODEL_MISSING_EXIT
+    except pipeline.JobMismatch as other_order:
+        # A folder made for another order (or with another --tries): nothing is made, and the message says the ways out.
+        print(f"model-maker: {other_order}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

@@ -13,6 +13,9 @@ each are in [`docs/results.md`](docs/results.md), [`docs/objects.md`](docs/objec
 - `docs/objects.md` is now the reference (the steps, how a prompt is read, every check and its limit, the
   marks, content credentials, where the models are, without a card, offline); its dated sections, what each limit
   was measured on and what did not work, moved unchanged to `docs/history/`, one file per topic.
+- A `make` or `batch` with another `--tries` than a job's painted pictures were made with is refused, with the ways
+  on (the same `--tries`, `--attempt N`, another `--out`); before, it returned the first object as made with the new
+  value. A `batch` run again with another `--texture` bakes again; before, it kept the first bake.
 
 ## 0.3.4
 
